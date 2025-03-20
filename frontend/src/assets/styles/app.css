@@ -1,0 +1,112 @@
+body {
+  font-family: sans-serif;
+  font-weight: 700;
+  /* color: #374151; */
+}
+
+.loader {
+  width: fit-content;
+  font-weight: bold;
+  font-family: monospace;
+  white-space: pre;
+  font-size: 30px;
+  line-height: 1.2em;
+  height: 1.2em;
+  overflow: hidden;
+}
+
+.loader:before {
+  content: "Loading...\AgodnLai...\Aoiaglni...\ALiongad...\Agindola...\Analoidg...";
+  white-space: pre;
+  display: inline-block;
+  animation: l38 1s infinite steps(6);
+}
+
+@keyframes l38 {
+  100% {
+    transform: translateY(-100%)
+  }
+}
+
+.lienchiang_country,
+.yilan_country,
+.changhua_country,
+.nantou_country,
+.yunlin_country,
+.pingtung_country,
+.keelung_city,
+.hsinchu_city,
+.taipei_city,
+.new_taipei_city,
+.taichung_city,
+.tainan_city,
+.taoyuan_city,
+.miaoli_country,
+.hsinchu_country,
+.chiayi_city,
+.chiayi_country,
+.kaohsiung_city,
+.taitung_country,
+.hualien_country,
+.penghu_country,
+.kinmen_country {
+  stroke: #000;
+  fill: transparent;
+  transition: 0.5s;
+}
+
+.lienchiang_country:hover,
+.yilan_country:hover,
+.changhua_country:hover,
+.nantou_country:hover,
+.yunlin_country:hover,
+.pingtung_country:hover,
+.keelung_city:hover,
+.hsinchu_city:hover,
+.taipei_city:hover,
+.new_taipei_city:hover,
+.taichung_city:hover,
+.tainan_city:hover,
+.taoyuan_city:hover,
+.miaoli_country:hover,
+.hsinchu_country:hover,
+.chiayi_city:hover,
+.chiayi_country:hover,
+.kaohsiung_city:hover,
+.taitung_country:hover,
+.hualien_country:hover,
+.penghu_country:hover,
+.kinmen_country:hover {
+  fill: #B99362;
+  transform: translate(-5px, -5px);
+}
+
+.dark .lienchiang_country,
+.dark .yilan_country,
+.dark .changhua_country,
+.dark .nantou_country,
+.dark .yunlin_country,
+.dark .pingtung_country,
+.dark .keelung_city,
+.dark .hsinchu_city,
+.dark .taipei_city,
+.dark .new_taipei_city,
+.dark .taichung_city,
+.dark .tainan_city,
+.dark .taoyuan_city,
+.dark .miaoli_country,
+.dark .hsinchu_country,
+.dark .chiayi_city,
+.dark .chiayi_country,
+.dark .kaohsiung_city,
+.dark .taitung_country,
+.dark .hualien_country,
+.dark .penghu_country,
+.dark .kinmen_country {
+  stroke: #fff;
+}
+
+.cityClicked {
+  fill: #B99362;
+  transform: translate(-5px, -5px);
+}
