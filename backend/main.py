@@ -25,6 +25,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+@app.get("/")
+async def root():
+    return {"message": "🚀 Backend is alive !!!"}
+
 @app.post("/upload-image")
 async def upload_image(file: UploadFile = File(...)):
     file_extension = file.filename.split(".")[-1].lower()
@@ -57,7 +61,8 @@ async def view_image(file_name: str):
 async def generate_multiple_pdfs(
     image_filename: str = Form(...), #檔名成稱
     content: str = Form(...), #文字內容
-    font_size: int = Form(18) #字體大小
+    font_size: int = Form(18), #字體大小
+    code: str = 200
 ):
     try:
         width, height = A4
@@ -101,7 +106,7 @@ async def generate_multiple_pdfs(
             c.save()
             pdf_urls.append(f"/view-pdf/{file_name}")
 
-        return JSONResponse(content={"pdf_urls": pdf_urls})
+        return JSONResponse(content={"pdf_urls": pdf_urls,"code":200})
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
