@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Leva } from "leva";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
-import { Scene } from "@/containers/home/geometry/Scene";
+import Scene from "@/containers/home/geometry/Scene";
 
 const Home = () => {
   // const [isLoading, setIsLoading] = useState(true);
@@ -16,7 +16,7 @@ const Home = () => {
   return (
     <>
       <div
-        className={`w-full h-screen relative ${
+        className={`w-full h-[80vh] relative ${
           isCanvasLoaded ? "opacity-100" : "opacity-0"
         } transition-opacity duration-500`}
       >

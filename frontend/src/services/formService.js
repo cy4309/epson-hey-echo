@@ -1,6 +1,7 @@
 import axios from "axios";
 // const baseUrl = `${import.meta.env.BACKEND_API_URL}`;
-const baseUrl = "http://localhost:8000";
+// const baseUrl = "http://localhost:8000";
+const baseUrl = "https://epson-hey-echo.onrender.com";
 
 export const uploadImage = async (formData) => {
   console.log(formData);
