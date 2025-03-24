@@ -1,13 +1,14 @@
 import axios from "axios";
-// const baseUrl = `${import.meta.env.BACKEND_API_URL}`;
-// const baseUrl = "http://localhost:8000";
-const baseUrl = "https://epson-hey-echo.onrender.com";
+// const backendBaseUrl = `${import.meta.env.BACKEND_API_URL}`;
+// const backendBaseUrl = "http://localhost:8000";
+// const backendBaseUrl = "https://epson-hey-echo.onrender.com";
+const backendBaseUrl = import.meta.env.VITE_BACKEND_API_BASE_URL;
 
 export const uploadImage = async (formData) => {
   console.log(formData);
   return await axios
-    // .post(`${baseUrl}/upload-image`, { formData: formData })
-    .post(`${baseUrl}/upload-image`, formData, {
+    // .post(`${backendBaseUrl}/upload-image`, { formData: formData })
+    .post(`${backendBaseUrl}/upload-image`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -22,8 +23,8 @@ export const uploadImage = async (formData) => {
 
 export const generateMultiplePdfs = async (payload) => {
   return await axios
-    // .post(`${baseUrl}/upload-image`, { formData: formData })
-    .post(`${baseUrl}/generate-multiple-pdfs`, payload, {
+    // .post(`${backendBaseUrl}/upload-image`, { formData: formData })
+    .post(`${backendBaseUrl}/generate-multiple-pdfs`, payload, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
