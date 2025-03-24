@@ -166,11 +166,11 @@ const Form = () => {
           </>
         )}
         {pdfUrls.length > 0 && (
-          <div className="flex flex-wrap gap-4 justify-center mt-4">
+          <div className="gap-6 flex justify-center items-center scale-75">
             {pdfUrls.map((url, index) => (
               <iframe
                 key={index}
-                src={`https://epson-hey-echo.onrender.com${url}`}
+                src={`${import.meta.env.VITE_BACKEND_API_BASE_URL}${url}`}
                 width="300px"
                 height="400px"
                 className="border rounded shadow"
