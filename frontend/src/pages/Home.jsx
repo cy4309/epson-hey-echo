@@ -45,10 +45,10 @@ const Home = () => {
             outputColorSpace: SRGBColorSpace,
           }}
           camera={{
-            fov: 9,
+            fov: 3,
             near: 0.1,
             far: 500,
-            position: [35, 2, 6],
+            position: [5, 8, 24],
           }}
           onCreated={() => setIsCanvasLoaded(true)}
         >
