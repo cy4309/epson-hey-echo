@@ -37,7 +37,13 @@ async def upload_image(file: UploadFile = File(...)):
     with open(file_path, "wb") as f:
         f.write(await file.read())
 
-    return JSONResponse(content={"message": "圖片上傳成功", "image_url": f"/view-image/{file_name}", "filename": file_name})
+    return JSONResponse(
+        content={
+            "message": "圖片上傳成功",
+            "image_url": f"/view-image/{file_name}", 
+            "filename": file_name,
+            "code":200
+            })
 
 @app.get("/view-image/{file_name}")
 async def view_image(file_name: str):
@@ -59,8 +65,8 @@ async def generate_multiple_pdfs(
 
         # 定義五種排版方式的位置
         positions = {
-            "topLeft": (40, height - 200),
-            "topRight": (width - 140, height - 200),
+            "topLeft": (40, height - 20),
+            "topRight": (width - 140, height - 20),
             "center": (width / 2 - 50, height / 2),
             "bottomLeft": (40, 40),
             "bottomRight": (width - 140, 40)
