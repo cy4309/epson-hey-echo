@@ -46,7 +46,7 @@ async def upload_image(file: UploadFile = File(...)):
             "message": "圖片上傳成功",
             "image_url": f"/view-image/{file_name}", 
             "filename": file_name,
-            "code":200
+            
             })
 
 @app.get("/view-image/{file_name}")
@@ -62,7 +62,7 @@ async def generate_multiple_pdfs(
     image_filename: str = Form(...), #檔名成稱
     content: str = Form(...), #文字內容
     font_size: int = Form(18), #字體大小
-    code: str = 200
+    code: int = Form(200)
 ):
     try:
         width, height = A4
