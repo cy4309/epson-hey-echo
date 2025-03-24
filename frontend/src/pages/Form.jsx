@@ -1,14 +1,19 @@
 import { useState, useRef } from "react";
 import BaseButton from "@/components/BaseButton";
-import { uploadImage } from "@/services/formService";
+import { uploadImage, generateMultiplePdfs } from "@/services/formService";
+import { showSwal } from "@/utils/notification";
+import { Input } from "antd";
 
 const Form = () => {
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
-  const [hasUploaded, setHasUploaded] = useState(false);
   // const [isConversation, setIsConversation] = useState(false);
-
+  const [hasUploaded, setHasUploaded] = useState(false);
+  const [isUploaded, setIsUploaded] = useState(false);
+  const [fileName, setFileName] = useState("");
+  const [textContent, setTextContent] = useState("abc");
+  const [fontSize, setFontSize] = useState(18);
   const handleFileUpload = (e) => {
     // const file = e.target.files?.[0];
     // if (!file) return;
@@ -32,7 +37,7 @@ const Form = () => {
     setHasUploaded(true);
   };
 
-  const submitFile = async () => {
+  const submitImg = async () => {
     if (!file) return;
 
     const formData = new FormData();
@@ -42,13 +47,40 @@ const Form = () => {
       const res = await uploadImage(formData);
       console.log(res);
       if (res.code === 200) {
-        alert("上傳成功");
+        showSwal({ isSuccess: true, title: `上傳成功!` });
+        setIsUploaded(true);
+        setFileName(res.filename);
       } else {
-        alert("上傳失敗，請稍後再試");
+        showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
       }
     } catch (err) {
       console.error(err);
-      alert("上傳失敗，請稍後再試");
+      showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+    }
+  };
+
+  const submitFile = async () => {
+    if (!textContent || !fontSize) {
+      showSwal({ isSuccess: false, title: `請輸入文字內容和字體大小` });
+      return;
+    }
+    const payload = {
+      image_filename: fileName,
+      content: textContent,
+      font_size: fontSize,
+    };
+
+    try {
+      const res = await generateMultiplePdfs(payload);
+      console.log(res);
+      if (res.code === 200) {
+        showSwal({ isSuccess: true, title: `上傳成功!` });
+      } else {
+        showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+      }
+    } catch (err) {
+      console.error(err);
+      showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
     }
   };
 
@@ -89,12 +121,34 @@ const Form = () => {
             </button>
           </div>
         )}
-        {filePreview && (
+        {filePreview && !isUploaded && (
           <BaseButton
             label="送出圖片"
-            onClick={submitFile}
+            onClick={submitImg}
             className="w-2/3 m-4"
+            defaultValue="abc"
           />
+        )}
+        {isUploaded && (
+          <>
+            <Input
+              name="text"
+              placeholder="輸入文字內容"
+              className="m-2"
+              size="large"
+              value={textContent}
+              onChange={(e) => setTextContent(e.target.value)}
+            />
+            <Input
+              name="text"
+              placeholder="字體大小"
+              className="m-2"
+              size="large"
+              value={fontSize}
+              onChange={(e) => setFontSize(Number(e.target.value))}
+            />
+            <BaseButton className="m-2" label="送出" onClick={submitFile} />
+          </>
         )}
       </>
       {/* )} */}

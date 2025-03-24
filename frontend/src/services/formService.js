@@ -18,3 +18,19 @@ export const uploadImage = async (formData) => {
       return { code: 500, redirectUrl: "/login", msg: err };
     });
 };
+
+export const generateMultiplePdfs = async (payload) => {
+  return await axios
+    // .post(`${baseUrl}/upload-image`, { formData: formData })
+    .post(`${baseUrl}/generate-multiple-pdfs`, payload, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return { code: 500, redirectUrl: "/login", msg: err };
+    });
+};
