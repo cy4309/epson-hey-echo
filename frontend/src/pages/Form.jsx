@@ -15,6 +15,7 @@ const Form = () => {
   const [fileName, setFileName] = useState("");
   const [textContent, setTextContent] = useState("abc");
   const [fontSize, setFontSize] = useState(18);
+  const [pdfUrls, setPdfUrls] = useState([]); //Joyce test
   const handleFileUpload = (e) => {
     // const file = e.target.files?.[0];
     // if (!file) return;
@@ -76,6 +77,7 @@ const Form = () => {
       console.log(res);
       if (res.code === 200) {
         showSwal({ isSuccess: true, title: `上傳成功!` });
+        setPdfUrls(res.pdf_urls);
       } else {
         showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
       }
@@ -162,6 +164,20 @@ const Form = () => {
             <BaseButton className="m-2" label="送出" onClick={submitFile} />
             {/* <BaseButton className="m-2" label="列印" onClick={submitPrint} /> */}
           </>
+        )}
+        {pdfUrls.length > 0 && (
+          <div className="flex flex-wrap gap-4 justify-center mt-4">
+            {pdfUrls.map((url, index) => (
+              <iframe
+                key={index}
+                src={`https://epson-hey-echo.onrender.com${url}`}
+                width="300px"
+                height="400px"
+                className="border rounded shadow"
+                title={`pdf-preview-${index}`}
+              />
+            ))}
+          </div>
         )}
         <BaseButton className="m-2" label="列印" onClick={handlePrint} />
       </>
