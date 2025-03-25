@@ -9,15 +9,8 @@ import {
 } from "@/services/epsonService";
 
 const Preview = () => {
-  const handlePrint = () => {
+  const handleAuthCode = () => {
     getAuthCode();
-    // window.open(
-    //   `${
-    //     import.meta.env.VITE_EPSON_API_AUTH_URL
-    //   }/auth/authorize?response_type=code&client_id=${
-    //     import.meta.env.VITE_EPSON_CLIENT_ID
-    //   }&redirect_uri=${import.meta.env.VITE_EPSON_REDIRECT_URI}&scope=device`
-    // );
   };
   const handleAccessToken = async () => {
     try {
@@ -44,8 +37,10 @@ const Preview = () => {
     }
   };
   const handleFileUpload = async () => {
+    const fileUrl =
+      "https://epson-hey-echo.onrender.com/view-pdf/4234264fd91f4666a73735a534834e1e_topLeft.pdf";
     try {
-      const res = await postFileUpload();
+      const res = await postFileUpload(fileUrl);
       console.log(res);
     } catch (err) {
       console.error(err);
@@ -64,27 +59,33 @@ const Preview = () => {
 
   return (
     <>
-      <BaseButton className="m-2" label="get_auth_code" onClick={handlePrint} />
-      <BaseButton
-        className="m-2"
-        label="post_access_token"
-        onClick={handleAccessToken}
-      />
-      <BaseButton
-        className="m-2"
-        label="post_print_job_creation"
-        onClick={handlePrintJobCreation}
-      />
-      <BaseButton
-        className="m-2"
-        label="post_file_upload"
-        onClick={handleFileUpload}
-      />
-      <BaseButton
-        className="m-2"
-        label="post_print_execution"
-        onClick={handlePrintExecution}
-      />
+      <div className="w-full flex flex-wrap justify-center items-center">
+        <BaseButton
+          className="w-full m-2"
+          label="0_get_auth_code"
+          onClick={handleAuthCode}
+        />
+        <BaseButton
+          className="w-full m-2"
+          label="1_post_access_token"
+          onClick={handleAccessToken}
+        />
+        <BaseButton
+          className="w-full m-2"
+          label="2_post_print_job_creation"
+          onClick={handlePrintJobCreation}
+        />
+        <BaseButton
+          className="w-full m-2"
+          label="3_post_file_upload"
+          onClick={handleFileUpload}
+        />
+        <BaseButton
+          className="w-full m-2"
+          label="4_post_print_execution"
+          onClick={handlePrintExecution}
+        />
+      </div>
     </>
   );
 };

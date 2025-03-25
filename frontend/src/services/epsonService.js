@@ -2,7 +2,6 @@ import axios from "axios";
 // base url
 const epsonAuthUrl = import.meta.env.VITE_EPSON_API_AUTH_URL;
 const epsonBaseUrl = import.meta.env.VITE_EPSON_API_BASE_URL;
-const epsonUploadUrl = import.meta.env.VITE_EPSON_API_UPLOAD_URL;
 // client
 const clientId = import.meta.env.VITE_EPSON_CLIENT_ID;
 const clientSecret = import.meta.env.VITE_EPSON_CLIENT_SECRET;
@@ -10,12 +9,13 @@ const redirectUri = import.meta.env.VITE_EPSON_REDIRECT_URI;
 const epsonApiKey = import.meta.env.VITE_EPSON_API_KEY;
 // authorization
 const basicAuth = btoa(`${clientId}:${clientSecret}`); // 編碼為 Base64 格式
-let authCode = "";
+let authCode = "Vc07rHy7ArjIK5Xp4bsdQP-G9eRGD_T6X2GPdUNfAds";
 let accessToken = "";
 // let refreshToken = "";
 // response data
 let jobId = "";
 let uploadUri = "";
+// let uploadUri = https://upload.epsonconnect.com/data?Key=91ef4affb385e54f999dbc11714e3711cd161d57394ea31aee1c521b81c796c4&File=https://epson-hey-echo.onrender.com/view-pdf/4234264fd91f4666a73735a534834e1e_topLeft.pdf;
 
 // 0 authorization code
 export const getAuthCode = async () => {
@@ -47,7 +47,7 @@ export const postAccessToken = async () => {
       }
     )
     .then((res) => {
-      console.log(res);
+      console.log(res.data);
       accessToken = res.data.access_token;
       return res.data;
     })
@@ -59,14 +59,8 @@ export const postAccessToken = async () => {
 // 2 print job creation
 export const postPrintJobCreation = async () => {
   return await axios
-    .get(
+    .post(
       `${epsonBaseUrl}/api/2/printing/jobs`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "x-api-key": epsonApiKey,
-        },
-      },
       {
         jobName: "JobName01",
         printMode: "document",
@@ -85,10 +79,16 @@ export const postPrintJobCreation = async () => {
             ],
           },
         ],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "x-api-key": epsonApiKey,
+        },
       }
     )
     .then((res) => {
-      console.log(res);
+      console.log(res.data);
       jobId = res.data.jobId;
       uploadUri = res.data.uploadUri;
       return res.data;
@@ -99,45 +99,50 @@ export const postPrintJobCreation = async () => {
 };
 
 // 3 file upload
-export const postFileUpload = async () => {
+export const postFileUpload = async (fileUrl) => {
+  if (!fileUrl) {
+    return { code: 400, msg: "No file URL provided" };
+  }
   return await axios
-    .post(
-      `${epsonUploadUrl}&File=1.pdf`,
-      {
-        fileName: "test.pdf",
-        fileType: "application/pdf",
-        fileSize: 123456,
-        filePath: "/path/to/file.pdf",
+    .post(`${uploadUri}&File=${encodeURIComponent(fileUrl)}`, {
+      headers: {
+        "Content-Type": "application/json",
       },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "x-api-key": epsonApiKey,
-        },
-      }
-    )
+    })
     .then((res) => {
+      console.log(res.data);
       return res.data;
     })
     .catch((err) => {
       return { code: 500, redirectUrl: "/login", msg: err };
     });
+  // try {
+  //   const fileResponse = await axios.get(fileUrl, { responseType: "blob" });
+  //   const formData = new FormData();
+  //   formData.append("file", fileResponse.data, "uploaded.pdf");
+
+  //   const response = await axios.post(uploadUri, formData, {
+  //     headers: { "Content-Type": "multipart/form-data" },
+  //   });
+
+  //   console.log(response.data);
+  //   return response.data;
+  // } catch (error) {
+  //   return { code: 500, redirectUrl: "/login", msg: error.message };
+  // }
 };
 
 // 4 print execution
 export const postPrintExecution = async () => {
   return await axios
-    .post(
-      `${epsonBaseUrl}/api/2/printing/jobs/${jobId}/execute`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "x-api-key": epsonApiKey,
-        },
-      }
-    )
+    .post(`${epsonBaseUrl}/api/2/printing/jobs/${jobId}/print`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "x-api-key": epsonApiKey,
+      },
+    })
     .then((res) => {
+      console.log(res.data);
       return res.data;
     })
     .catch((err) => {
