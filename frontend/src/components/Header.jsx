@@ -55,6 +55,12 @@ const Nav = () => {
         <img src="/epson-logo.png" alt="epson-logo" className="w-10 mr-2" />
         <h2>Hey, Echo!</h2>
       </div>
+      <span
+        className="cursor-pointer underline"
+        onClick={() => navigate("/form")}
+      >
+        Form
+      </span>
       {/* <div
         className="flex justify-center items-center cursor-pointer"
         onClick={() => navigate("/")}
