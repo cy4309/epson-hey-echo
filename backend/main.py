@@ -20,7 +20,7 @@ os.makedirs(PDF_DIR, exist_ok=True)
 # API ：上傳圖片
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # 允許前端請求
+    allow_origins=["http://localhost:5173","https://your-frontend.onrender.com"],  # 允許前端請求
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
