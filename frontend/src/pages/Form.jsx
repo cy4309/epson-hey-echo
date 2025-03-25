@@ -171,10 +171,8 @@ const Form = () => {
               <iframe
                 key={index}
                 src={`${import.meta.env.VITE_BACKEND_API_BASE_URL}${url}`}
-                width="300px"
-                height="400px"
-                className="border rounded shadow"
-                title={`pdf-preview-${index}`}
+                className="h-[400px] rounded-lg shadow"
+                // title={`pdf-preview-${index}`}
               />
             ))}
           </div>
