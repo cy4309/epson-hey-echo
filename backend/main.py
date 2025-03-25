@@ -56,7 +56,7 @@ async def  generate_prompt(req: Request):
             {"role": "user", "content": user_input}
          ]
     )
-    return {"response": response.choices[0].text.strip()}
+    return {"response": response.choices[0].message.content.strip()}
 @app.post("/generate_image")
 async def generate_image(req: Request):
     data = await req.json()
