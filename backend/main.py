@@ -30,7 +30,7 @@ async def root():
     return {"message":"Backend is alive !!!"}
 
 # 測試chatbot
-@app.post("/generate-promt")
+@app.post("/generate-prompt")
 async def  generate_prompt(req: Request):
     data = await req.json()
     user_input = data.get("input","")
@@ -49,7 +49,7 @@ async def  generate_prompt(req: Request):
         【構圖技巧與視角】
         Rule of Thirds, Leading Lines, Framing, Symmetry and Patterns, Depth of Field, Negative Space, Golden Ratio, Eye Level, Diagonal Composition, Juxtaposition, Point of View, Isolation, S-Curve, Vanishing Point, Bird's-eye view, First-person view, Close-up, Wide shot, Telephoto lens, One-point perspective
         """
-    response = openai.Completion.create(
+    response = openai.ChatCompletion.create(
          model="gpt-4",
          messages=[
             {"role": "system", "content": system_msg},
