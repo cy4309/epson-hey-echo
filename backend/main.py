@@ -30,8 +30,8 @@ async def root():
     return {"message":"Backend is alive !!!"}
 
 # 測試chatbot
-@app.post("/chatbot")
-async def chatbot(req: Request):
+@app.post("/generate-promt")
+async def  generate_prompt(req: Request):
     data = await req.json()
     user_input = data.get("input","")
     system_msg = """
