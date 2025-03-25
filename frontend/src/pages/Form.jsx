@@ -3,7 +3,6 @@ import BaseButton from "@/components/BaseButton";
 import { uploadImage, generateMultiplePdfs } from "@/services/formService";
 import { showSwal } from "@/utils/notification";
 import { Input } from "antd";
-import { getAuthorizationCode } from "@/services/epsonService";
 
 const Form = () => {
   const fileInputRef = useRef(null);
@@ -87,17 +86,6 @@ const Form = () => {
     }
   };
 
-  const handlePrint = () => {
-    // getAuthorizationCode();
-    window.open(
-      `${
-        import.meta.env.VITE_EPSON_API_AUTH_URL
-      }/auth/authorize?response_type=code&client_id=${
-        import.meta.env.VITE_EPSON_CLIENT_ID
-      }&redirect_uri=${import.meta.env.VITE_EPSON_REDIRECT_URI}&scope=device`
-    );
-  };
-
   return (
     <>
       {/* {isConversation && ( */}
@@ -177,7 +165,6 @@ const Form = () => {
             ))}
           </div>
         )}
-        <BaseButton className="m-2" label="列印" onClick={handlePrint} />
       </>
       {/* )} */}
     </>

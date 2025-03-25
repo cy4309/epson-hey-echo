@@ -57,9 +57,21 @@ const Nav = () => {
       </div>
       <span
         className="cursor-pointer underline"
+        onClick={() => navigate("/chatbot")}
+      >
+        Chatbot
+      </span>
+      <span
+        className="cursor-pointer underline"
         onClick={() => navigate("/form")}
       >
         Form
+      </span>
+      <span
+        className="cursor-pointer underline"
+        onClick={() => navigate("/preview")}
+      >
+        Preview
       </span>
       {/* <div
         className="flex justify-center items-center cursor-pointer"
