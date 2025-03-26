@@ -20,7 +20,7 @@ os.makedirs(PDF_DIR, exist_ok=True)
 # API ：上傳圖片
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://epson-hey-echo.onrender.com"],  # 允許前端請求。舊的: http://localhost:5173
+    allow_origins=["http://localhost:5173","https://epson-hey-echo.onrender.com"],  # 允許前端請求。舊的: http://localhost:5173
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
