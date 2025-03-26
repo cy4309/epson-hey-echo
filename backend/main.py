@@ -9,6 +9,7 @@ from reportlab.lib.utils import ImageReader
 import uuid
 import os
 import openai
+from openai import OpenAI
 from PIL import Image
 # 測試chatbot
 # openai.api_key = os.getenv("OPENAI_API_KEY") 
