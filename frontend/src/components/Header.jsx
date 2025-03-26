@@ -2,7 +2,7 @@ import BaseButton from "@/components/BaseButton";
 import { useDispatch } from "react-redux";
 import { toggleDarkMode } from "@/stores/features/styleSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { SunOutlined } from "@ant-design/icons";
+import { SunOutlined, LogoutOutlined } from "@ant-design/icons";
 // import { CaretLeftOutlined } from "@ant-design/icons";
 // import Login from "@/containers/Login";
 // import { showSwal } from "@/utils/notification";
@@ -23,7 +23,7 @@ const Nav = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("userName");
-    navigate("/");
+    navigate("/login");
   };
 
   // const handleAuth = () => {
@@ -42,7 +42,7 @@ const Nav = () => {
     <nav className="container p-4 z-10 flex justify-between items-center">
       <div
         className="flex justify-center items-center cursor-pointer"
-        onClick={() => handleLogout()}
+        onClick={() => navigate("/")}
       >
         {/* {isHomePage && (
           <BaseButton
@@ -81,13 +81,16 @@ const Nav = () => {
         <h1>Face Fortune Tool</h1>
       </div> */}
       <div className="flex justify-center items-center">
-        <p className="text-sm mr-4 flex items-center">V0.0.1</p>
+        {/* <p className="text-sm mr-4 flex items-center">V0.0.1</p> */}
         <BaseButton
-          className="h-10 cursor-pointer hover:bg-hoverGray"
+          className="mr-2 h-10 cursor-pointer hover:bg-hoverGray"
           // onClick={() => dispatch(toggleDarkMode())}
           onClick={handleToggleDarkMode}
         >
           <SunOutlined />
+        </BaseButton>
+        <BaseButton className="mr-2" onClick={() => handleLogout()}>
+          <LogoutOutlined />
         </BaseButton>
         {/* <BaseButton
           label={isAuthenticated ? "Log Out" : "Log In"}

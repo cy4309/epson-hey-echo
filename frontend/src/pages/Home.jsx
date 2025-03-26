@@ -1,27 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 // import LoadingIndicator from "@/components/LoadingIndicator";
 import { Canvas } from "@react-three/fiber";
 import { Leva } from "leva";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import Scene from "@/containers/home/geometry/Scene";
-// import { useLocation, useNavigate } from "react-router-dom";
 
 const Home = () => {
   // const [isLoading, setIsLoading] = useState(true);
   const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
   const modelUrl = "/picbox3.glb";
-  // const location = useLocation();
-  // const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   const params = new URLSearchParams(location.search);
-  //   const authCode = params.get("code");
-
-  //   if (authCode) {
-  //     // 還需把authCode傳進redux
-  //     navigate("/preview");
-  //   }
-  // }, [location, navigate]);
 
   // if (isLoading) {
   //   return <LoadingIndicator />;

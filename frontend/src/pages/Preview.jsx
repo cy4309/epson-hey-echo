@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import BaseButton from "@/components/BaseButton";
 import { showSwal } from "@/utils/notification";
 import {
@@ -9,6 +11,16 @@ import {
 } from "@/services/epsonService";
 
 const Preview = () => {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const authCode = params.get("code");
+
+  useEffect(() => {
+    if (authCode) {
+      // 還需把authCode傳進redux
+      console.log(authCode);
+    }
+  }, [authCode]);
   const handleAuthCode = () => {
     getAuthCode();
   };

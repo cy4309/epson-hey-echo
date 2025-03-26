@@ -1,0 +1,85 @@
+<!-- https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/xxx.pdf -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Upload Epson File</title>
+  </head>
+  <body>
+    <h1>Upload Epson File</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label for="fileName">File Name:</label><br />
+      <input type="text" id="fileName" name="fileName" required /><br /><br />
+
+      <!-- <label for="suffix">Suffix:</label><br />
+      <input type="text" id="suffix" name="suffix" /><br /><br /> -->
+
+      <label for="file">Choose a file:</label><br />
+      <input type="file" id="file" name="file" required /><br /><br />
+
+      <button type="submit">Upload</button>
+    </form>
+
+    <p id="result"></p>
+
+    <script>
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const form = event.target;
+          const formData = new FormData(form);
+
+          const fileInput = document.getElementById("file");
+          // const suffixInput = document.getElementById("suffix");
+
+          if (fileInput.files.length > 0) {
+            const fileName = fileInput.files[0].name;
+            const fileExtension = fileName.split(".").pop(); // 提取檔案後綴
+            // suffixInput.value = `.${fileExtension}`; // 自動填入 suffix 欄位
+            formData.append("suffix", `.${fileExtension}`);
+          }
+
+          const response = await fetch(
+            // "http://127.0.0.1:8600/api/UploadEpson",
+            "https://imorph.spe3d.co/api/UploadEpson",
+            {
+              method: "POST",
+              headers: {
+                Authorization: "b1f7690c-ad05-4416-8c42-72df5c38fae2",
+              },
+              body: formData,
+            }
+          );
+
+          const result = document.getElementById("result");
+          const contentType = response.headers.get("content-type") || "";
+
+          try {
+            if (contentType.includes("application/json")) {
+              const data = await response.json();
+              result.innerHTML = `
+                  <strong>Status:</strong> ${response.status} ${
+                response.statusText
+              }<br>
+                  <strong>Response:</strong><pre>${JSON.stringify(
+                    data,
+                    null,
+                    2
+                  )}</pre>
+                `;
+            } else {
+              const text = await response.text();
+              result.innerHTML = `
+                  <strong>Status:</strong> ${response.status} ${response.statusText}<br>
+                  <strong>Response:</strong><pre>${text}</pre>
+                `;
+            }
+          } catch (e) {
+            result.textContent = "Error parsing response: " + e;
+          }
+        });
+    </script>
+  </body>
+</html>
