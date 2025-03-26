@@ -54,7 +54,7 @@ async def  generate_prompt(req: Request):
         """
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",#gpt-3.4
             messages=[
                 {"role": "system", "content": system_msg},
                 {"role": "user", "content": user_input}
@@ -65,7 +65,7 @@ async def  generate_prompt(req: Request):
         print("[ERROR] OpenAI error:", e)
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-@app.post("/generate_image")
+@app.post("/generate-image")
 async def generate_image(req: Request):
     data = await req.json()
     prompt = data["prompt"]
