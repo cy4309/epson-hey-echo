@@ -22,7 +22,8 @@ os.makedirs(PDF_DIR, exist_ok=True)
 # API ：上傳圖片
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173","https://epson-hey-echo.onrender.com"],  # 允許前端請求。舊的: http://localhost:5173
+    # allow_origins=["http://localhost:5173","https://epson-hey-echo.onrender.com"],  # 允許前端請求。舊的: http://localhost:5173
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -51,14 +52,19 @@ async def  generate_prompt(req: Request):
         【構圖技巧與視角】
         Rule of Thirds, Leading Lines, Framing, Symmetry and Patterns, Depth of Field, Negative Space, Golden Ratio, Eye Level, Diagonal Composition, Juxtaposition, Point of View, Isolation, S-Curve, Vanishing Point, Bird's-eye view, First-person view, Close-up, Wide shot, Telephoto lens, One-point perspective
         """
-    response = client.chat.completions.create(
-         model="gpt-4",
-         messages=[
-            {"role": "system", "content": system_msg},
-            {"role": "user", "content": user_input}
-         ]
-    )
-    return {"response": response.choices[0].message.content.strip()}
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": user_input}
+            ]
+        )
+        return {"response": response.choices[0].message.content.strip()}
+    except Exception as e:
+        print("[ERROR] OpenAI error:", e)
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
 @app.post("/generate_image")
 async def generate_image(req: Request):
     data = await req.json()
