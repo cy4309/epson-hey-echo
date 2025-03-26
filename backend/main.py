@@ -7,6 +7,8 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from openai import OpenAI
+from s3_uploader import upload_to_s3, upload_to_epsondest
+
 import uuid
 import os
 from PIL import Image
@@ -23,7 +25,7 @@ os.makedirs(PDF_DIR, exist_ok=True)
 app.add_middleware(
     CORSMiddleware,
     # allow_origins=["http://localhost:5173","https://epson-hey-echo.onrender.com"],  # 允許前端請求。舊的: http://localhost:5173
-    allow_origins=["*"],
+    allow_origins=["*"],#確定此方法可行
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -54,7 +56,7 @@ async def  generate_prompt(req: Request):
         """
     try:
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",#gpt-3.4
+            model="gpt-3.5-turbo",#gpt-4
             messages=[
                 {"role": "system", "content": system_msg},
                 {"role": "user", "content": user_input}
@@ -67,15 +69,19 @@ async def  generate_prompt(req: Request):
 
 @app.post("/generate-image")
 async def generate_image(req: Request):
-    data = await req.json()
-    prompt = data["prompt"]
-    response = client.images.generate(
-        model="dall-e-3",
-        prompt=prompt,
-        n=1,
-        size="1024x1024"
-    )
-    return {"image_url": response.data[0].url}
+    try:
+        data = await req.json()
+        prompt = data["prompt"]
+        response = client.images.generate(
+            model="dall-e-3",
+            prompt=prompt,
+            n=1,
+            size="1024x1024"
+        )
+        return {"image_url": response.data[0].url}
+    except Exception as e:
+        print("[ERROR] generate-image:", e)
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 # API ：上傳圖片
 @app.post("/upload-image")
@@ -94,12 +100,14 @@ async def upload_image(file: UploadFile = File(...)):
             "filename": file_name,
             "code": 200
             })
+
 @app.get("/view-image/{file_name}")
 async def view_image(file_name: str):
     file_path = os.path.join(UPLOAD_DIR, file_name)
     if not os.path.exists(file_path):
         return JSONResponse(content={"error": "File not found"}, status_code=404)
     return FileResponse(file_path, media_type="image/jpeg")
+
 # API ：生成五個 PDF，每個應用不同排版方式
 @app.post("/generate-multiple-pdfs")
 async def generate_multiple_pdfs(
@@ -113,12 +121,13 @@ async def generate_multiple_pdfs(
         pdf_urls = []
         # 定義五種排版方式的位置
         positions = {
-            "topLeft": (40, height - 20),
-            "topRight": (width - 140, height - 20),
+            "topLeft": (40, height - 40),
+            "topRight": (width - 140, height - 40),
             "center": (width / 2 - 50, height / 2),
             "bottomLeft": (40, 40),
             "bottomRight": (width - 140, 40)
         }
+
         image_path = os.path.join(UPLOAD_DIR, image_filename)
         if not os.path.exists(image_path):
             return JSONResponse(content={"error": "圖片檔案不存在"}, status_code=400)
@@ -141,10 +150,20 @@ async def generate_multiple_pdfs(
             c.setFillColorRGB(1, 1, 1)  # 白色文字確保可見
             c.drawString(x, y, content)
             c.save()
-            pdf_urls.append(f"/view-pdf/{file_name}")
-        return JSONResponse(content={"pdf_urls": pdf_urls,"code":200})
+            
+            s3_url = upload_to_s3(file_path, f"pdf/{file_name}")  # 上傳 S3
+            pdf_urls.append(s3_url)
+            upload_status, upload_response = upload_to_epsondest(file_path, file_name)
+            print(f"[INFO] Upload to Epson API: {upload_status} - {upload_response}")
+
+            os.remove(file_path)
+        return JSONResponse(content={
+            "pdf_urls": pdf_urls,
+            "code":200
+            })
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
+
 @app.get("/view-pdf/{file_name}")
 async def view_pdf(file_name: str):
     file_path = os.path.join(PDF_DIR, file_name)
