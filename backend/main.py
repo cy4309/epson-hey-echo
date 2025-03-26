@@ -7,7 +7,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from openai import OpenAI
-from backend.s3_uploader import upload_to_s3, upload_to_epsondest
+from backend.s3_uploader import upload_to_epsondest
 
 import uuid
 import os
@@ -151,7 +151,7 @@ async def generate_multiple_pdfs(
             c.drawString(x, y, content)
             c.save()
             
-            s3_url = upload_to_s3(file_path, f"pdf/{file_name}")  # 上傳 S3
+            s3_url = upload_to_epsondest(file_path, f"pdf/{file_name}")  # 上傳 S3
             pdf_urls.append(s3_url)
             upload_status, upload_response = upload_to_epsondest(file_path, file_name)
             print(f"[INFO] Upload to Epson API: {upload_status} - {upload_response}")
