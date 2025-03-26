@@ -1,16 +1,17 @@
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.requests import Request
 from pydantic import BaseModel
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 import uuid
 import os
-# 測試chatbot
 import openai
 from PIL import Image
-# openai.api_key = os.getenv("OPENAI_API_KEY") # 測試chatbot
+openai.api_key = os.getenv("OPENAI_API_KEY") # 測試chatbot
+
 app = FastAPI()
 UPLOAD_DIR = "uploads"
 PDF_DIR = "pdf_files"
@@ -19,24 +20,55 @@ os.makedirs(PDF_DIR, exist_ok=True)
 # API ：上傳圖片
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # 允許前端請求
+    allow_origins=["https://epson-hey-echo.onrender.com"],  # 允許前端請求。舊的: http://localhost:5173
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 @app.get("/")
 async def root():
-    return {"message": ":rocket: Backend is alive !!!"}
-# @app.post("/generate_image")
-# async def generate_image(req: Request):
-#     data = await req.json()
-#     prompt = data["prompt"]
-#     response = openai.Image.create(
-#         prompt=prompt,
-#         n=1,
-#         size="1024x1024"
-#     )
-#     return {"image_url": response["data"][0]["url"]}
+    return {"message":"Backend is alive !!!"}
+
+# 測試chatbot
+@app.post("/generate-prompt")
+async def  generate_prompt(req: Request):
+    data = await req.json()
+    user_input = data.get("input","")
+    system_msg = """
+        你是一位圖像提示詞工程師，根據使用者輸入，請生成英文 prompt，可用於 DALL·E 圖像生成，並盡可能加入下列詞庫中的相關詞彙（不需要全部使用）以提升視覺品質與一致性。請以英文輸出，不要額外解釋：
+
+        【光照效果】
+        Soft lighting, Hard lighting, Backlighting, Side lighting, Silhouette, Diffused light, Spotlight, Rim lighting, Ambient lighting, Tyndall Effect, Rayleigh Scattering, God Rays, Bokeh, Caustics, Chiaroscuro, Gobo Lighting, Halo Effect, Golden hour
+
+        【色彩色調】
+        Saturated, Desaturated, High Contrast, Low Contrast, Vibrant, Muted, Warm Tones, Cool Tones, Monochromatic, Duotone, Sepia, Cross Processing, HDR Toning, Tint, Lomo Effect, Bleach Bypass, Cyanotype, Grain, Analog
+
+        【渲染與質感】
+        Polaroid Effect, Octane Render, 4K Resolution, Texture Mapping, HDR, Matte Painting, Glossy Finish, Roughness, Cinema 4D, Blender, Maya, Arnold Renderer, V-Ray, Substance Painter, Quixel Mixer, Houdini
+
+        【構圖技巧與視角】
+        Rule of Thirds, Leading Lines, Framing, Symmetry and Patterns, Depth of Field, Negative Space, Golden Ratio, Eye Level, Diagonal Composition, Juxtaposition, Point of View, Isolation, S-Curve, Vanishing Point, Bird's-eye view, First-person view, Close-up, Wide shot, Telephoto lens, One-point perspective
+        """
+    response = openai.ChatCompletion.create(
+         model="gpt-4",
+         messages=[
+            {"role": "system", "content": system_msg},
+            {"role": "user", "content": user_input}
+         ]
+    )
+    return {"response": response.choices[0].message.content.strip()}
+@app.post("/generate_image")
+async def generate_image(req: Request):
+    data = await req.json()
+    prompt = data["prompt"]
+    response = openai.Image.create(
+        prompt=prompt,
+        n=1,
+        size="1024x1024"
+    )
+    return {"image_url": response["data"][0]["url"]}
+
+# API ：上傳圖片
 @app.post("/upload-image")
 async def upload_image(file: UploadFile = File(...)):
     file_extension = file.filename.split(".")[-1].lower()
