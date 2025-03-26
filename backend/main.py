@@ -6,10 +6,9 @@ from pydantic import BaseModel
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
+from openai import OpenAI
 import uuid
 import os
-import openai
-from openai import OpenAI
 from PIL import Image
 # 測試chatbot
 # openai.api_key = os.getenv("OPENAI_API_KEY") 
