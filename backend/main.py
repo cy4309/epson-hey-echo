@@ -10,7 +10,9 @@ import uuid
 import os
 import openai
 from PIL import Image
-openai.api_key = os.getenv("OPENAI_API_KEY") # 測試chatbot
+# 測試chatbot
+# openai.api_key = os.getenv("OPENAI_API_KEY") 
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = FastAPI()
 UPLOAD_DIR = "uploads"
@@ -49,7 +51,7 @@ async def  generate_prompt(req: Request):
         【構圖技巧與視角】
         Rule of Thirds, Leading Lines, Framing, Symmetry and Patterns, Depth of Field, Negative Space, Golden Ratio, Eye Level, Diagonal Composition, Juxtaposition, Point of View, Isolation, S-Curve, Vanishing Point, Bird's-eye view, First-person view, Close-up, Wide shot, Telephoto lens, One-point perspective
         """
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
          model="gpt-4",
          messages=[
             {"role": "system", "content": system_msg},
@@ -61,12 +63,13 @@ async def  generate_prompt(req: Request):
 async def generate_image(req: Request):
     data = await req.json()
     prompt = data["prompt"]
-    response = openai.Image.create(
+    response = client.images.generate(
+        model="dall-e-3",
         prompt=prompt,
         n=1,
         size="1024x1024"
     )
-    return {"image_url": response["data"][0]["url"]}
+    return {"image_url": response.data[0].url}
 
 # API ：上傳圖片
 @app.post("/upload-image")
