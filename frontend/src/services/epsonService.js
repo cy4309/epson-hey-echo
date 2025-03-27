@@ -144,12 +144,16 @@ export const postFileUpload = async (file) => {
 // 4 print execution
 export const postPrintExecution = async () => {
   return await axios
-    .post(`${epsonBaseUrl}/api/2/printing/jobs/${jobId}/print`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "x-api-key": epsonApiKey,
-      },
-    })
+    .post(
+      `${epsonBaseUrl}/api/2/printing/jobs/${jobId}/print`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "x-api-key": epsonApiKey,
+        },
+      }
+    )
     .then((res) => {
       console.log(res);
       return res;
