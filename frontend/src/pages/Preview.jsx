@@ -84,7 +84,7 @@ const Preview = () => {
     try {
       const res = await postFileUpload(file);
       console.log(res);
-      if (res.code === 200) {
+      if (res.status === 200) {
         showSwal({ isSuccess: true, title: `上傳成功!` });
       } else {
         showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });

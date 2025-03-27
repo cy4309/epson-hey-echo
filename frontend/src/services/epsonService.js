@@ -12,7 +12,7 @@ const redirectUri = import.meta.env.VITE_EPSON_REDIRECT_URI;
 const epsonApiKey = import.meta.env.VITE_EPSON_API_KEY;
 // authorization
 const basicAuth = btoa(`${clientId}:${clientSecret}`); // 編碼為 Base64 格式
-// let authCode = "HYf7ZgVkCoGuJOO4ybPrndiVHOKR3pRYlYK4mSp2dGM";
+let authCode = "3_bW8IwcI58xeOOJDyZlKHgx1q7qpJZlV9umui-40qA";
 let accessToken = "";
 let refreshToken = "";
 console.log(refreshToken);
@@ -32,7 +32,8 @@ export const getAuthCode = async () => {
 
 // 1 access token
 export const postAccessToken = async () => {
-  const authCode = store.getState().epson.authCode;
+  // const authCode = store.getState().epson.authCode;
+  // console.log(authCode);
   return await axios
     .post(
       `${epsonAuthUrl}/auth/token`,
@@ -118,8 +119,8 @@ export const postFileUpload = async (file) => {
       },
     })
     .then((res) => {
-      console.log(res.data);
-      return res.data;
+      console.log(res);
+      return res;
     })
     .catch((err) => {
       return { code: 500, redirectUrl: "/login", msg: err };
@@ -150,8 +151,8 @@ export const postPrintExecution = async () => {
       },
     })
     .then((res) => {
-      console.log(res.data);
-      return res.data;
+      console.log(res);
+      return res;
     })
     .catch((err) => {
       return { code: 500, redirectUrl: "/login", msg: err };
