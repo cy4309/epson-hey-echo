@@ -13,44 +13,44 @@ const Chatbot = () => {
   const { Option } = Select;
   const { TextArea } = Input;
 
-  const generate = async () => {
-    try {
-      const res = await generatePrompt(input, lang);
-      console.log(res.data);
-    } catch (err) {
-      console.error(err);
-      showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
-    }
-  };
-
   // const generate = async () => {
-  //   setLoading(true);
-  //   setPrompt("");
-  //   setImageUrl("");
-
   //   try {
-  //     const promptRes = await fetch("https://epson-hey-echo.onrender.com/generate-prompt", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ input, lang }),
-  //     });
-  //     const promptData = await promptRes.json();
-  //     const finalPrompt = promptData.prompt;
-  //     setPrompt(finalPrompt);
-
-  //     const imageRes = await fetch("https://epson-hey-echo.onrender.com/generate-image", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ prompt: finalPrompt }),
-  //     });
-  //     const imageData = await imageRes.json();
-  //     setImageUrl(imageData.image_url);
+  //     const res = await generatePrompt(input, lang);
+  //     console.log(res.data);
   //   } catch (err) {
-  //     console.error("錯誤:", err);
-  //   } finally {
-  //     setLoading(false);
+  //     console.error(err);
+  //     showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
   //   }
   // };
+
+  const generate = async () => {
+    setLoading(true);
+    setPrompt("");
+    setImageUrl("");
+
+    try {
+      const promptRes = await fetch("https://epson-hey-echo.onrender.com/generate-prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ input, lang }),
+      });
+      const promptData = await promptRes.json();
+      const finalPrompt = promptData.response;
+      setPrompt(finalPrompt);
+
+      const imageRes = await fetch("https://epson-hey-echo.onrender.com/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: finalPrompt }),
+      });
+      const imageData = await imageRes.json();
+      setImageUrl(imageData.image_url);
+    } catch (err) {
+      console.error("錯誤:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
