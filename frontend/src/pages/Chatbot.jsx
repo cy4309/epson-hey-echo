@@ -35,7 +35,7 @@ const Chatbot = () => {
         body: JSON.stringify({ input, lang }),
       });
       const promptData = await promptRes.json();
-      const finalPrompt = promptData.prompt;
+      const finalPrompt = promptData.response;
       setPrompt(finalPrompt);
 
       const imageRes = await fetch("https://epson-hey-echo.onrender.com/generate-image", {
