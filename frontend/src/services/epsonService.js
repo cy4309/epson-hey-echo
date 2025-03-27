@@ -12,7 +12,7 @@ const redirectUri = import.meta.env.VITE_EPSON_REDIRECT_URI;
 const epsonApiKey = import.meta.env.VITE_EPSON_API_KEY;
 // authorization
 const basicAuth = btoa(`${clientId}:${clientSecret}`); // 編碼為 Base64 格式
-let authCode = "3_bW8IwcI58xeOOJDyZlKHgx1q7qpJZlV9umui-40qA";
+// let authCode = "3_bW8IwcI58xeOOJDyZlKHgx1q7qpJZlV9umui-40qA";
 let accessToken = "";
 let refreshToken = "";
 console.log(refreshToken);
@@ -32,8 +32,8 @@ export const getAuthCode = async () => {
 
 // 1 access token
 export const postAccessToken = async () => {
-  // const authCode = store.getState().epson.authCode;
-  // console.log(authCode);
+  const authCode = store.getState().epson.authCode;
+  console.log(authCode);
   return await axios
     .post(
       `${epsonAuthUrl}/auth/token`,
