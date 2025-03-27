@@ -71,7 +71,10 @@ async def  generate_prompt(req: Request):
 async def generate_image(req: Request):
     try:
         data = await req.json()
-        prompt = data["prompt"]
+        prompt = data.get("prompt")
+        if not prompt:
+            return JSONResponse(content={"error": "Prompt is required"}, status_code=400)
+        
         response = client.images.generate(
             model="dall-e-3",
             prompt=prompt,
