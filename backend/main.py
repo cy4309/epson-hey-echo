@@ -46,13 +46,12 @@ async def generate_prompt(req: Request):
         # Step 1: 整理 message 給 Gemini
         combined_text = ""
         for msg in messages:
-            role = msg.get("role")
-            if msg.get("type") == "text":
-                prefix = "User" if role == "user" else "AI"
-                combined_text += f"{prefix}: {msg.get('content')}\n"
+            if msg["type"] == "text":
+                prefix = "User" if msg["role"] == "user" else "AI"
+                combined_text += f"{prefix}: {msg['content']}\n"
 
         # gemini_response = gemini_model.generate_content(combined_text)
-        model = genai.GenerativeModel("gemini-pro")
+        model = genai.GenerativeModel(model_name="gemini-pro")
         gemini_response = model.generate_content(combined_text)
         idea_description = gemini_response.text.strip()
 
