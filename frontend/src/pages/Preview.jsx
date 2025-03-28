@@ -20,7 +20,6 @@ const Preview = () => {
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
-  // const [hasUploaded, setHasUploaded] = useState(false);
 
   useEffect(() => {
     if (authCode) {
@@ -29,6 +28,17 @@ const Preview = () => {
       executePrint(); // 導回來後繼續執行後續步驟
     }
   }, [authCode]);
+
+  useEffect(() => {
+    const storedFile = localStorage.getItem("uploadedFile");
+    const storedFileName = localStorage.getItem("uploadedFileName");
+    const storedFileType = localStorage.getItem("uploadedFileType");
+
+    if (storedFile && storedFileName && storedFileType) {
+      setFile({ name: storedFileName, type: storedFileType });
+      setFilePreview(storedFile);
+    }
+  }, []);
 
   const executePrint = async () => {
     try {
@@ -93,14 +103,45 @@ const Preview = () => {
   const handleFileUpload = (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
-    setFile(selectedFile);
-    setFilePreview(URL.createObjectURL(selectedFile));
-    // setHasUploaded(true);
+
+    const fileType = selectedFile.type;
+    const fileName = selectedFile.name;
+
+    if (fileType.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64File = reader.result;
+        localStorage.setItem("uploadedFile", base64File);
+        localStorage.setItem("uploadedFileName", fileName);
+        localStorage.setItem("uploadedFileType", fileType);
+        setFile(selectedFile);
+        setFilePreview(URL.createObjectURL(selectedFile));
+      };
+      reader.readAsDataURL(selectedFile);
+    } else if (fileType === "application/pdf") {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64File = reader.result;
+        localStorage.setItem("uploadedFile", base64File);
+        localStorage.setItem("uploadedFileName", fileName);
+        localStorage.setItem("uploadedFileType", fileType);
+        setFile(selectedFile);
+        setFilePreview(reader.result);
+      };
+      reader.readAsDataURL(selectedFile);
+    } else {
+      showSwal({ isSuccess: false, title: "不支援的文件類型!" });
+    }
+    // setFile(selectedFile);
+    // setFilePreview(URL.createObjectURL(selectedFile));
   };
   const submitFile = async () => {
     if (!file) return;
     try {
-      const res = await postFileUpload(file);
+      const base64File = localStorage.getItem("uploadedFile");
+      const binaryFile = base64ToBinary(base64File, file.name, file.type);
+
+      const res = await postFileUpload(binaryFile);
       console.log(res);
       if (res.status === 200) {
         showSwal({ isSuccess: true, title: `上傳成功!` });
@@ -111,6 +152,15 @@ const Preview = () => {
       console.error(err);
       showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
     }
+  };
+  const base64ToBinary = (base64, fileName, mimeType) => {
+    const binaryString = atob(base64.split(",")[1]); // 去掉 Base64 前綴
+    const binaryLength = binaryString.length;
+    const binaryArray = new Uint8Array(binaryLength);
+    for (let i = 0; i < binaryLength; i++) {
+      binaryArray[i] = binaryString.charCodeAt(i);
+    }
+    return new File([binaryArray], fileName, { type: mimeType });
   };
   const handlePrintExecution = async () => {
     try {
