@@ -18,7 +18,7 @@ const Preview = () => {
   const params = new URLSearchParams(location.search);
   const authCode = params.get("code");
   const fileInputRef = useRef(null);
-  const [file, setFile] = useState(null);
+  // const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
 
   useEffect(() => {
@@ -26,12 +26,9 @@ const Preview = () => {
       console.log("Authorization code detected:", authCode);
       dispatch(setAuthCode(authCode));
 
+      // 從 localStorage 恢復文件預覽
       const storedFile = localStorage.getItem("uploadedFile");
-      const storedFileName = localStorage.getItem("uploadedFileName");
-      const storedFileType = localStorage.getItem("uploadedFileType");
-
-      if (storedFile && storedFileName && storedFileType) {
-        setFile({ name: storedFileName, type: storedFileType });
+      if (storedFile) {
         setFilePreview(storedFile);
       }
 
@@ -58,11 +55,6 @@ const Preview = () => {
 
       // Step 4: Upload File
       console.log("Step 4: Uploading File...");
-      if (!file) {
-        console.error("No file selected for upload.");
-        showSwal({ isSuccess: false, title: "請先上傳圖片!" });
-        return;
-      }
       await submitFile();
 
       // Step 5: Execute Print
@@ -113,7 +105,7 @@ const Preview = () => {
         localStorage.setItem("uploadedFile", base64File);
         localStorage.setItem("uploadedFileName", fileName);
         localStorage.setItem("uploadedFileType", fileType);
-        setFile(selectedFile);
+        // setFile(selectedFile);
         setFilePreview(URL.createObjectURL(selectedFile));
       };
       reader.readAsDataURL(selectedFile);
@@ -124,7 +116,7 @@ const Preview = () => {
         localStorage.setItem("uploadedFile", base64File);
         localStorage.setItem("uploadedFileName", fileName);
         localStorage.setItem("uploadedFileType", fileType);
-        setFile(selectedFile);
+        // setFile(selectedFile);
         setFilePreview(reader.result);
       };
       reader.readAsDataURL(selectedFile);
@@ -135,10 +127,21 @@ const Preview = () => {
     // setFilePreview(URL.createObjectURL(selectedFile));
   };
   const submitFile = async () => {
-    if (!file) return;
+    // if (!file) return;
+    // 從 localStorage 獲取文件數據
+    const base64File = localStorage.getItem("uploadedFile");
+    const fileName = localStorage.getItem("uploadedFileName");
+    const fileType = localStorage.getItem("uploadedFileType");
+
+    if (!base64File || !fileName || !fileType) {
+      showSwal({ isSuccess: false, title: "請先上傳圖片!" });
+      return;
+    }
+
     try {
-      const base64File = localStorage.getItem("uploadedFile");
-      const binaryFile = base64ToBinary(base64File, file.name, file.type);
+      // const base64File = localStorage.getItem("uploadedFile");
+      // const binaryFile = base64ToBinary(base64File, file.name, file.type);
+      const binaryFile = base64ToBinary(base64File, fileName, fileType);
 
       const res = await postFileUpload(binaryFile);
       console.log(res);
@@ -146,10 +149,12 @@ const Preview = () => {
         showSwal({ isSuccess: true, title: `上傳成功!` });
         localStorage.removeItem("uploadedFile");
         localStorage.removeItem("uploadedFileName");
+        localStorage.removeItem("uploadedFileType");
       } else {
         showSwal({ isSuccess: false, title: `上傳失敗，請重新上傳!` });
         localStorage.removeItem("uploadedFile");
         localStorage.removeItem("uploadedFileName");
+        localStorage.removeItem("uploadedFileType");
       }
     } catch (err) {
       console.error(err);
@@ -194,7 +199,7 @@ const Preview = () => {
           className="hidden"
           onChange={handleFileUpload}
         />
-        {!file ? (
+        {!filePreview ? (
           <BaseButton
             label="上傳圖片"
             onClick={() => fileInputRef.current?.click()}
@@ -207,7 +212,7 @@ const Preview = () => {
             className="w-full m-4 rounded-full"
           />
         )}
-        {file && (
+        {filePreview && (
           <BaseButton
             label="執行列印"
             className="w-full m-2"
