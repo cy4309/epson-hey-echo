@@ -52,7 +52,7 @@ async def generate_prompt(req: Request):
                 combined_text += f"{prefix}: {msg.get('content')}\n"
 
         # gemini_response = gemini_model.generate_content(combined_text)
-        model = genai.GenerativeModel(model_name="models/gemini-pro")
+        model = genai.GenerativeModel("gemini-pro")
         gemini_response = model.generate_content(combined_text)
         idea_description = gemini_response.text.strip()
 
