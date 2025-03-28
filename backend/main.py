@@ -51,7 +51,9 @@ async def generate_prompt(req: Request):
                 prefix = "User" if role == "user" else "AI"
                 combined_text += f"{prefix}: {msg.get('content')}\n"
 
-        gemini_response = gemini_model.generate_content(combined_text)
+        # gemini_response = gemini_model.generate_content(combined_text)
+        model = genai.GenerativeModel(model_name="models/gemini-pro")
+        gemini_response = model.generate_content(combined_text)
         idea_description = gemini_response.text.strip()
 
         # Step 2: 使用 GPT 生成 prompt
