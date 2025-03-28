@@ -55,9 +55,9 @@ const Chatbot = () => {
         ))}
         {loading && (
           <Spin tip="生成中...">
-            <div style={{ minHeight: 40 }}></div> {/* 占位 */}
+            <div style={{ minHeight: 40 }}></div>
           </Spin>
-      )}
+        )}
       </div>
 
       <TextArea
