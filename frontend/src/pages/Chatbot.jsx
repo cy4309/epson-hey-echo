@@ -1,96 +1,80 @@
 import { useState } from "react";
-import { showSwal } from "@/utils/notification";
-import { generatePrompt } from "@/services/generateService";
-import { Select, Input } from "antd";
+import { Input, Spin } from "antd";
 import BaseButton from "@/components/BaseButton";
 
 const Chatbot = () => {
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [lang, setLang] = useState("zh");
-  const [prompt, setPrompt] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const { Option } = Select;
   const { TextArea } = Input;
 
-  // const generate = async () => {
-  //   try {
-  //     const res = await generatePrompt(input, lang);
-  //     console.log(res.data);
-  //   } catch (err) {
-  //     console.error(err);
-  //     showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
-  //   }
-  // };
+  const handleSend = async () => {
+    if (!input.trim()) return;
 
-  const generate = async () => {
+    const newUserMsg = { role: "user", type: "text", content: input };
+    const updatedMessages = [...messages, newUserMsg];
+    setMessages(updatedMessages);
+    setInput("");
     setLoading(true);
-    setPrompt("");
-    setImageUrl("");
 
     try {
-      const promptRes = await fetch("https://epson-hey-echo.onrender.com/generate-prompt", {
+      const res = await fetch("https://epson-hey-echo.onrender.com/multi-dialogue-to-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input, lang }),
+        body: JSON.stringify({ messages: updatedMessages }),
       });
-      const promptData = await promptRes.json();
-      const finalPrompt = promptData.response;
-      setPrompt(finalPrompt);
 
-      const imageRes = await fetch("https://epson-hey-echo.onrender.com/generate-image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: finalPrompt }),
-      });
-      const imageData = await imageRes.json();
-      setImageUrl(imageData.image_url);
+      const data = await res.json();
+      const newMessages = data.new_messages || [];
+      setMessages((prev) => [...prev, ...newMessages]);
     } catch (err) {
-      console.error("錯誤:", err);
+      console.error("發生錯誤:", err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
-      <div className="w-full p-4 border flex flex-col justify-center items-center rounded-lg">
-        <h2 className="mb-2">AI 生圖 Chatbot</h2>
-        <div>
-          <label className="m-2">語言：</label>
-          <Select value={lang} onChange={(e) => setLang(e.target.value)}>
-            <Option value="zh">中文</Option>
-            <Option value="en">English</Option>
-          </Select>
-        </div>
+    <div className="w-full max-w-xl mx-auto p-4 border rounded-lg">
+      <h2 className="text-xl font-semibold mb-4 text-center">AI 設計師 · 對話式生圖</h2>
 
-        <TextArea
-          className="m-2"
-          rows={4}
-          placeholder="輸入你想要的畫面描述"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
-
-        <BaseButton onClick={generate} disabled={loading}>
-          {loading ? "生成中..." : "開始生成"}
-        </BaseButton>
-
-        {prompt && (
-          <div style={{ marginTop: "1.5rem" }}>
-            <h4>GPT 生成的 Prompt：</h4>
-            <p>{prompt}</p>
+      <div className="h-[400px] overflow-y-auto border p-3 bg-white rounded mb-3">
+        {messages.map((msg, i) => (
+          <div key={i} className={`mb-3 ${msg.role === "user" ? "text-right" : "text-left"}`}>
+            {msg.type === "text" && (
+              <div className={`inline-block px-3 py-2 rounded-lg ${msg.role === "user" ? "bg-blue-100" : "bg-gray-100"}`}>
+                {msg.content}
+              </div>
+            )}
+            {msg.type === "image" && (
+              <div className="mt-2">
+                <img src={msg.image_url} alt="AI 圖片" className="max-w-full rounded shadow" />
+              </div>
+            )}
           </div>
-        )}
-
-        {imageUrl && (
-          <div style={{ marginTop: "1.5rem" }}>
-            <h4>生成圖像：</h4>
-            <img src={imageUrl} alt="生成圖" style={{ width: "100%" }} />
-          </div>
-        )}
+        ))}
+        {loading && <Spin tip="生成中..." />}
       </div>
-    </>
+
+      <TextArea
+        rows={3}
+        placeholder="描述你想要的畫面，可以繼續補充喔！"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onPressEnter={(e) => {
+          if (!e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+          }
+        }}
+      />
+
+      <div className="text-center mt-3">
+        <BaseButton onClick={handleSend} disabled={loading || !input.trim()}>
+          {loading ? "生成中..." : "送出訊息"}
+        </BaseButton>
+      </div>
+    </div>
   );
 };
 

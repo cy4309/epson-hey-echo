@@ -11,12 +11,10 @@ from backend.s3_uploader import upload_to_epsondest
 
 import uuid
 import os
-import google.generativeai as genai
 from PIL import Image
 # 測試chatbot
+# openai.api_key = os.getenv("OPENAI_API_KEY") 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-gemini_model = genai.GenerativeModel("gemini-pro")
 
 app = FastAPI()
 UPLOAD_DIR = "uploads"
@@ -36,69 +34,57 @@ app.add_middleware(
 async def root():
     return {"message":"Backend is alive !!!"}
 
-# 測試chatbot: gemini+gpt
-@app.post("/multi-dialogue-to-image")
-async def generate_prompt(req: Request):
-    try:
-        data = await req.json()
-        messages = data.get("messages", [])
-
-        # Step 1: 整理 message 給 Gemini
-        combined_text = ""
-        for msg in messages:
-            role = msg.get("role")
-            if msg.get("type") == "text":
-                prefix = "User" if role == "user" else "AI"
-                combined_text += f"{prefix}: {msg.get('content')}\n"
-
-        gemini_response = gemini_model.generate_content(combined_text)
-        idea_description = gemini_response.text.strip()
-
-        # Step 2: 使用 GPT 生成 prompt
-        system_msg = """
+# 測試chatbot
+@app.post("/generate-prompt")
+async def  generate_prompt(req: Request):
+    data = await req.json()
+    user_input = data.get("input","")
+    system_msg = """
         你是一位圖像提示詞工程師，根據使用者輸入，請生成英文 prompt，可用於 DALL·E 圖像生成，並盡可能加入下列詞庫中的相關詞彙（不需要全部使用）以提升視覺品質與一致性。請以英文輸出，不要額外解釋：
 
         【光照效果】
-        Soft lighting, Hard lighting, Backlighting, Ambient lighting, Spotlight, Golden hour
+        Soft lighting, Hard lighting, Backlighting, Side lighting, Silhouette, Diffused light, Spotlight, Rim lighting, Ambient lighting, Tyndall Effect, Rayleigh Scattering, God Rays, Bokeh, Caustics, Chiaroscuro, Gobo Lighting, Halo Effect, Golden hour
 
         【色彩色調】
-        Vibrant, Warm Tones, Cool Tones, High Contrast, Sepia
+        Saturated, Desaturated, High Contrast, Low Contrast, Vibrant, Muted, Warm Tones, Cool Tones, Monochromatic, Duotone, Sepia, Cross Processing, HDR Toning, Tint, Lomo Effect, Bleach Bypass, Cyanotype, Grain, Analog
 
         【渲染與質感】
-        4K Resolution, Octane Render, Blender, HDR, Glossy Finish
+        Polaroid Effect, Octane Render, 4K Resolution, Texture Mapping, HDR, Matte Painting, Glossy Finish, Roughness, Cinema 4D, Blender, Maya, Arnold Renderer, V-Ray, Substance Painter, Quixel Mixer, Houdini
 
         【構圖技巧與視角】
-        Rule of Thirds, Close-up, Eye Level, Wide shot, One-point perspective
+        Rule of Thirds, Leading Lines, Framing, Symmetry and Patterns, Depth of Field, Negative Space, Golden Ratio, Eye Level, Diagonal Composition, Juxtaposition, Point of View, Isolation, S-Curve, Vanishing Point, Bird's-eye view, First-person view, Close-up, Wide shot, Telephoto lens, One-point perspective
         """
-        gpt_response = client.chat.completions.create(
-            model="gpt-4-1106-preview",
+    try:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",#gpt-4o
             messages=[
                 {"role": "system", "content": system_msg},
-                {"role": "user", "content": idea_description}
+                {"role": "user", "content": user_input}
             ]
         )
-        prompt = gpt_response.choices[0].message.content.strip()
+        return {"response": response.choices[0].message.content.strip()}
+    except Exception as e:
+        print("[ERROR] OpenAI error:", e)
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
-        # Step 3: 使用 DALL·E 生成圖片
-        img_response = client.images.generate(
+@app.post("/generate-image")
+async def generate_image(req: Request):
+    try:
+        data = await req.json()
+        prompt = data.get("prompt")
+        if not prompt:
+            return JSONResponse(content={"error": "Prompt is required"}, status_code=400)
+        
+        response = client.images.generate(
             model="dall-e-3",
             prompt=prompt,
             n=1,
             size="1024x1024"
         )
-        image_url = img_response.data[0].url
-
-        return JSONResponse(content={
-            "new_messages": [
-                {"role": "assistant", "type": "text", "content": prompt},
-                {"role": "assistant", "type": "image", "image_url": image_url}
-            ]
-        })
-
+        return {"image_url": response.data[0].url}
     except Exception as e:
         print("[ERROR] generate-image:", e)
         return JSONResponse(content={"error": str(e)}, status_code=500)
-
 
 # API ：上傳圖片
 @app.post("/upload-image")
