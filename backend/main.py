@@ -13,10 +13,10 @@ import uuid
 import os
 import google.generativeai as genai
 from PIL import Image
+
 # 測試chatbot
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-gemini_model = genai.GenerativeModel("gemini-pro")
 
 app = FastAPI()
 UPLOAD_DIR = "uploads"
