@@ -25,20 +25,19 @@ const Preview = () => {
     if (authCode) {
       console.log("Authorization code detected:", authCode);
       dispatch(setAuthCode(authCode));
+
+      const storedFile = localStorage.getItem("uploadedFile");
+      const storedFileName = localStorage.getItem("uploadedFileName");
+      const storedFileType = localStorage.getItem("uploadedFileType");
+
+      if (storedFile && storedFileName && storedFileType) {
+        setFile({ name: storedFileName, type: storedFileType });
+        setFilePreview(storedFile);
+      }
+
       executePrint(); // 導回來後繼續執行後續步驟
     }
   }, [authCode]);
-
-  useEffect(() => {
-    const storedFile = localStorage.getItem("uploadedFile");
-    const storedFileName = localStorage.getItem("uploadedFileName");
-    const storedFileType = localStorage.getItem("uploadedFileType");
-
-    if (storedFile && storedFileName && storedFileType) {
-      setFile({ name: storedFileName, type: storedFileType });
-      setFilePreview(storedFile);
-    }
-  }, []);
 
   const executePrint = async () => {
     try {
@@ -145,8 +144,12 @@ const Preview = () => {
       console.log(res);
       if (res.status === 200) {
         showSwal({ isSuccess: true, title: `上傳成功!` });
+        localStorage.removeItem("uploadedFile");
+        localStorage.removeItem("uploadedFileName");
       } else {
-        showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+        showSwal({ isSuccess: false, title: `上傳失敗，請重新上傳!` });
+        localStorage.removeItem("uploadedFile");
+        localStorage.removeItem("uploadedFileName");
       }
     } catch (err) {
       console.error(err);
@@ -204,11 +207,13 @@ const Preview = () => {
             className="w-full m-4 rounded-full"
           />
         )}
-        <BaseButton
-          label="執行列印"
-          className="w-full m-2"
-          onClick={executePrint}
-        />
+        {file && (
+          <BaseButton
+            label="執行列印"
+            className="w-full m-2"
+            onClick={executePrint}
+          />
+        )}
         {/* <BaseButton
           className="w-full m-2"
           label="0_get_auth_code"
