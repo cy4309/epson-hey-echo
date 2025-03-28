@@ -25,9 +25,10 @@ export const getAuthCode = async () => {
   // return await axios.get(
   //   `${epsonAuthUrl}/auth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=device`
   // );
-  window.open(
-    `${epsonAuthUrl}/auth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=device`
-  );
+  // window.open(
+  //   `${epsonAuthUrl}/auth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=device`
+  // );
+  window.location.href = `${epsonAuthUrl}/auth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=device`;
 };
 
 // 1 access token

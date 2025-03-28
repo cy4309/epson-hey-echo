@@ -20,13 +20,55 @@ const Preview = () => {
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
-  const [hasUploaded, setHasUploaded] = useState(false);
+  // const [hasUploaded, setHasUploaded] = useState(false);
 
   useEffect(() => {
     if (authCode) {
+      console.log("Authorization code detected:", authCode);
       dispatch(setAuthCode(authCode));
+      executePrint(); // 導回來後繼續執行後續步驟
     }
   }, [authCode]);
+
+  const executePrint = async () => {
+    try {
+      // Step 1: Handle Auth Code
+      console.log("Step 1: Getting Auth Code...");
+      if (!authCode) {
+        handleAuthCode();
+        return;
+      }
+
+      // Step 2: Post Access Token
+      console.log("Step 2: Posting Access Token...");
+      await handleAccessToken();
+
+      // Step 3: Create Print Job
+      console.log("Step 3: Creating Print Job...");
+      await handlePrintJobCreation();
+
+      // Step 4: Upload File
+      console.log("Step 4: Uploading File...");
+      if (!file) {
+        console.error("No file selected for upload.");
+        showSwal({ isSuccess: false, title: "請先上傳圖片!" });
+        return;
+      }
+      await submitFile();
+
+      // Step 5: Execute Print
+      console.log("Step 5: Executing Print...");
+      await handlePrintExecution();
+
+      // Success
+      console.log("Print process completed successfully!");
+      showSwal({ isSuccess: true, title: "列印成功!" });
+    } catch (err) {
+      console.error("Error during print process:", err);
+      showSwal({ isSuccess: false, title: "列印失敗，請稍後再試!" });
+    }
+  };
+
   const handleAuthCode = () => {
     getAuthCode();
   };
@@ -34,12 +76,6 @@ const Preview = () => {
     try {
       const res = await postAccessToken();
       console.log(res);
-      // if (res.code === 200) {
-      //   showSwal({ isSuccess: true, title: `上傳成功!` });
-      //   setPdfUrls(res.pdf_urls);
-      // } else {
-      //   showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
-      // }
     } catch (err) {
       console.error(err);
       showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
@@ -57,30 +93,12 @@ const Preview = () => {
   const handleFileUpload = (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
-
-    const fileType = selectedFile.type;
-    if (
-      fileType !== "image/png" &&
-      fileType !== "image/jpeg" &&
-      fileType !== "image/jpg"
-    ) {
-      showSwal({
-        isSuccess: false,
-        title: `請上傳PNG或JPEG格式的圖片`,
-      });
-      return;
-    }
-
     setFile(selectedFile);
     setFilePreview(URL.createObjectURL(selectedFile));
-    setHasUploaded(true);
+    // setHasUploaded(true);
   };
   const submitFile = async () => {
     if (!file) return;
-
-    // const formData = new FormData();
-    // formData.append("file", file);
-
     try {
       const res = await postFileUpload(file);
       console.log(res);
@@ -107,28 +125,56 @@ const Preview = () => {
   return (
     <>
       <div className="w-full flex flex-wrap justify-center items-center">
+        {filePreview && (
+          <div className="w-1/2 h-1/2 flex justify-center items-center rounded-lg">
+            <img
+              className="w-full h-full rounded-lg object-contain"
+              src={filePreview}
+              alt="preview"
+            />
+          </div>
+        )}
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept=".png, .jpg, .jpeg, .pdf"
+          className="hidden"
+          onChange={handleFileUpload}
+        />
+        {!file ? (
+          <BaseButton
+            label="上傳圖片"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full m-4 rounded-full"
+          />
+        ) : (
+          <BaseButton
+            label="重新上傳圖片"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full m-4 rounded-full"
+          />
+        )}
         <BaseButton
+          label="執行列印"
+          className="w-full m-2"
+          onClick={executePrint}
+        />
+        {/* <BaseButton
           className="w-full m-2"
           label="0_get_auth_code"
           onClick={handleAuthCode}
-        />
-        <BaseButton
+        /> */}
+        {/* <BaseButton
           className="w-full m-2"
           label="1_post_access_token"
           onClick={handleAccessToken}
-        />
-        <BaseButton
+        /> */}
+        {/* <BaseButton
           className="w-full m-2"
           label="2_post_print_job_creation"
           onClick={handlePrintJobCreation}
-        />
-
-        {/* <BaseButton
-          className="w-full m-2"
-          label="3_post_file_upload"
-          onClick={handleFileUpload}
         /> */}
-        {filePreview && (
+        {/* {filePreview && (
           <div className="w-1/2 h-1/2 flex justify-center items-center rounded-lg">
             <img
               className="w-full h-full rounded-lg object-contain"
@@ -155,9 +201,7 @@ const Preview = () => {
             <button
               className="w-12 h-12 m-4 bg-primaryColorGray rounded-full flex justify-center items-center cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
-            >
-              {/* <FontAwesomeIcon icon={faImage} className="text-xl" /> */}
-            </button>
+            ></button>
           </div>
         )}
         {filePreview && (
@@ -167,13 +211,12 @@ const Preview = () => {
             className="w-2/3 m-4"
             defaultValue="abc"
           />
-        )}
-
-        <BaseButton
+        )} */}
+        {/* <BaseButton
           className="w-full m-2"
           label="4_post_print_execution"
           onClick={handlePrintExecution}
-        />
+        /> */}
       </div>
     </>
   );
