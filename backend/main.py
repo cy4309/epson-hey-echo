@@ -53,13 +53,13 @@ async def generate_prompt(req: Request):
                 combined_text += f"{prefix}: {msg['content']}\n"
 
         # gemini_response = gemini_model.generate_content(combined_text)
-        model = genai.GenerativeModel("gemini-pro")
+        # model = genai.GenerativeModel("gemini-pro")
         # gemini_response = model.generate_content(combined_text)
         response = client.models.generate_content(
         model='gemini-2.0-flash', contents='How does RLHF work?'
         )
         print(response.text)
-        idea_description = gemini_response.text.strip()
+        idea_description = response.text.strip()
 
         # Step 2: 使用 GPT 生成 prompt
         system_msg = """
