@@ -79,8 +79,9 @@ export const postPrintJobCreation = async () => {
         printSettings: {
           paperSize: "ps_a4",
           paperType: "pt_plainpaper",
-          borderless: false,
-          printQuality: "normal",
+          // borderless: false, // L6490
+          borderless: true, // L6290
+          printQuality: "high",
           paperSource: "auto",
           colorMode: "color",
         },
