@@ -19,6 +19,7 @@ from PIL import Image
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+print("GEMINI_API_KEY:", os.getenv("GEMINI_API_KEY")[:6])
 
 app = FastAPI()
 UPLOAD_DIR = "uploads"
@@ -55,9 +56,12 @@ async def generate_prompt(req: Request):
         # gemini_response = gemini_model.generate_content(combined_text)
         # model = genai.GenerativeModel("gemini-pro")
         # gemini_response = model.generate_content(combined_text)
-        response = client.models.generate_content(
-        model='gemini-2.0-flash', contents='How does RLHF work?'
-        )
+
+        # response = client.models.generate_content(
+        # model='gemini-2.0-flash', contents='How does RLHF work?'
+        # )
+        model = genai.GenerativeModel('gemini-2.0-flash')  # 用你要的版本
+        response = model.generate_content("How does RLHF work?")
         print(response.text)
         idea_description = response.text.strip()
 
