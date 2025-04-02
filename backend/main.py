@@ -18,7 +18,7 @@ from PIL import Image
 # 測試chatbot
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-client = genai.Client(api_key='GEMINI_API_KEY')
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 app = FastAPI()
 UPLOAD_DIR = "uploads"
