@@ -82,7 +82,7 @@ async def generate_prompt(req: Request):
         model = genai.GenerativeModel('gemini-2.0-flash')
         chat = model.start_chat(history = chat_history)
         
-        response = chat.send_message("請總結以上對話，產出一個適合畫出來的想法")
+        response = chat.send_message("請用自然口語方式告訴我，你覺得我們聊完之後可以畫出什麼樣的畫面？不用條列，只要像專業設計師建議一樣描述就好。")
         idea_description = response.text.strip()
         chat_history.append({"role": "model", "parts": [idea_description]})
         print("[Gemini idea]", idea_description)
