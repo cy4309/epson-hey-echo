@@ -1,24 +1,21 @@
-from fastapi import FastAPI, File, UploadFile, Form
+from fastapi import FastAPI, File, UploadFile, Form, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.requests import Request
+# from fastapi.requests import Request
 from pydantic import BaseModel
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from openai import OpenAI
 from backend.s3_uploader import upload_to_epsondest
-from google import genai
-
+import google.generativeai as genai
+from PIL import Image
 import uuid
 import os
-# import google.generativeai as genai
-from PIL import Image
 
-# 測試chatbot
+#初始化 OpenAI and Gemini
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-# genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 print("GEMINI_API_KEY:", os.getenv("GEMINI_API_KEY")[:6])
 
 app = FastAPI()
@@ -26,6 +23,10 @@ UPLOAD_DIR = "uploads"
 PDF_DIR = "pdf_files"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(PDF_DIR, exist_ok=True)
+
+#記憶Gemini 對話歷史
+chat_history = []
+
 # API ：上傳圖片
 app.add_middleware(
     CORSMiddleware,
@@ -39,6 +40,30 @@ app.add_middleware(
 async def root():
     return {"message":"Backend is alive !!!"}
 
+#test: gemini和gpt
+@app.get("/test-gemini")
+async def test_gemini():
+    try:
+        model = genai.GenerativeModel("gemini-2.0-flash")
+        response = model.generate_content("請提供一個適合用 AI 畫出的有趣場景")
+        return {"gemini_response": response.text.strip()}
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.get("/test-gpt")
+async def test_gpt():
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4-1106-preview",
+            messages=[
+                {"role": "system", "content": "你是提示詞專家，請用英文寫一個適合 DALL·E 圖像生成的 prompt"},
+                {"role": "user", "content": "我想畫一隻戴著太空帽的柴犬站在月球上"}
+            ]
+        )
+        return {"gpt_prompt": response.choices[0].message.content.strip()}
+    except Exception as e:
+        return {"error": str(e)}
+    
 # 測試chatbot: gemini+gpt
 @app.post("/multi-dialogue-to-image")
 async def generate_prompt(req: Request):
@@ -46,58 +71,63 @@ async def generate_prompt(req: Request):
         data = await req.json()
         messages = data.get("messages", [])
 
-        # Step 1: 整理 message 給 Gemini
+        # Step 1: 與Gemini對話
         combined_text = ""
         for msg in messages:
             if msg["type"] == "text":
-                prefix = "User" if msg["role"] == "user" else "AI"
-                combined_text += f"{prefix}: {msg['content']}\n"
+                role = "User" if msg["role"] == "user" else "model"
+                chat_history.append({"role": role, "parts": [msg["content"]]})
+                # combined_text += f"{role}: {msg['content']}\n"
 
-        # gemini_response = gemini_model.generate_content(combined_text)
-        # model = genai.GenerativeModel("gemini-pro")
-        # gemini_response = model.generate_content(combined_text)
-
-        # response = client.models.generate_content(
-        # model='gemini-2.0-flash', contents='How does RLHF work?'
-        # )
-        model = genai.GenerativeModel('gemini-2.0-flash')  # 用你要的版本
-        response = model.generate_content("How does RLHF work?")
-        print(response.text)
+        model = genai.GenerativeModel('gemini-2.0-flash')
+        chat = model.start_chat(history = chat_history)
+        
+        response = chat.send_message("請總結以上對話，產出一個適合畫出來的想法")
+        # print(response.text)
         idea_description = response.text.strip()
+        chat_history.append({"role": "model", "parts": [idea_description]})
+        print("[Gemini idea]", idea_description)
+        
+        # Step 2: 使用 GPT-4 轉換為 prompt
+        try:
+            system_msg = """
+            你是一位圖像提示詞工程師，根據使用者輸入，請生成英文 prompt，可用於 DALL·E 圖像生成，並盡可能加入下列詞庫中的相關詞彙（不需要全部使用）以提升視覺品質與一致性。請以英文輸出，不要額外解釋：
 
-        # Step 2: 使用 GPT 生成 prompt
-        system_msg = """
-        你是一位圖像提示詞工程師，根據使用者輸入，請生成英文 prompt，可用於 DALL·E 圖像生成，並盡可能加入下列詞庫中的相關詞彙（不需要全部使用）以提升視覺品質與一致性。請以英文輸出，不要額外解釋：
+            【光照效果】
+            Soft lighting, Hard lighting, Backlighting, Ambient lighting, Spotlight, Golden hour
 
-        【光照效果】
-        Soft lighting, Hard lighting, Backlighting, Ambient lighting, Spotlight, Golden hour
+            【色彩色調】
+            Vibrant, Warm Tones, Cool Tones, High Contrast, Sepia
 
-        【色彩色調】
-        Vibrant, Warm Tones, Cool Tones, High Contrast, Sepia
+            【渲染與質感】
+            4K Resolution, Octane Render, Blender, HDR, Glossy Finish
 
-        【渲染與質感】
-        4K Resolution, Octane Render, Blender, HDR, Glossy Finish
-
-        【構圖技巧與視角】
-        Rule of Thirds, Close-up, Eye Level, Wide shot, One-point perspective
-        """
-        gpt_response = client.chat.completions.create(
-            model="gpt-4-1106-preview",
-            messages=[
-                {"role": "system", "content": system_msg},
-                {"role": "user", "content": idea_description}
-            ]
-        )
-        prompt = gpt_response.choices[0].message.content.strip()
+            【構圖技巧與視角】
+            Rule of Thirds, Close-up, Eye Level, Wide shot, One-point perspective
+            """
+            gpt_response = client.chat.completions.create(
+                model="gpt-4-1106-preview",
+                messages=[
+                    {"role": "system", "content": system_msg},
+                    {"role": "user", "content": idea_description}
+                ]
+            )
+            prompt = gpt_response.choices[0].message.content.strip()
+            print("[GPT prompt]", prompt)
+        except Exception as gpt_error:
+            return JSONResponse(content={"error": f"GPT 錯誤：{str(gpt_error)}"}, status_code=500)
 
         # Step 3: 使用 DALL·E 生成圖片
-        img_response = client.images.generate(
-            model="dall-e-3",
-            prompt=prompt,
-            n=1,
-            size="1024x1024"
-        )
-        image_url = img_response.data[0].url
+        try:
+            img_response = client.images.generate(
+                model="dall-e-3",
+                prompt=prompt,
+                n=1,
+                size="1024x1024"
+            )
+            image_url = img_response.data[0].url
+        except Exception as dalle_error:
+            return JSONResponse(content={"error": f"DALL·E 錯誤：{str(dalle_error)}"}, status_code=500)
 
         return JSONResponse(content={
             "new_messages": [
@@ -105,7 +135,7 @@ async def generate_prompt(req: Request):
                 {"role": "assistant", "type": "image", "image_url": image_url}
             ]
         })
-
+        
     except Exception as e:
         print("[ERROR] generate-image:", e)
         return JSONResponse(content={"error": str(e)}, status_code=500)
