@@ -83,7 +83,6 @@ async def generate_prompt(req: Request):
         chat = model.start_chat(history = chat_history)
         
         response = chat.send_message("請總結以上對話，產出一個適合畫出來的想法")
-        # print(response.text)
         idea_description = response.text.strip()
         chat_history.append({"role": "model", "parts": [idea_description]})
         print("[Gemini idea]", idea_description)
@@ -131,8 +130,8 @@ async def generate_prompt(req: Request):
 
         return JSONResponse(content={
             "new_messages": [
-                {"role": "assistant", "type": "text", "content": prompt},
-                {"role": "assistant", "type": "image", "image_url": image_url}
+                {"role": "assistant", "type": "text", "content": idea_description},# 顯示 Gemini 回覆
+                {"role": "assistant", "type": "image", "image_url": image_url} # 顯示圖片
             ]
         })
         
