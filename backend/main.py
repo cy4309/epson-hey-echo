@@ -153,7 +153,7 @@ async def upload_image(file: UploadFile = File(...)):
     return JSONResponse(
         content={
             "message": "圖片上傳成功",
-            "image_url": f"/view-image/{file_name}",
+            "image_url": f"https://epson-hey-echo.onrender.com/view-image/{file_name}",
             "filename": file_name,
             "code": 200
             })
@@ -208,12 +208,17 @@ async def generate_multiple_pdfs(
             c.drawString(x, y, content)
             c.save()
             
-            s3_url = upload_to_epsondest(file_path, f"pdf/{file_name}")  # 上傳 S3
-            pdf_urls.append(s3_url)
+            # s3_url = upload_to_epsondest(file_path, f"pdf/{file_name}")  # 上傳 S3
+            # pdf_urls.append(s3_url)
             upload_status, upload_response = upload_to_epsondest(file_path, file_name)
             print(f"[INFO] Upload to Epson API: {upload_status} - {upload_response}")
-
+            pdf_urls.append({
+                "layout": layout,
+                "status": upload_status,
+                "result": upload_response
+            })
             os.remove(file_path)
+
         return JSONResponse(content={
             "pdf_urls": pdf_urls,
             "code":200
