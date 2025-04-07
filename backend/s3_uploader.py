@@ -7,7 +7,9 @@ def upload_to_epsondest(filepath: str, filename: str):
         "Authorization": "b1f7690c-ad05-4416-8c42-72df5c38fae2"
     }
     with open(filepath, "rb") as f:
-        suffix = filename.split(".")[-1]
+        filename_only = os.path.basename(filename)
+        suffix = f".{filename_only.split('.')[-1]}"
+        
         files = {
             # "file": (filename, open(filepath, "rb")),
             "file": (filename, f),
