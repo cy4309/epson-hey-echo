@@ -1,4 +1,5 @@
 import requests
+import os
 
 def upload_to_epsondest(filepath: str, filename: str):
     url = "https://imorph.spe3d.co/api/UploadEpson"
@@ -6,12 +7,17 @@ def upload_to_epsondest(filepath: str, filename: str):
         "Authorization": "b1f7690c-ad05-4416-8c42-72df5c38fae2"
     }
     with open(filepath, "rb") as f:
+        suffix = filename.split(".")[-1]
         files = {
             # "file": (filename, open(filepath, "rb")),
             "file": (filename, f),
             "fileName": (None, filename),
-            "suffix": (None, f".{filename.split('.')[-1]}")
+            "suffix": (None, suffix)
         }
+        print("[INFO] Epson 上傳檔案:", filename)
+        print("[INFO] Epson 上傳路徑:", filepath)
+        print("[INFO] Epson 上傳網址:", url)
+        print("[INFO] 檔案後綴名:", suffix)
 
         response = requests.post(url, headers=headers, files=files)
         try:
