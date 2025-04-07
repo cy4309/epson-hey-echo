@@ -1,10 +1,13 @@
 import { useState, useRef } from "react";
 import BaseButton from "@/components/BaseButton";
-import { uploadImage, generateMultiplePdfs } from "@/services/formService";
+import {
+  uploadImage,
+  generateMultiplePdfs,
+} from "@/services/illustrateService";
 import { showSwal } from "@/utils/notification";
 import { Input } from "antd";
 
-const Composition = () => {
+const Illustration = () => {
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
@@ -171,4 +174,4 @@ const Composition = () => {
   );
 };
 
-export default Composition;
+export default Illustration;

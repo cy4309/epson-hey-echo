@@ -7,9 +7,10 @@ import {
   AreaChartOutlined,
   ArrowLeftOutlined,
 } from "@ant-design/icons";
-// import LoadingIndicator from "@/components/LoadingIndicator";
 import BaseButton from "@/components/BaseButton";
-import Composition from "@/containers/home/Composition";
+// import LoadingIndicator from "@/components/LoadingIndicator";
+import { showSwal } from "@/utils/notification";
+import { generateDialogueToImage } from "@/services/generateService";
 
 const Chatbot = () => {
   const navigate = useNavigate();
@@ -17,7 +18,6 @@ const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isCompositionVisible, setIsCompositionVisible] = useState(false);
   const [isGenerationCompleted, setIsGenerationCompleted] = useState(false);
   const { TextArea } = Input;
 
@@ -31,23 +31,34 @@ const Chatbot = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        "https://epson-hey-echo.onrender.com/multi-dialogue-to-image",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: updatedMessages }),
-        }
-      );
-
-      const data = await res.json();
-      const newMessages = data.new_messages || [];
+      const res = await generateDialogueToImage(updatedMessages);
+      console.log(res);
+      const newMessages = res.new_messages || [];
       setMessages((prev) => [...prev, ...newMessages]);
     } catch (err) {
-      console.error("發生錯誤:", err);
+      console.error(err);
+      showSwal({ isSuccess: false, title: `對話失敗，請稍後再試!` });
     } finally {
       setLoading(false);
     }
+
+    // try {
+    //   const res = await fetch(
+    //     "https://epson-hey-echo.onrender.com/multi-dialogue-to-image",
+    //     {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify({ messages: updatedMessages }),
+    //     }
+    //   );
+    //   const data = await res.json();
+    //   const newMessages = data.new_messages || [];
+    //   setMessages((prev) => [...prev, ...newMessages]);
+    // } catch (err) {
+    //   console.error("發生錯誤:", err);
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   // if (isLoading) {
@@ -116,6 +127,7 @@ const Chatbot = () => {
               <Spin tip="生成中...">
                 <div style={{ minHeight: 40 }}></div>
               </Spin>
+              // <LoadingIndicator />
             )}
           </div>
 
@@ -144,7 +156,7 @@ const Chatbot = () => {
       )}
 
       {isGenerationCompleted && (
-        <div className="mb-4 w-full flex justify-center items-center">
+        <div className="w-full flex flex-col justify-center items-center">
           <BaseButton
             className="mx-2"
             onClick={() => setIsGenerationCompleted((prev) => !prev)}
@@ -154,17 +166,16 @@ const Chatbot = () => {
           </BaseButton>
           <BaseButton
             label="排版"
-            className="mx-2"
-            onClick={() => setIsCompositionVisible((prev) => !prev)}
+            className="mx-2 w-full"
+            onClick={() => navigate("/illustration")}
           />
           <BaseButton
             label="列印"
-            className="mx-2"
+            className="mx-2 w-full"
             onClick={() => navigate("/print")}
           />
         </div>
       )}
-      {isCompositionVisible && <Composition />}
     </>
   );
 };

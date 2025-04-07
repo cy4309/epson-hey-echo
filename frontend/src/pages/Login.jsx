@@ -69,7 +69,7 @@ const Login = () => {
       {/* <div className="absolute inset-0 flex flex-col justify-center items-center space-y-4"> */}
       <BaseButton
         className="w-2/3"
-        onClick={() => handleLogin("Let's go", "Admin")}
+        onClick={() => handleLogin("Welcome", "Admin")}
       >
         Get Started
       </BaseButton>
