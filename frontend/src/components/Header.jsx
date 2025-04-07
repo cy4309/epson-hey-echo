@@ -40,56 +40,16 @@ const Nav = () => {
 
   return (
     <nav className="container p-4 z-10 flex justify-between items-center">
-      <div
-        className="flex justify-center items-center cursor-pointer"
-        onClick={() => navigate("/")}
-      >
-        {/* {isHomePage && (
-          <BaseButton
-            className="flex justify-center items-center cursor-pointer"
-            onClick={() => handleLogout()}
-          >
-            <CaretLeftOutlined /> Back
-          </BaseButton>
-        )} */}
-        <img src="/epson-logo.png" alt="epson-logo" className="w-10 mr-2" />
-        <h2>Hey, Echo!</h2>
-      </div>
-      <span
-        className="cursor-pointer underline"
-        onClick={() => navigate("/chatbot")}
-      >
-        Chatbot
-      </span>
-      <span
-        className="cursor-pointer underline"
-        onClick={() => navigate("/form")}
-      >
-        Form
-      </span>
-      <span
-        className="cursor-pointer underline"
-        onClick={() => navigate("/preview")}
-      >
-        Preview
-      </span>
-      {/* <div
-        className="flex justify-center items-center cursor-pointer"
-        onClick={() => navigate("/")}
-      >
-        <img src="/s.png" alt="Spe3d" className="h-6 mr-2" />
-        <h1>Face Fortune Tool</h1>
-      </div> */}
-      <div className="flex justify-center items-center">
+      <div className="w-full flex justify-end items-center">
         {/* <p className="text-sm mr-4 flex items-center">V0.0.1</p> */}
         <BaseButton
-          className="mr-2 h-10 cursor-pointer hover:bg-hoverGray"
+          className="mr-2 h-10"
           // onClick={() => dispatch(toggleDarkMode())}
           onClick={handleToggleDarkMode}
         >
           <SunOutlined />
         </BaseButton>
-        <BaseButton className="mr-2" onClick={() => handleLogout()}>
+        <BaseButton className="mr-2 h-10" onClick={() => handleLogout()}>
           <LogoutOutlined />
         </BaseButton>
         {/* <BaseButton
@@ -103,8 +63,6 @@ const Nav = () => {
           }`}
         /> */}
       </div>
-
-      {/* <Login isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} /> */}
     </nav>
   );
 };

@@ -26,10 +26,6 @@ import PropTypes from "prop-types";
 // };
 
 const Home = lazy(() => import("@/pages/Home"));
-const Chatbot = lazy(() => import("@/pages/Chatbot"));
-const Form = lazy(() => import("@/pages/Form"));
-const Preview = lazy(() => import("@/pages/Preview"));
-const Print = lazy(() => import("@/pages/Print"));
 // const Login = lazy(() => import("@/pages/Login"));
 const Error = lazy(() => import("@/pages/Error"));
 
@@ -82,46 +78,6 @@ const App = () => {
                 <ProtectedRoute>
                   <Suspense fallback={<LoadingIndicator />}>
                     <Home />
-                  </Suspense>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path={router_path.chatbot}
-              element={
-                <ProtectedRoute>
-                  <Suspense fallback={<LoadingIndicator />}>
-                    <Chatbot />
-                  </Suspense>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path={router_path.form}
-              element={
-                <ProtectedRoute>
-                  <Suspense fallback={<LoadingIndicator />}>
-                    <Form />
-                  </Suspense>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path={router_path.preview}
-              element={
-                <ProtectedRoute>
-                  <Suspense fallback={<LoadingIndicator />}>
-                    <Preview />
-                  </Suspense>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path={router_path.print}
-              element={
-                <ProtectedRoute>
-                  <Suspense fallback={<LoadingIndicator />}>
-                    <Print />
                   </Suspense>
                 </ProtectedRoute>
               }
