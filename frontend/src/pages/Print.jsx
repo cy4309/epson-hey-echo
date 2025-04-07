@@ -12,7 +12,7 @@ import {
 import { useDispatch } from "react-redux";
 import { setAuthCode } from "@/stores/features/epsonSlice";
 
-const Preview = () => {
+const Print = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const params = new URLSearchParams(location.search);
@@ -282,4 +282,4 @@ const Preview = () => {
   );
 };
 
-export default Preview;
+export default Print;

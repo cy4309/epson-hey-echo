@@ -4,7 +4,7 @@ import { uploadImage, generateMultiplePdfs } from "@/services/formService";
 import { showSwal } from "@/utils/notification";
 import { Input } from "antd";
 
-const Form = () => {
+const Composition = () => {
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
@@ -171,4 +171,4 @@ const Form = () => {
   );
 };
 
-export default Form;
+export default Composition;

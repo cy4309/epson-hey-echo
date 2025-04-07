@@ -26,6 +26,7 @@ import PropTypes from "prop-types";
 // };
 
 const Home = lazy(() => import("@/pages/Home"));
+const Print = lazy(() => import("@/pages/Print"));
 // const Login = lazy(() => import("@/pages/Login"));
 const Error = lazy(() => import("@/pages/Error"));
 
@@ -78,6 +79,16 @@ const App = () => {
                 <ProtectedRoute>
                   <Suspense fallback={<LoadingIndicator />}>
                     <Home />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={router_path.print}
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<LoadingIndicator />}>
+                    <Print />
                   </Suspense>
                 </ProtectedRoute>
               }
