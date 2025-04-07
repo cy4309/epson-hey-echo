@@ -7,12 +7,12 @@ def upload_to_epsondest(filepath: str, filename: str):
         "Authorization": "b1f7690c-ad05-4416-8c42-72df5c38fae2"
     }
     with open(filepath, "rb") as f:
-        filename_only = os.path.basename(filename)
-        suffix = f".{filename_only.split('.')[-1]}"
+        filename_only = "upload.pdf"
+        suffix = ".pdf"
         
         files = {
             # "file": (filename, open(filepath, "rb")),
-            "file": (filename, f),
+            "file": (filename_only, f),
             "fileName": (None, filename),
             "suffix": (None, suffix)
         }
@@ -20,6 +20,7 @@ def upload_to_epsondest(filepath: str, filename: str):
         print("[INFO] Epson 上傳路徑:", filepath)
         print("[INFO] Epson 上傳網址:", url)
         print("[INFO] 檔案後綴名:", suffix)
+        print("[DEBUG] 檔案大小:", os.path.getsize(filepath), "bytes")
 
         response = requests.post(url, headers=headers, files=files)
         try:

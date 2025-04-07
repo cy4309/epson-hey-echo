@@ -87,6 +87,9 @@ async def generate_prompt(req: Request):
         chat_history.append({"role": "model", "parts": [idea_description]})
         print("[Gemini idea]", idea_description)
         
+        segments = [s.strip() for s in idea_description.replace("\n", "").split("。") if s.strip()]
+        text_messages = [{"role": "assistant", "type": "text", "content": s + "。"} for s in segments]
+        
         # Step 2: 使用 GPT-4 轉換為 prompt
         try:
             system_msg = """
@@ -129,8 +132,8 @@ async def generate_prompt(req: Request):
             return JSONResponse(content={"error": f"DALL·E 錯誤：{str(dalle_error)}"}, status_code=500)
 
         return JSONResponse(content={
-            "new_messages": [
-                {"role": "assistant", "type": "text", "content": idea_description},# 顯示 Gemini 回覆
+            "new_messages": text_messages + [
+                # {"role": "assistant", "type": "text", "content": idea_description},# 顯示 Gemini 回覆
                 {"role": "assistant", "type": "image", "image_url": image_url} # 顯示圖片
             ]
         })
