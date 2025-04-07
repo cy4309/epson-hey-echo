@@ -59,7 +59,7 @@ const Login = () => {
             fov: 3,
             near: 0.1,
             far: 500,
-            position: [5, 8, 24],
+            position: [1, 12, 20],
           }}
           onCreated={() => setIsCanvasLoaded(true)}
         >

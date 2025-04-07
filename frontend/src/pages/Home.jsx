@@ -1,22 +1,23 @@
 import { useState } from "react";
 import { Input, Spin } from "antd";
+import { useNavigate } from "react-router-dom";
 import {
   CheckOutlined,
   FormOutlined,
   AreaChartOutlined,
+  ArrowLeftOutlined,
 } from "@ant-design/icons";
 // import LoadingIndicator from "@/components/LoadingIndicator";
 import BaseButton from "@/components/BaseButton";
-import Form from "@/containers/home/Form";
-import Preview from "@/containers/home/Preview";
+import Composition from "@/containers/home/Composition";
 
 const Chatbot = () => {
+  const navigate = useNavigate();
   // const [isLoading, setIsLoading] = useState(true);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isFormVisible, setIsFormVisible] = useState(false);
-  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
+  const [isCompositionVisible, setIsCompositionVisible] = useState(false);
   const [isGenerationCompleted, setIsGenerationCompleted] = useState(false);
   const { TextArea } = Input;
 
@@ -143,19 +144,27 @@ const Chatbot = () => {
       )}
 
       {isGenerationCompleted && (
-        <div className="w-2/5 flex justify-between items-center">
+        <div className="mb-4 w-full flex justify-center items-center">
+          <BaseButton
+            className="mx-2"
+            onClick={() => setIsGenerationCompleted((prev) => !prev)}
+          >
+            <ArrowLeftOutlined />
+            <span className="ml-2">返回</span>
+          </BaseButton>
           <BaseButton
             label="排版"
-            onClick={() => setIsFormVisible((prev) => !prev)}
+            className="mx-2"
+            onClick={() => setIsCompositionVisible((prev) => !prev)}
           />
           <BaseButton
             label="列印"
-            onClick={() => setIsPreviewVisible((prev) => !prev)}
+            className="mx-2"
+            onClick={() => navigate("/print")}
           />
         </div>
       )}
-      {isFormVisible && <Form />}
-      {isPreviewVisible && <Preview />}
+      {isCompositionVisible && <Composition />}
     </>
   );
 };
