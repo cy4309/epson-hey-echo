@@ -7,7 +7,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from openai import OpenAI
-from backend.s3_uploader import upload_image_to_epsondest
+from s3_uploader import upload_image_to_epsondest
 import google.generativeai as genai
 from PIL import Image
 import uuid
@@ -160,7 +160,7 @@ async def generate_prompt(req: Request):
                 ]
             ).choices[0].message.content.strip()
 
-            print("[🎯 文案生成]", title, subtitle, cta)
+            print("[文案生成]", title, subtitle, cta)
 
             # 產純色背景（先用 Pillow 產圖）
             from PIL import Image, ImageDraw, ImageFont
