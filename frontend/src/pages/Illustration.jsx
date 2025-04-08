@@ -32,7 +32,7 @@ const Illustration = () => {
 
     const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
     if (!allowedTypes.includes(selectedFile.type)) {
-      alert("只支援 PNG、JPG、JPEG 格式");
+      showSwal(false, "只支援 PNG、JPG、JPEG 格式");
       return;
     }
 
@@ -73,6 +73,7 @@ const Illustration = () => {
       content: textContent,
       font_size: fontSize,
     };
+    console.log(payload);
 
     try {
       const res = await generateMultiplePdfs(payload);
@@ -159,12 +160,20 @@ const Illustration = () => {
         {pdfUrls.length > 0 && (
           <div className="gap-6 flex justify-center items-center scale-75">
             {pdfUrls.map((url, index) => (
-              <iframe
+              <img
                 key={index}
-                src={`${import.meta.env.VITE_BACKEND_API_BASE_URL}${url}`}
+                src={`${
+                  import.meta.env.VITE_BACKEND_S3_API_BASE_URL
+                }/${fileName}`}
                 className="h-[400px] rounded-lg shadow"
                 // title={`pdf-preview-${index}`}
               />
+              // <iframe
+              //   key={index}
+              //   src={`${import.meta.env.VITE_BACKEND_API_BASE_URL}${url}`}
+              //   className="h-[400px] rounded-lg shadow"
+              //   // title={`pdf-preview-${index}`}
+              // />
             ))}
           </div>
         )}

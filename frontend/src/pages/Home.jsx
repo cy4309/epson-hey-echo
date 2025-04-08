@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Input, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
 import {
   CheckOutlined,
   FormOutlined,
-  AreaChartOutlined,
+  // AreaChartOutlined,
+  PlusOutlined,
   ArrowLeftOutlined,
 } from "@ant-design/icons";
 import BaseButton from "@/components/BaseButton";
 // import LoadingIndicator from "@/components/LoadingIndicator";
 import { showSwal } from "@/utils/notification";
 import { generateDialogueToImage } from "@/services/generateService";
+import { uploadImage } from "@/services/illustrateService";
 
 const Chatbot = () => {
   const navigate = useNavigate();
@@ -20,8 +22,11 @@ const Chatbot = () => {
   const [loading, setLoading] = useState(false);
   const [isGenerationCompleted, setIsGenerationCompleted] = useState(false);
   const { TextArea } = Input;
+  const fileInputRef = useRef(null);
+  const [file, setFile] = useState(null);
+  const [filePreview, setFilePreview] = useState("");
 
-  const handleSend = async () => {
+  const handleSendDialog = async () => {
     if (!input.trim()) return;
 
     const newUserMsg = { role: "user", type: "text", content: input };
@@ -42,23 +47,46 @@ const Chatbot = () => {
       setLoading(false);
     }
 
-    // try {
-    //   const res = await fetch(
-    //     "https://epson-hey-echo.onrender.com/multi-dialogue-to-image",
-    //     {
-    //       method: "POST",
-    //       headers: { "Content-Type": "application/json" },
-    //       body: JSON.stringify({ messages: updatedMessages }),
-    //     }
-    //   );
-    //   const data = await res.json();
-    //   const newMessages = data.new_messages || [];
-    //   setMessages((prev) => [...prev, ...newMessages]);
-    // } catch (err) {
-    //   console.error("發生錯誤:", err);
-    // } finally {
-    //   setLoading(false);
-    // }
+    if (!file) return;
+    if (file) {
+      submitFileUpload();
+    }
+  };
+
+  const submitFileUpload = async () => {
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await uploadImage(formData);
+      console.log(res);
+      if (res.code === 200) {
+        showSwal({ isSuccess: true, title: `上傳成功!` });
+        // setIsUploaded(true);
+        // setFileName(res.filename);
+      } else {
+        showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+      }
+    } catch (err) {
+      console.error(err);
+      showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+    }
+  };
+
+  const handleFileUpload = (e) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+    // console.log(selectedFile);
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
+    if (!allowedTypes.includes(selectedFile.type)) {
+      showSwal(false, "只支援 PNG、JPG、JPEG 格式");
+      return;
+    }
+
+    setFile(selectedFile);
+    const previewUrl = URL.createObjectURL(selectedFile);
+    setFilePreview(previewUrl);
+    // setInput((prev) => `${prev}\n![圖片描述](${previewUrl})`);
+    // setHasUploaded(true);
   };
 
   // if (isLoading) {
@@ -81,10 +109,6 @@ const Chatbot = () => {
                 <FormOutlined />
                 <span className="ml-2">New</span>
               </BaseButton>
-              <BaseButton className="ml-2">
-                <AreaChartOutlined />
-                <span className="ml-2">Upload</span>
-              </BaseButton>
               <BaseButton
                 className="ml-2"
                 onClick={() => setIsGenerationCompleted((prev) => !prev)}
@@ -95,17 +119,17 @@ const Chatbot = () => {
             </div>
           </aside>
 
-          <div className="h-[400px] overflow-y-auto border p-3 bg-white rounded mb-3">
+          <div className="mb-2 p-2 h-[400px] overflow-y-auto border bg-white rounded">
             {messages.map((msg, i) => (
               <div
                 key={i}
-                className={`mb-3 ${
+                className={`mb-2 ${
                   msg.role === "user" ? "text-right" : "text-left"
                 }`}
               >
                 {msg.type === "text" && (
                   <div
-                    className={`inline-block px-3 py-2 rounded-lg ${
+                    className={`px-2 py-2 inline-block rounded-lg ${
                       msg.role === "user" ? "bg-blue-100" : "bg-gray-100"
                     }`}
                   >
@@ -130,7 +154,30 @@ const Chatbot = () => {
               // <LoadingIndicator />
             )}
           </div>
-
+          <div className="mb-2 w-full flex justify-start items-center">
+            {filePreview && (
+              <img
+                src={filePreview}
+                alt="預覽圖片"
+                className="mr-2 w-16 rounded-lg shadow"
+              />
+            )}
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".png, .jpg, .jpeg, .pdf"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+            <BaseButton
+              className="w-4"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {/* <AreaChartOutlined /> */}
+              <PlusOutlined />
+              {/* <span className="ml-2">Upload</span> */}
+            </BaseButton>
+          </div>
           <TextArea
             rows={3}
             placeholder="描述你想要的畫面，可以繼續補充喔！"
@@ -139,14 +186,14 @@ const Chatbot = () => {
             onPressEnter={(e) => {
               if (!e.shiftKey) {
                 e.preventDefault();
-                handleSend();
+                handleSendDialog();
               }
             }}
           />
 
-          <div className="text-center mt-3">
+          <div className="mt-2 text-center">
             <BaseButton
-              onClick={handleSend}
+              onClick={handleSendDialog}
               disabled={loading || !input.trim()}
             >
               {loading ? "生成中..." : "送出訊息"}
