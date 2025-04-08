@@ -162,7 +162,7 @@ async def generate_prompt(req: Request):
 
             print("[🎯 文案生成]", title, subtitle, cta)
 
-            # 🎨 產純色背景（這裡先用 Pillow 產圖）
+            # 🎨 產純色背景（先用 Pillow 產圖）
             from PIL import Image, ImageDraw, ImageFont
             import uuid, os
             width, height = 1240, 1754
@@ -172,7 +172,7 @@ async def generate_prompt(req: Request):
             draw = ImageDraw.Draw(poster)
             draw.rectangle([0, height * 0.75, width, height], fill=bottom_color)
 
-            # 🖼️ 疊建築圖（假設已經有 image_url，從你 upload-image 來）
+            # 🖼️ 疊建築圖
             from io import BytesIO
             import requests
 
@@ -283,17 +283,18 @@ async def upload_image(file: UploadFile = File(...)):
     file_extension = file.filename.split(".")[-1].lower()
     if file_extension not in ["png", "jpg", "jpeg"]:
         return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
-    file_name = f"{uuid.uuid4().hex}.{file_extension}"
-    file_path = os.path.join(UPLOAD_DIR, file_name)
-    with open(file_path, "wb") as f:
-        f.write(await file.read())
-    return JSONResponse(
-        content={
-            "message": "圖片上傳成功",
-            "image_url": f"https://epson-hey-echo.onrender.com/view-image/{file_name}",
-            "filename": file_name,
-            "code": 200
-            })
+    try:
+        file_name = f"{uuid.uuid4().hex}.{file_extension}"
+        file_path = os.path.join(UPLOAD_DIR, file_name)
+        with open(file_path, "wb") as f:
+            f.write(await file.read())
+        from s3_uploader import upload_image_to_epsondest
+        status, image_url = upload_image_to_epsondest(file_path, file_name)
+        if status != 200:
+            return JSONResponse(content={"error": "上傳 Epson 失敗"}, status_code=500)
+        return {"code": 200, "image_url": image_url}
+    except Exception as e:
+        return {"code": 500, "error": str(e)}
 
 @app.get("/view-image/{file_name}")
 async def view_image(file_name: str):
