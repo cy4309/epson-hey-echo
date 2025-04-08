@@ -36,11 +36,16 @@ const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      const res = await generateDialogueToImage(updatedMessages);
+      const image_url = await submitFileUpload(); //@Joyce:測試圖片上傳
+      // const res = await generateDialogueToImage(updatedMessages);
+      const res = await generateDialogueToImage({ //@Joyce:測試圖片上傳
+        messages: updatedMessages,
+        image_url: image_url || ""
+      });
       console.log(res);
       const newMessages = res.new_messages || [];
       setMessages((prev) => [...prev, ...newMessages]);
-      submitFileUpload();
+      // submitFileUpload(); //@Joyce:測試圖片上傳，先測一下把圖一同傳入對話裡
     } catch (err) {
       console.error(err);
       showSwal({ isSuccess: false, title: `對話失敗，請稍後再試!` });
@@ -58,7 +63,9 @@ const Chatbot = () => {
       console.log(res);
       if (res.code === 200) {
         showSwal({ isSuccess: true, title: `上傳成功!` });
+        const url = res.image_url; // @Joyce:測試圖片上傳
         removeFile();
+        return url; // @Joyce:測試圖片上傳
         // setIsUploaded(true);
         // setFileName(res.filename);
       } else {

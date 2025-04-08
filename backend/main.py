@@ -100,6 +100,7 @@ async def generate_prompt(req: Request):
             if msg["type"] == "text":
                 role = "User" if msg["role"] == "user" else "model"
                 chat_history.append({"role": role, "parts": [msg["content"]]})
+                image_url = data.get("image_url")
                 # combined_text += f"{role}: {msg['content']}\n"
 
         model = genai.GenerativeModel('gemini-2.0-flash')
@@ -111,7 +112,15 @@ async def generate_prompt(req: Request):
         print("[Gemini idea]", idea_description)
         
         segments = [s.strip() for s in idea_description.replace("\n", "").split("。") if s.strip()]
-        text_messages = [{"role": "assistant", "type": "text", "content": s + "。"} for s in segments]
+        text_messages = [{"role": "assistant", "type": "text", "content": s + "。"} for s in segments] #回複訊息
+        image_url = data.get("image_url")
+        if image_url:
+            text_messages.insert(0,{
+                "role": "user",
+                "type": "image",
+                "image_url": image_url
+            })
+        
         
         # Step 2: 使用 GPT-4 轉換為 prompt
         try:
