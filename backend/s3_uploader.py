@@ -1,18 +1,17 @@
 import requests
 import os
 
-def upload_to_epsondest(filepath: str, filename: str):
+def upload_image_to_epsondest(filepath: str, filename: str):
     url = "https://imorph.spe3d.co/api/UploadEpson"
-    headers = {
+    headers = { 
         "Authorization": "b1f7690c-ad05-4416-8c42-72df5c38fae2"
     }
     with open(filepath, "rb") as f:
-        filename_only = "upload.pdf"
-        suffix = ".pdf"
-        
+        # filename_only = "upload.pdf"
+        suffix = os.path.splitext(filename)[-1]  # 取副檔名
         files = {
             # "file": (filename, open(filepath, "rb")),
-            "file": (filename_only, f),
+            "file": (filename, f),
             "fileName": (None, filename),
             "suffix": (None, suffix)
         }

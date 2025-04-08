@@ -7,7 +7,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from openai import OpenAI
-from backend.s3_uploader import upload_to_epsondest
+from backend.s3_uploader import upload_image_to_epsondest
 import google.generativeai as genai
 from PIL import Image
 import uuid
@@ -121,6 +121,103 @@ async def generate_prompt(req: Request):
                 "image_url": image_url
             })
         
+        # 🔍 先找出使用者最後一則文字訊息
+        user_texts = [m["content"] for m in messages if m["role"] == "user" and m["type"] == "text"]
+        user_last_input = user_texts[-1] if user_texts else ""
+
+        # ✅ 如果包含指定關鍵語句，走「合成房仲海報邏輯」
+        trigger_phrases = [
+            "幫我合成",
+            "我要一張房仲海報",
+            "這是建築圖，幫我搭背景和字"
+        ]
+
+        if any(phrase in user_last_input for phrase in trigger_phrases):
+            print("[🪄 Trigger] 進入房仲海報合成功能")
+
+            # 🧠 GPT 幫忙產文案（你也可以用 Gemini 生成）
+            title = client.chat.completions.create(
+                model="gpt-4-1106-preview",
+                messages=[
+                    {"role": "system", "content": "你是一位房仲廣告設計師，請產出一個吸睛的房仲主標題，不超過20字，語氣自然口語。"},
+                    {"role": "user", "content": user_last_input}
+                ]
+            ).choices[0].message.content.strip()
+
+            subtitle = client.chat.completions.create(
+                model="gpt-4-1106-preview",
+                messages=[
+                    {"role": "system", "content": "請補一句說明性副標（最多20字）"},
+                    {"role": "user", "content": user_last_input}
+                ]
+            ).choices[0].message.content.strip()
+
+            cta = client.chat.completions.create(
+                model="gpt-4-1106-preview",
+                messages=[
+                    {"role": "system", "content": "請產出一段房仲廣告常用的聯絡資訊文字（例如：傅樁淵 0988-100-122）"},
+                    {"role": "user", "content": user_last_input}
+                ]
+            ).choices[0].message.content.strip()
+
+            print("[🎯 文案生成]", title, subtitle, cta)
+
+            # 🎨 產純色背景（這裡先用 Pillow 產圖）
+            from PIL import Image, ImageDraw, ImageFont
+            import uuid, os
+            width, height = 1240, 1754
+            bg_color = "#264432"
+            bottom_color = "#F8F1D7"
+            poster = Image.new("RGB", (width, height), bg_color)
+            draw = ImageDraw.Draw(poster)
+            draw.rectangle([0, height * 0.75, width, height], fill=bottom_color)
+
+            # 🖼️ 疊建築圖（假設已經有 image_url，從你 upload-image 來）
+            from io import BytesIO
+            import requests
+
+            image_url = data.get("image_url")
+            if image_url:
+                r = requests.get(image_url)
+                fg = Image.open(BytesIO(r.content)).convert("RGBA")
+
+                # resize + paste
+                ratio = width * 0.8 / fg.width
+                fg_resized = fg.resize((int(fg.width * ratio), int(fg.height * ratio)))
+                x = (width - fg_resized.width) // 2
+                y = int(height * 0.35 - fg_resized.height / 2)
+                poster.paste(fg_resized, (x, y), fg_resized)
+
+            # 📝 加上文字
+            try:
+                font_h1 = ImageFont.truetype("arial.ttf", 72)
+                font_h2 = ImageFont.truetype("arial.ttf", 40)
+                font_cta = ImageFont.truetype("arial.ttf", 36)
+            except:
+                font_h1 = font_h2 = font_cta = ImageFont.load_default()
+
+            draw.text((80, 60), title, font=font_h1, fill="#F8F1D7")
+            draw.text((80, height * 0.75 + 40), subtitle, font=font_h2, fill="#264432")
+            draw.text((80, height * 0.75 + 120), cta, font=font_cta, fill="#264432")
+
+            # 儲存圖片
+            filename = f"{uuid.uuid4().hex}.png"
+            filepath = os.path.join(UPLOAD_DIR, filename)
+            poster.save(filepath)
+            
+            # 上傳 Epson
+            from s3_uploader import upload_image_to_epsondest  # 放最上面 import
+
+            status, image_url = upload_image_to_epsondest(filepath, filename)
+            if status != 200:
+                return JSONResponse(content={"error": "圖片上傳 Epson 失敗"}, status_code=500)
+
+            return JSONResponse(content={
+                "new_messages": [
+                    {"role": "assistant", "type": "text", "content": f"已根據你的需求合成海報囉：\n {title}\n {subtitle}\n {cta}"},
+                    {"role": "assistant", "type": "image", "image_url": image_url}
+                ]
+            })
         
         # Step 2: 使用 GPT-4 轉換為 prompt
         try:
