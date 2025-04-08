@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   CheckOutlined,
   FormOutlined,
+  CloseCircleOutlined,
   // AreaChartOutlined,
   PlusOutlined,
   ArrowLeftOutlined,
@@ -89,6 +90,12 @@ const Chatbot = () => {
     // setHasUploaded(true);
   };
 
+  const removeFile = () => {
+    setFile(null);
+    setFilePreview("");
+    fileInputRef.current.value = null;
+  };
+
   // if (isLoading) {
   //   return <LoadingIndicator />;
   // }
@@ -156,11 +163,16 @@ const Chatbot = () => {
           </div>
           <div className="mb-2 w-full flex justify-start items-center">
             {filePreview && (
-              <img
-                src={filePreview}
-                alt="預覽圖片"
-                className="mr-2 w-16 rounded-lg shadow"
-              />
+              <div className="relative">
+                <button className="absolute text-white" onClick={removeFile}>
+                  <CloseCircleOutlined />
+                </button>
+                <img
+                  src={filePreview}
+                  alt="預覽圖片"
+                  className="mr-2 w-16 rounded-lg shadow"
+                />
+              </div>
             )}
             <input
               type="file"
