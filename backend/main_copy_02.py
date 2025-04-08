@@ -65,6 +65,29 @@ async def test_gpt():
         return {"error": str(e)}
     
 # 測試chatbot: gemini+gpt
+# #開場白
+# @app.get("/onboarding")
+# async def onboarding():
+#     return {
+#         "messages": [
+#             {
+#                 "role": "assistant",
+#                 "type": "text",
+#                 "content": "嗨我是你的 AI 設計師，Echo 🎨 請問你今天想要設計什麼呢？"
+#             },
+#             {
+#                 "role": "assistant",
+#                 "type": "text",
+#                 "content": "你可以選擇：\n1️⃣ AI 圖像創作\n2️⃣ 排版成 PDF\n3️⃣ 給我靈感，我幫你想\n\n直接輸入數字或描述也可以喔！"
+#             },
+#             {
+#                 "role": "assistant",
+#                 "type": "text",
+#                 "content": "如果你有圖片想一起用，也可以上傳，我會幫你加上文字、設計風格，再輸出成漂亮的排版唷！"
+#             }
+#         ]
+#     }
+
 @app.post("/multi-dialogue-to-image")
 async def generate_prompt(req: Request):
     try:
@@ -86,6 +109,9 @@ async def generate_prompt(req: Request):
         idea_description = response.text.strip()
         chat_history.append({"role": "model", "parts": [idea_description]})
         print("[Gemini idea]", idea_description)
+        
+        segments = [s.strip() for s in idea_description.replace("\n", "").split("。") if s.strip()]
+        text_messages = [{"role": "assistant", "type": "text", "content": s + "。"} for s in segments]
         
         # Step 2: 使用 GPT-4 轉換為 prompt
         try:
@@ -129,8 +155,8 @@ async def generate_prompt(req: Request):
             return JSONResponse(content={"error": f"DALL·E 錯誤：{str(dalle_error)}"}, status_code=500)
 
         return JSONResponse(content={
-            "new_messages": [
-                {"role": "assistant", "type": "text", "content": idea_description},# 顯示 Gemini 回覆
+            "new_messages": text_messages + [
+                # {"role": "assistant", "type": "text", "content": idea_description},# 顯示 Gemini 回覆
                 {"role": "assistant", "type": "image", "image_url": image_url} # 顯示圖片
             ]
         })
@@ -153,7 +179,7 @@ async def upload_image(file: UploadFile = File(...)):
     return JSONResponse(
         content={
             "message": "圖片上傳成功",
-            "image_url": f"/view-image/{file_name}",
+            "image_url": f"https://epson-hey-echo.onrender.com/view-image/{file_name}",
             "filename": file_name,
             "code": 200
             })
@@ -208,12 +234,17 @@ async def generate_multiple_pdfs(
             c.drawString(x, y, content)
             c.save()
             
-            s3_url = upload_to_epsondest(file_path, f"pdf/{file_name}")  # 上傳 S3
-            pdf_urls.append(s3_url)
+            # s3_url = upload_to_epsondest(file_path, f"pdf/{file_name}")  # 上傳 S3
+            # pdf_urls.append(s3_url)
             upload_status, upload_response = upload_to_epsondest(file_path, file_name)
             print(f"[INFO] Upload to Epson API: {upload_status} - {upload_response}")
-
+            pdf_urls.append({
+                "layout": layout,
+                "status": upload_status,
+                "result": upload_response
+            })
             os.remove(file_path)
+
         return JSONResponse(content={
             "pdf_urls": pdf_urls,
             "code":200
