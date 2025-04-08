@@ -29,20 +29,26 @@ const Chatbot = () => {
     setImageUrl("");
 
     try {
-      const promptRes = await fetch("https://epson-hey-echo.onrender.com/generate-prompt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input, lang }),
-      });
+      const promptRes = await fetch(
+        "https://epson-hey-echo.onrender.com/generate-prompt",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ input, lang }),
+        }
+      );
       const promptData = await promptRes.json();
       const finalPrompt = promptData.response;
       setPrompt(finalPrompt);
 
-      const imageRes = await fetch("https://epson-hey-echo.onrender.com/generate-image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: finalPrompt }),
-      });
+      const imageRes = await fetch(
+        "https://epson-hey-echo.onrender.com/generate-image",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: finalPrompt }),
+        }
+      );
       const imageData = await imageRes.json();
       setImageUrl(imageData.image_url);
     } catch (err) {
@@ -54,7 +60,7 @@ const Chatbot = () => {
 
   return (
     <>
-      <div className="w-full p-4 border flex flex-col justify-center items-center rounded-lg">
+      <div className="w-full p-4 border flex flex-col justify-center items-center rounded-xl">
         <h2 className="mb-2">AI 生圖 Chatbot</h2>
         <div>
           <label className="m-2">語言：</label>

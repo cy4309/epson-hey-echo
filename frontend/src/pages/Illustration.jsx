@@ -11,7 +11,6 @@ const Illustration = () => {
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
-  // const [isConversation, setIsConversation] = useState(false);
   const [hasUploaded, setHasUploaded] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
   const [fileName, setFileName] = useState("");
@@ -92,93 +91,89 @@ const Illustration = () => {
 
   return (
     <>
-      {/* {isConversation && ( */}
-      <>
-        {filePreview && (
-          <div className="w-1/2 h-1/2 flex justify-center items-center rounded-lg">
-            <img
-              className="w-full h-full rounded-lg object-contain"
-              src={filePreview}
-              alt="preview"
-            />
-          </div>
-        )}
-
-        <input
-          type="file"
-          ref={fileInputRef}
-          accept=".png, .jpg, .jpeg"
-          className="hidden"
-          onChange={handleFileUpload}
-        />
-        {!hasUploaded ? (
-          <BaseButton
-            label="上傳圖片"
-            onClick={() => fileInputRef.current?.click()}
-            className="w-2/3 m-4 rounded-full"
-          ></BaseButton>
-        ) : (
-          <div className="w-2/3">
-            <button
-              className="w-12 h-12 m-4 bg-primaryColorGray rounded-full flex justify-center items-center cursor-pointer"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {/* <FontAwesomeIcon icon={faImage} className="text-xl" /> */}
-            </button>
-          </div>
-        )}
-        {filePreview && !isUploaded && (
-          <BaseButton
-            label="送出圖片"
-            onClick={submitImg}
-            className="w-2/3 m-4"
-            defaultValue="abc"
+      {filePreview && (
+        <div className="w-1/2 h-1/2 flex justify-center items-center rounded-xl">
+          <img
+            className="w-full h-full rounded-xl object-contain"
+            src={filePreview}
+            alt="preview"
           />
-        )}
-        {isUploaded && (
-          <>
-            <Input
-              name="text"
-              placeholder="輸入文字內容"
-              className="m-2"
-              size="large"
-              value={textContent}
-              onChange={(e) => setTextContent(e.target.value)}
+        </div>
+      )}
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept=".png, .jpg, .jpeg"
+        className="hidden"
+        onChange={handleFileUpload}
+      />
+      {!hasUploaded ? (
+        <BaseButton
+          label="上傳圖片"
+          onClick={() => fileInputRef.current?.click()}
+          className="w-2/3 m-4 rounded-xl"
+        ></BaseButton>
+      ) : (
+        <div className="w-2/3">
+          <button
+            className="w-12 h-12 m-4 bg-primaryColorGray rounded-xl flex justify-center items-center cursor-pointer"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {/* <FontAwesomeIcon icon={faImage} className="text-xl" /> */}
+          </button>
+        </div>
+      )}
+      {filePreview && !isUploaded && (
+        <BaseButton
+          label="送出圖片"
+          onClick={submitImg}
+          className="w-2/3 m-4"
+          defaultValue="abc"
+        />
+      )}
+      {isUploaded && (
+        <>
+          <Input
+            name="text"
+            placeholder="輸入文字內容"
+            className="m-2"
+            size="large"
+            value={textContent}
+            onChange={(e) => setTextContent(e.target.value)}
+          />
+          <Input
+            name="text"
+            placeholder="字體大小"
+            className="m-2"
+            size="large"
+            value={fontSize}
+            onChange={(e) => setFontSize(Number(e.target.value))}
+          />
+          <BaseButton className="m-2" label="送出" onClick={submitFile} />
+          {/* <BaseButton className="m-2" label="列印" onClick={submitPrint} /> */}
+        </>
+      )}
+      {pdfUrls.length > 0 && (
+        <div className="gap-6 flex justify-center items-center scale-75">
+          {pdfUrls.map((url, index) => (
+            <img
+              key={index}
+              src={`${
+                import.meta.env.VITE_BACKEND_S3_API_BASE_URL
+              }/${fileName}`}
+              className="h-[400px] rounded-xl shadow"
+              // title={`pdf-preview-${index}`}
             />
-            <Input
-              name="text"
-              placeholder="字體大小"
-              className="m-2"
-              size="large"
-              value={fontSize}
-              onChange={(e) => setFontSize(Number(e.target.value))}
-            />
-            <BaseButton className="m-2" label="送出" onClick={submitFile} />
-            {/* <BaseButton className="m-2" label="列印" onClick={submitPrint} /> */}
-          </>
-        )}
-        {pdfUrls.length > 0 && (
-          <div className="gap-6 flex justify-center items-center scale-75">
-            {pdfUrls.map((url, index) => (
-              <img
-                key={index}
-                src={`${
-                  import.meta.env.VITE_BACKEND_S3_API_BASE_URL
-                }/${fileName}`}
-                className="h-[400px] rounded-lg shadow"
-                // title={`pdf-preview-${index}`}
-              />
-              // <iframe
-              //   key={index}
-              //   src={`${import.meta.env.VITE_BACKEND_API_BASE_URL}${url}`}
-              //   className="h-[400px] rounded-lg shadow"
-              //   // title={`pdf-preview-${index}`}
-              // />
-            ))}
-          </div>
-        )}
-      </>
-      {/* )} */}
+            // <iframe
+            //   key={index}
+            //   src={`${import.meta.env.VITE_BACKEND_API_BASE_URL}${url}`}
+            //   className="h-[400px] rounded-xl shadow"
+            //   // title={`pdf-preview-${index}`}
+            // />
+          ))}
+        </div>
+      )}
     </>
   );
 };

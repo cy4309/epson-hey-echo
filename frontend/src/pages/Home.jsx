@@ -1,26 +1,25 @@
 import { useState, useRef } from "react";
-import { Input, Spin } from "antd";
+import { Input } from "antd";
 import { useNavigate } from "react-router-dom";
 import {
   CheckOutlined,
   FormOutlined,
   CloseCircleOutlined,
-  // AreaChartOutlined,
+  ArrowRightOutlined,
   PlusOutlined,
   ArrowLeftOutlined,
 } from "@ant-design/icons";
 import BaseButton from "@/components/BaseButton";
-// import LoadingIndicator from "@/components/LoadingIndicator";
+import LoadingIndicator from "@/components/LoadingIndicator";
 import { showSwal } from "@/utils/notification";
 import { generateDialogueToImage } from "@/services/generateService";
 import { uploadImage } from "@/services/illustrateService";
 
 const Chatbot = () => {
   const navigate = useNavigate();
-  // const [isLoading, setIsLoading] = useState(true);
   const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [textAreaValue, setTextAreaValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [isGenerationCompleted, setIsGenerationCompleted] = useState(false);
   const { TextArea } = Input;
   const fileInputRef = useRef(null);
@@ -28,33 +27,30 @@ const Chatbot = () => {
   const [filePreview, setFilePreview] = useState("");
 
   const handleSendDialog = async () => {
-    if (!input.trim()) return;
+    if (!textAreaValue.trim()) return;
 
-    const newUserMsg = { role: "user", type: "text", content: input };
+    const newUserMsg = { role: "user", type: "text", content: textAreaValue };
     const updatedMessages = [...messages, newUserMsg];
     setMessages(updatedMessages);
-    setInput("");
-    setLoading(true);
+    setTextAreaValue("");
+    setIsLoading(true);
 
     try {
       const res = await generateDialogueToImage(updatedMessages);
       console.log(res);
       const newMessages = res.new_messages || [];
       setMessages((prev) => [...prev, ...newMessages]);
+      submitFileUpload();
     } catch (err) {
       console.error(err);
       showSwal({ isSuccess: false, title: `對話失敗，請稍後再試!` });
     } finally {
-      setLoading(false);
-    }
-
-    if (!file) return;
-    if (file) {
-      submitFileUpload();
+      setIsLoading(false);
     }
   };
 
   const submitFileUpload = async () => {
+    if (!file) return;
     const formData = new FormData();
     formData.append("file", file);
     try {
@@ -62,6 +58,7 @@ const Chatbot = () => {
       console.log(res);
       if (res.code === 200) {
         showSwal({ isSuccess: true, title: `上傳成功!` });
+        removeFile();
         // setIsUploaded(true);
         // setFileName(res.filename);
       } else {
@@ -82,11 +79,10 @@ const Chatbot = () => {
       showSwal(false, "只支援 PNG、JPG、JPEG 格式");
       return;
     }
-
     setFile(selectedFile);
     const previewUrl = URL.createObjectURL(selectedFile);
     setFilePreview(previewUrl);
-    // setInput((prev) => `${prev}\n![圖片描述](${previewUrl})`);
+    // setTextAreaValue((prev) => `${prev}\n![圖片描述](${previewUrl})`);
     // setHasUploaded(true);
   };
 
@@ -102,12 +98,11 @@ const Chatbot = () => {
   return (
     <>
       {!isGenerationCompleted && (
-        <div className="p-4 w-full max-w-xl mx-auto border rounded-lg">
+        <div className="p-4 w-full max-w-4xl mx-auto border rounded-xl">
           <aside>
-            <h2 className="mb-4 text-xl font-semibold text-center">
-              AI 設計師 · 對話式生圖
-            </h2>
-
+            {/* <h2 className="mb-4 text-xl font-semibold text-center">
+                AI 設計師 · 對話式生圖
+              </h2> */}
             <div className="mb-4 flex justify-center items-center">
               <BaseButton
                 className="ml-2"
@@ -126,7 +121,7 @@ const Chatbot = () => {
             </div>
           </aside>
 
-          <div className="mb-2 p-2 h-[400px] overflow-y-auto border bg-white rounded">
+          <div className="mb-4 p-4 h-[400px] overflow-y-auto border-0 bg-white rounded-xl dark:bg-primary dark:text-black">
             {messages.map((msg, i) => (
               <div
                 key={i}
@@ -136,8 +131,8 @@ const Chatbot = () => {
               >
                 {msg.type === "text" && (
                   <div
-                    className={`px-2 py-2 inline-block rounded-lg ${
-                      msg.role === "user" ? "bg-blue-100" : "bg-gray-100"
+                    className={`px-2 py-2 inline-block rounded-xl ${
+                      msg.role === "user" ? "bg-primaryYellow" : "bg-secondary"
                     }`}
                   >
                     {msg.content}
@@ -148,17 +143,17 @@ const Chatbot = () => {
                     <img
                       src={msg.image_url}
                       alt="AI 圖片"
-                      className="max-w-full rounded shadow"
+                      className="max-w-full rounded-xl shadow"
                     />
                   </div>
                 )}
               </div>
             ))}
-            {loading && (
-              <Spin tip="生成中...">
-                <div style={{ minHeight: 40 }}></div>
-              </Spin>
-              // <LoadingIndicator />
+            {isLoading && (
+              // <Spin tip="生成中...">
+              //   <div style={{ minHeight: 40 }}></div>
+              // </Spin>
+              <LoadingIndicator />
             )}
           </div>
           <div className="mb-2 w-full flex justify-start items-center">
@@ -170,10 +165,13 @@ const Chatbot = () => {
                 <img
                   src={filePreview}
                   alt="預覽圖片"
-                  className="mr-2 w-16 rounded-lg shadow"
+                  className="mr-2 w-16 rounded-xl shadow"
                 />
               </div>
             )}
+          </div>
+
+          <div className="p-4 w-full border rounded-xl flex">
             <input
               type="file"
               ref={fileInputRef}
@@ -181,43 +179,44 @@ const Chatbot = () => {
               className="hidden"
               onChange={handleFileUpload}
             />
-            <BaseButton
-              className="w-4"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {/* <AreaChartOutlined /> */}
+            <BaseButton onClick={() => fileInputRef.current?.click()}>
               <PlusOutlined />
-              {/* <span className="ml-2">Upload</span> */}
             </BaseButton>
+            <TextArea
+              className="mx-2 border-0"
+              rows={3}
+              placeholder="描述你想要的畫面，可以繼續補充喔！"
+              value={textAreaValue}
+              onChange={(e) => setTextAreaValue(e.target.value)}
+              onPressEnter={(e) => {
+                if (!e.shiftKey) {
+                  e.preventDefault();
+                  handleSendDialog();
+                }
+              }}
+            />
+            {textAreaValue.trim() !== "" && (
+              <BaseButton onClick={handleSendDialog}>
+                <ArrowRightOutlined />
+              </BaseButton>
+            )}
           </div>
-          <TextArea
-            rows={3}
-            placeholder="描述你想要的畫面，可以繼續補充喔！"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onPressEnter={(e) => {
-              if (!e.shiftKey) {
-                e.preventDefault();
-                handleSendDialog();
-              }
-            }}
-          />
 
-          <div className="mt-2 text-center">
+          {/* <div className="mt-2 text-center">
             <BaseButton
               onClick={handleSendDialog}
               disabled={loading || !input.trim()}
             >
               {loading ? "生成中..." : "送出訊息"}
             </BaseButton>
-          </div>
+            </div> */}
         </div>
       )}
 
       {isGenerationCompleted && (
-        <div className="w-full flex flex-col justify-center items-center">
+        <div className="p-4 w-full max-w-4xl mx-auto border rounded-xl">
           <BaseButton
-            className="mx-2"
+            className="my-4"
             onClick={() => setIsGenerationCompleted((prev) => !prev)}
           >
             <ArrowLeftOutlined />
@@ -225,12 +224,12 @@ const Chatbot = () => {
           </BaseButton>
           <BaseButton
             label="排版"
-            className="mx-2 w-full"
+            className="my-4 w-full"
             onClick={() => navigate("/illustration")}
           />
           <BaseButton
             label="列印"
-            className="mx-2 w-full"
+            className="my-4 w-full"
             onClick={() => navigate("/print")}
           />
         </div>

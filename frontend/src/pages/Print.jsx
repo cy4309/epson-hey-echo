@@ -184,9 +184,9 @@ const Print = () => {
     <>
       <div className="w-full flex flex-wrap justify-center items-center">
         {filePreview && (
-          <div className="w-1/2 h-1/2 flex justify-center items-center rounded-lg">
+          <div className="w-1/2 h-1/2 flex justify-center items-center rounded-xl">
             <img
-              className="w-full h-full rounded-lg object-contain"
+              className="w-full h-full rounded-xl object-contain"
               src={filePreview}
               alt="preview"
             />
@@ -203,13 +203,13 @@ const Print = () => {
           <BaseButton
             label="上傳圖片"
             onClick={() => fileInputRef.current?.click()}
-            className="w-full m-4 rounded-full"
+            className="w-full m-4 rounded-xl"
           />
         ) : (
           <BaseButton
             label="重新上傳圖片"
             onClick={() => fileInputRef.current?.click()}
-            className="w-full m-4 rounded-full"
+            className="w-full m-4 rounded-xl"
           />
         )}
         {filePreview && (
@@ -235,9 +235,9 @@ const Print = () => {
           onClick={handlePrintJobCreation}
         /> */}
         {/* {filePreview && (
-          <div className="w-1/2 h-1/2 flex justify-center items-center rounded-lg">
+          <div className="w-1/2 h-1/2 flex justify-center items-center rounded-xl">
             <img
-              className="w-full h-full rounded-lg object-contain"
+              className="w-full h-full rounded-xl object-contain"
               src={filePreview}
               alt="preview"
             />
@@ -254,12 +254,12 @@ const Print = () => {
           <BaseButton
             label="上傳圖片"
             onClick={() => fileInputRef.current?.click()}
-            className="w-2/3 m-4 rounded-full"
+            className="w-2/3 m-4 rounded-xl"
           ></BaseButton>
         ) : (
           <div className="w-2/3">
             <button
-              className="w-12 h-12 m-4 bg-primaryColorGray rounded-full flex justify-center items-center cursor-pointer"
+              className="w-12 h-12 m-4 bg-primaryColorGray rounded-xl flex justify-center items-center cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
             ></button>
           </div>
