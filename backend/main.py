@@ -197,7 +197,7 @@ async def generate_multiple_pdfs(
     image_filename: str = Form(...), #檔名成稱
     content: str = Form(...), #文字內容
     font_size: int = Form(18), #字體大小
-    # code: int = Form(200)
+    code: int = Form(200)
 ):
     try:
         width, height = A4
