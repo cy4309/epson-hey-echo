@@ -121,11 +121,11 @@ async def generate_prompt(req: Request):
                 "image_url": image_url
             })
         
-        # 🔍 先找出使用者最後一則文字訊息
+        # 先找出使用者最後一則文字訊息
         user_texts = [m["content"] for m in messages if m["role"] == "user" and m["type"] == "text"]
         user_last_input = user_texts[-1] if user_texts else ""
 
-        # ✅ 如果包含指定關鍵語句，走「合成房仲海報邏輯」
+        # 如果包含指定關鍵語句，走「合成房仲海報邏輯」
         trigger_phrases = [
             "幫我合成",
             "我要一張房仲海報",
@@ -135,7 +135,7 @@ async def generate_prompt(req: Request):
         if any(phrase in user_last_input for phrase in trigger_phrases):
             print("[🪄 Trigger] 進入房仲海報合成功能")
 
-            # 🧠 GPT 幫忙產文案（你也可以用 Gemini 生成）
+            # GPT 幫忙產文案（你也可以用 Gemini 生成）
             title = client.chat.completions.create(
                 model="gpt-4-1106-preview",
                 messages=[
@@ -162,7 +162,7 @@ async def generate_prompt(req: Request):
 
             print("[🎯 文案生成]", title, subtitle, cta)
 
-            # 🎨 產純色背景（先用 Pillow 產圖）
+            # 產純色背景（先用 Pillow 產圖）
             from PIL import Image, ImageDraw, ImageFont
             import uuid, os
             width, height = 1240, 1754
@@ -172,7 +172,7 @@ async def generate_prompt(req: Request):
             draw = ImageDraw.Draw(poster)
             draw.rectangle([0, height * 0.75, width, height], fill=bottom_color)
 
-            # 🖼️ 疊建築圖
+            # 疊建築圖
             from io import BytesIO
             import requests
 
@@ -212,11 +212,23 @@ async def generate_prompt(req: Request):
             if status != 200:
                 return JSONResponse(content={"error": "圖片上傳 Epson 失敗"}, status_code=500)
 
+            response_messages = [
+                {"role": "assistant", "type": "text", "content": f"已根據你的需求合成海報囉：\n {title}\n {subtitle}\na {cta}"},
+                {"role": "assistant", "type": "image", "image_url": image_url}
+            ]
+            # 如果使用者有上傳圖片，放在最前面
+            if data.get("image_url"):
+                response_messages.insert(0, {
+                    "role": "user",
+                    "type": "image",
+                    "image_url": data["image_url"]
+                })
             return JSONResponse(content={
-                "new_messages": [
-                    {"role": "assistant", "type": "text", "content": f"已根據你的需求合成海報囉：\n {title}\n {subtitle}\n {cta}"},
-                    {"role": "assistant", "type": "image", "image_url": image_url}
-                ]
+                "new_messages": response_messages
+                    # [
+                    # {"role": "assistant", "type": "text", "content": f"已根據你的需求合成海報囉：\n {title}\n {subtitle}\n {cta}"},
+                    # {"role": "assistant", "type": "image", "image_url": image_url}
+                    # ] 
             })
         
         # Step 2: 使用 GPT-4 轉換為 prompt
