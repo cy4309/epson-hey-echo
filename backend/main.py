@@ -106,7 +106,7 @@ async def generate_prompt(req: Request):
         model = genai.GenerativeModel('gemini-2.0-flash')
         chat = model.start_chat(history = chat_history)
         
-        response = chat.send_message("請用專業設計師自然口語的聊天方式告訴我，你覺得我們聊完之後可以怎麼設計這個畫面？不用條列，只要簡短描述就好。")
+        response = chat.send_message("你是專門設計房仲文宣的設計師。請用自然的聊天語氣，告訴我你會怎麼設計這張房仲宣傳海報，可以提到主體（像是建築物、街景）、氣氛、色調和視覺重點。簡短描述就好，不用條列。")
         idea_description = response.text.strip()
         chat_history.append({"role": "model", "parts": [idea_description]})
         print("[Gemini idea]", idea_description)
@@ -125,19 +125,24 @@ async def generate_prompt(req: Request):
         # Step 2: 使用 GPT-4 轉換為 prompt
         try:
             system_msg = """
-            你是一位圖像提示詞工程師，根據使用者輸入，請生成英文 prompt，可用於 DALL·E 圖像生成，並盡可能加入下列詞庫中的相關詞彙（不需要全部使用）以提升視覺品質與一致性。請以英文輸出，不要額外解釋：
+            你是一位熟悉房仲廣告與建築攝影的圖像提示詞工程師。根據輸入內容，請撰寫英文 prompt，供 DALL·E 圖像生成。請務必包含明確的主體（如建築、街景、房屋外觀），以利生成高品質、具主體性的圖片。
 
             【光照效果】
-            Soft lighting, Hard lighting, Backlighting, Ambient lighting, Spotlight, Golden hour
+            Soft lighting (柔光), Hard lighting (硬光), Backlighting (逆光), Side lighting (側光), Silhouette (剪影), Diffused light (擴散光), Spotlight (聚光), Rim lighting (邊光), Ambient lighting (環境光), Tyndall Effect (泰因達爾效應), Rayleigh Scattering (瑞利散射), God Rays / Crepuscular Rays (耶穌光/暮光射線), Bokeh (散景), Caustics (焦散效果), Chiaroscuro (明暗對比), Gobo Lighting (戈博照明), Halo Effect (光暈效果), Golden hour (黃金時刻)
 
             【色彩色調】
-            Vibrant, Warm Tones, Cool Tones, High Contrast, Sepia
+            Saturated (飽和), Desaturated (去飽和), High Contrast (高對比度), Low Contrast (低對比度), Vibrant (鮮豔), Muted (柔和), Warm Tones (暖色調), Cool Tones (冷色調), Monochromatic (單色調), Duotone (雙色調), Sepia (棕褐色調), Cross Processing (交叉沖印), HDR Toning (HDR調色), Tint (色調添加), Lomo Effect (LOMO效果), Bleach Bypass (漂白繞過), Cyanotype (藍印法), Grain / Film Grain (顆粒感/膠片顆粒), Analog (類比效果)
 
             【渲染與質感】
-            4K Resolution, Octane Render, Blender, HDR, Glossy Finish
+            Polaroid Effect (拍立得效果), Octane Render (Octane渲染器), 4K Resolution (4K解析度), Texture Mapping (紋理映射), HDR (High Dynamic Range, 高動態範圍), Matte Painting (數碼彩繪), Glossy Finish (光澤表面), Roughness / Bump Mapping (粗糙度/凸起映射), Cinema 4D (C4D), Blender (混合器), Maya, Arnold Renderer (阿諾德渲染器), V-Ray (V-Ray渲染器), Substance Painter (Substance繪畫器), Quixel Mixer (Quixel混合器), Houdini (胡迪尼)
+            
+            【構圖技巧與方法】
+            Rule of Thirds (三分法則), Leading Lines (引導線), Framing (框架法), Symmetry and Patterns (對稱與圖案), Depth of Field (景深), Negative Space (負空間), Golden Ratio (黃金比例), Focus on Eye Level (注視點層次), Diagonal Composition (對角線構圖), Juxtaposition (並置), Point of View (視點), Color Contrast (色彩對比), Isolation (孤立), S-Curve (S型曲線), Frame Within a Frame (框中框), Dynamic Tension (動態張力), Balance (平衡), Repetition (重複), Vanishing Point (消失點), Selective Focus (選擇性對焦), Symmetry and Asymmetry (對稱與不對稱), High Angle and Low Angle (高角度與低角度)
 
             【構圖技巧與視角】
-            Rule of Thirds, Close-up, Eye Level, Wide shot, One-point perspective
+            Rule of Thirds (三分法則), Leading Lines (引導線), Framing (框架法), Symmetry and Patterns (對稱與圖案), Depth of Field (景深), Negative Space (負空間), Golden Ratio (黃金比例), Focus on Eye Level (注視點層次), Diagonal Composition (對角線構圖), Juxtaposition (並置), Point of View (視點), Color Contrast (色彩對比), Isolation (孤立), S-Curve (S型曲線), Frame Within a Frame (框中框), Dynamic Tension (動態張力), Balance (平衡), Repetition (重複), Vanishing Point (消失點), Selective Focus (選擇性對焦), Symmetry and Asymmetry (對稱與不對稱), High Angle and Low Angle (高角度與低角度)
+            
+            請注意：生成的 prompt 最終會用於設計房仲海報，畫面要適合作為廣告主視覺，建議避免過度抽象或無主體的構圖。
             """
             gpt_response = client.chat.completions.create(
                 model="gpt-4-1106-preview",
