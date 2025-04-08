@@ -7,7 +7,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from openai import OpenAI
-from s3_uploader import upload_image_to_epsondest
+from backend.s3_uploader import upload_image_to_epsondest
 import google.generativeai as genai
 from PIL import Image
 import uuid
