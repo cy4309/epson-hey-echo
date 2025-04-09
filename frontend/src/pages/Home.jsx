@@ -45,8 +45,11 @@ const Chatbot = () => {
     setIsLoading(true);
 
     try {
+      const newUserMsg = { role: "user", type: "text", content: textAreaValue };
       const image_url = await submitFileUpload(); //@Joyce:測試圖片上傳
       // const res = await generateDialogueToImage(updatedMessages);
+      const newImageMsg = { role: "user", type: "image", image_url };
+      const updatedMessages = [...messages, newUserMsg, newImageMsg];
       const res = await generateDialogueToImage({
         //@Joyce:測試圖片上傳
         messages: updatedMessages,
