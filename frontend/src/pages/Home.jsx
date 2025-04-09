@@ -63,7 +63,8 @@ const Chatbot = () => {
       console.log(res);
       if (res.code === 200) {
         showSwal({ isSuccess: true, title: `上傳成功!` });
-        const url = res.image_url; // @Joyce:測試圖片上傳
+        const filename = res.filename; // @Joyce:測試圖片上傳
+        const url = `${S3_BASE_URL}${filename}`; // @Joyce:測試圖片上傳
         removeFile();
         return url; // @Joyce:測試圖片上傳
         // setIsUploaded(true);

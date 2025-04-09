@@ -32,4 +32,4 @@ def upload_image_to_epsondest(filepath: str, filename: str):
                 print("[ERROR] Epson API 回傳錯誤或空資料:", result)
                 return 400, result
 
-        return 200, result["Data"]  
+        return 200, filename  
