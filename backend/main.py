@@ -301,21 +301,21 @@ async def upload_image(file: UploadFile = File(...)):
     if file_extension not in ["png", "jpg", "jpeg"]:
         return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
     try:
-        file_name = f"{uuid.uuid4().hex}.{file_extension}"
-        file_path = os.path.join(UPLOAD_DIR, file_name)
+        filename = f"{uuid.uuid4().hex}.{file_extension}"
+        file_path = os.path.join(UPLOAD_DIR, filename)
         with open(file_path, "wb") as f:
             f.write(await file.read())
         from backend.s3_uploader import upload_image_to_epsondest
-        status, image_url = upload_image_to_epsondest(file_path, file_name)
+        status, filename = upload_image_to_epsondest(file_path, filename)
         if status != 200:
             return JSONResponse(content={"error": "上傳 Epson 失敗"}, status_code=500)
-        return {"code": 200, "filename": file_name}
+        return {"code": 200, "filename": filename}
     except Exception as e:
         return {"code": 500, "error": str(e)}
 
-@app.get("/view-image/{file_name}")
-async def view_image(file_name: str):
-    file_path = os.path.join(UPLOAD_DIR, file_name)
+@app.get("/view-image/{filename}")
+async def view_image(filename: str):
+    file_path = os.path.join(UPLOAD_DIR, filename)
     if not os.path.exists(file_path):
         return JSONResponse(content={"error": "File not found"}, status_code=404)
     return FileResponse(file_path, media_type="image/jpeg")
@@ -352,8 +352,8 @@ async def generate_multiple_pdfs(
         img_y = (height - new_height) / 2
         # 為每種排版生成獨立的 PDF
         for layout, (x, y) in positions.items():
-            file_name = f"{uuid.uuid4().hex}_{layout}.pdf"
-            file_path = os.path.join(PDF_DIR, file_name)
+            filename = f"{uuid.uuid4().hex}_{layout}.pdf"
+            file_path = os.path.join(PDF_DIR, filename)
             c = canvas.Canvas(file_path, pagesize=A4)
             # 設置背景圖
             c.drawImage(img, img_x, img_y, new_width, new_height, mask="auto")
@@ -363,7 +363,7 @@ async def generate_multiple_pdfs(
             c.drawString(x, y, content)
             c.save()
 
-            upload_status, upload_response = pload_image_to_epsondest(file_path, file_name)
+            upload_status, upload_response = upload_image_to_epsondest(file_path, filename)
             print(f"[INFO] Upload to Epson API: {upload_status} - {upload_response}")
 
             if upload_status != 200:
@@ -382,9 +382,9 @@ async def generate_multiple_pdfs(
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-@app.get("/view-pdf/{file_name}")
-async def view_pdf(file_name: str):
-    file_path = os.path.join(PDF_DIR, file_name)
+@app.get("/view-pdf/{filename}")
+async def view_pdf(filename: str):
+    file_path = os.path.join(PDF_DIR, filename)
     if not os.path.exists(file_path):
         return JSONResponse(content={"error": "File not found"}, status_code=404)
     return FileResponse(file_path, media_type="application/pdf")
