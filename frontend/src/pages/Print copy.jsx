@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import BaseButton from "@/components/BaseButton";
 import { showSwal } from "@/utils/notification";
@@ -17,15 +17,9 @@ const Print = () => {
   const dispatch = useDispatch();
   const params = new URLSearchParams(location.search);
   const authCode = params.get("code");
+  const fileInputRef = useRef(null);
   // const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
-  const { imageUrl } = location.state || {};
-
-  useEffect(() => {
-    if (imageUrl) {
-      convertImageToBase64(imageUrl);
-    }
-  }, [imageUrl]);
 
   useEffect(() => {
     if (authCode) {
@@ -41,24 +35,6 @@ const Print = () => {
       executePrint(); // 導回來後繼續執行後續步驟
     }
   }, [authCode]);
-
-  const convertImageToBase64 = (url) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous"; // 設置跨域
-    img.src = url;
-
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0);
-      const base64 = canvas.toDataURL("image/png"); // 將圖片轉換為 Base64
-      console.log(base64);
-      localStorage.setItem("uploadedFile", base64);
-      setFilePreview(base64);
-    };
-  };
 
   const executePrint = async () => {
     try {
@@ -115,41 +91,41 @@ const Print = () => {
       showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
     }
   };
-  // const handleFileUpload = (e) => {
-  //   const selectedFile = e.target.files[0];
-  //   if (!selectedFile) return;
+  const handleFileUpload = (e) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
 
-  //   const fileType = selectedFile.type;
-  //   const fileName = selectedFile.name;
+    const fileType = selectedFile.type;
+    const fileName = selectedFile.name;
 
-  //   if (fileType.startsWith("image/")) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       const base64File = reader.result;
-  //       localStorage.setItem("uploadedFile", base64File);
-  //       localStorage.setItem("uploadedFileName", fileName);
-  //       localStorage.setItem("uploadedFileType", fileType);
-  //       // setFile(selectedFile);
-  //       setFilePreview(URL.createObjectURL(selectedFile));
-  //     };
-  //     reader.readAsDataURL(selectedFile);
-  //   } else if (fileType === "application/pdf") {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       const base64File = reader.result;
-  //       localStorage.setItem("uploadedFile", base64File);
-  //       localStorage.setItem("uploadedFileName", fileName);
-  //       localStorage.setItem("uploadedFileType", fileType);
-  //       // setFile(selectedFile);
-  //       setFilePreview(reader.result);
-  //     };
-  //     reader.readAsDataURL(selectedFile);
-  //   } else {
-  //     showSwal({ isSuccess: false, title: "不支援的文件類型!" });
-  //   }
-  //   // setFile(selectedFile);
-  //   // setFilePreview(URL.createObjectURL(selectedFile));
-  // };
+    if (fileType.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64File = reader.result;
+        localStorage.setItem("uploadedFile", base64File);
+        localStorage.setItem("uploadedFileName", fileName);
+        localStorage.setItem("uploadedFileType", fileType);
+        // setFile(selectedFile);
+        setFilePreview(URL.createObjectURL(selectedFile));
+      };
+      reader.readAsDataURL(selectedFile);
+    } else if (fileType === "application/pdf") {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64File = reader.result;
+        localStorage.setItem("uploadedFile", base64File);
+        localStorage.setItem("uploadedFileName", fileName);
+        localStorage.setItem("uploadedFileType", fileType);
+        // setFile(selectedFile);
+        setFilePreview(reader.result);
+      };
+      reader.readAsDataURL(selectedFile);
+    } else {
+      showSwal({ isSuccess: false, title: "不支援的文件類型!" });
+    }
+    // setFile(selectedFile);
+    // setFilePreview(URL.createObjectURL(selectedFile));
+  };
   const submitFile = async () => {
     // if (!file) return;
     // 從 localStorage 獲取文件數據
@@ -216,6 +192,26 @@ const Print = () => {
             />
           </div>
         )}
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept=".png, .jpg, .jpeg, .pdf"
+          className="hidden"
+          onChange={handleFileUpload}
+        />
+        {!filePreview ? (
+          <BaseButton
+            label="上傳圖片"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full m-4 rounded-xl"
+          />
+        ) : (
+          <BaseButton
+            label="重新上傳圖片"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full m-4 rounded-xl"
+          />
+        )}
         {filePreview && (
           <BaseButton
             label="執行列印"
@@ -223,6 +219,64 @@ const Print = () => {
             onClick={executePrint}
           />
         )}
+        {/* <BaseButton
+          className="w-full m-2"
+          label="0_get_auth_code"
+          onClick={handleAuthCode}
+        /> */}
+        {/* <BaseButton
+          className="w-full m-2"
+          label="1_post_access_token"
+          onClick={handleAccessToken}
+        /> */}
+        {/* <BaseButton
+          className="w-full m-2"
+          label="2_post_print_job_creation"
+          onClick={handlePrintJobCreation}
+        /> */}
+        {/* {filePreview && (
+          <div className="w-1/2 h-1/2 flex justify-center items-center rounded-xl">
+            <img
+              className="w-full h-full rounded-xl object-contain"
+              src={filePreview}
+              alt="preview"
+            />
+          </div>
+        )}
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept=".png, .jpg, .jpeg"
+          className="hidden"
+          onChange={handleFileUpload}
+        />
+        {!hasUploaded ? (
+          <BaseButton
+            label="上傳圖片"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-2/3 m-4 rounded-xl"
+          ></BaseButton>
+        ) : (
+          <div className="w-2/3">
+            <button
+              className="w-12 h-12 m-4 bg-primaryColorGray rounded-xl flex justify-center items-center cursor-pointer"
+              onClick={() => fileInputRef.current?.click()}
+            ></button>
+          </div>
+        )}
+        {filePreview && (
+          <BaseButton
+            label="送出圖片"
+            onClick={submitFile}
+            className="w-2/3 m-4"
+            defaultValue="abc"
+          />
+        )} */}
+        {/* <BaseButton
+          className="w-full m-2"
+          label="4_post_print_execution"
+          onClick={handlePrintExecution}
+        /> */}
       </div>
     </>
   );

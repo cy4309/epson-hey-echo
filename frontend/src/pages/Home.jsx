@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Input } from "antd";
 import { useNavigate } from "react-router-dom";
 import {
@@ -25,6 +25,14 @@ const Chatbot = () => {
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
+  const [imageSelectedToPrint, setImageSelectedToPrint] = useState("");
+  console.log(imageSelectedToPrint);
+
+  useEffect(() => {
+    setImageSelectedToPrint(
+      "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png"
+    );
+  }, []);
 
   const handleSendDialog = async () => {
     if (!textAreaValue.trim()) return;
@@ -38,14 +46,20 @@ const Chatbot = () => {
     try {
       const image_url = await submitFileUpload(); //@Joyce:測試圖片上傳
       // const res = await generateDialogueToImage(updatedMessages);
-      const res = await generateDialogueToImage({ //@Joyce:測試圖片上傳
+      const res = await generateDialogueToImage({
+        //@Joyce:測試圖片上傳
         messages: updatedMessages,
-        image_url: image_url || ""
+        image_url: image_url || "",
       });
       console.log(res);
       const newMessages = res.new_messages || [];
       setMessages((prev) => [...prev, ...newMessages]);
       // submitFileUpload(); //@Joyce:測試圖片上傳，先測一下把圖一同傳入對話裡
+
+      const imageUrls = res.new_messages
+        .filter((msg) => msg.type === "image")
+        .map((msg) => msg.image_url);
+      setImageSelectedToPrint(imageUrls[0]); // 取第一張圖片的 URL，只會有一張
     } catch (err) {
       console.error(err);
       showSwal({ isSuccess: false, title: `對話失敗，請稍後再試!` });
@@ -64,7 +78,6 @@ const Chatbot = () => {
       if (res.code === 200) {
         showSwal({ isSuccess: true, title: `上傳成功!` });
         const url = res.image_url; // @Joyce:測試圖片上傳
-        removeFile();
         return url; // @Joyce:測試圖片上傳
         // setIsUploaded(true);
         // setFileName(res.filename);
@@ -237,7 +250,9 @@ const Chatbot = () => {
           <BaseButton
             label="列印"
             className="my-4 w-full"
-            onClick={() => navigate("/print")}
+            onClick={() =>
+              navigate("/print", { state: { imageUrl: imageSelectedToPrint } })
+            }
           />
         </div>
       )}
