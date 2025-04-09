@@ -43,6 +43,14 @@ const Print = () => {
   }, [authCode]);
 
   const convertImageToBase64 = (url) => {
+    const fileName = url.substring(
+      url.lastIndexOf("/") + 1,
+      url.lastIndexOf(".")
+    );
+    const mimeType = url.substring(url.lastIndexOf(".") + 1);
+    localStorage.setItem("uploadedFileName", fileName);
+    localStorage.setItem("uploadedFileType", `image/${mimeType}`);
+
     const img = new Image();
     img.crossOrigin = "anonymous"; // 設置跨域
     img.src = url;
@@ -53,7 +61,7 @@ const Print = () => {
       canvas.height = img.height;
       const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0);
-      const base64 = canvas.toDataURL("image/png"); // 將圖片轉換為 Base64
+      const base64 = canvas.toDataURL(`image/${mimeType}`); // 將圖片轉換為 Base64
       console.log(base64);
       localStorage.setItem("uploadedFile", base64);
       setFilePreview(base64);
