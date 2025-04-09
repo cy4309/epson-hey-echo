@@ -1,21 +1,21 @@
 import requests
 import os
 
-def upload_image_to_epsondest(filepath: str, filename: str):
+def upload_image_to_epsondest(filepath: str, fileName: str):
     url = "https://imorph.spe3d.co/api/UploadEpson"
     headers = { 
         "Authorization": "b1f7690c-ad05-4416-8c42-72df5c38fae2"
     }
     with open(filepath, "rb") as f:
-        # filename_only = "upload.pdf"
-        suffix = os.path.splitext(filename)[-1]  # 取副檔名
+        # _only = "upload.pdf"
+        suffix = os.path.splitext(fileName)[-1]  # 取副檔名
         files = {
             # "file": (filename, open(filepath, "rb")),
-            "file": (filename, f),
-            "fileName": (None, filename),
+            "file": (fileName, f),
+            "fileName": (None, fileName),
             "suffix": (None, suffix)
         }
-        print("[INFO] Epson 上傳檔案:", filename)
+        print("[INFO] Epson 上傳檔案:", fileName)
         print("[INFO] Epson 上傳路徑:", filepath)
         print("[INFO] Epson 上傳網址:", url)
         print("[INFO] 檔案後綴名:", suffix)
@@ -32,4 +32,4 @@ def upload_image_to_epsondest(filepath: str, filename: str):
                 print("[ERROR] Epson API 回傳錯誤或空資料:", result)
                 return 400, result
 
-        return 200, result["Data"]  
+        return 200, fileName  
