@@ -126,21 +126,22 @@ async def generate_prompt(req: Request):
                 "image_url": image_url
             })
         
+        # 如果包含指定關鍵語句，走「合成房仲海報邏輯」
+        trigger_keywords = [
+            "合成", "建築","宣傳單"
+        ]
         # 先找出使用者最後一則文字訊息
         user_texts = [m["content"] for m in messages if m["role"] == "user" and m["type"] == "text"]
         user_last_input = user_texts[-1] if user_texts else ""
 
-        # 如果包含指定關鍵語句，走「合成房仲海報邏輯」
-        trigger_phrases = [
-            "幫我合成",
-            "我要一張房仲海報",
-            "這是建築圖，幫我搭背景和字"
-        ]
+        matched = any(keyword in user_last_input for keyword in trigger_keywords)
+        print("[Trigger判斷 user_last_input]:", user_last_input)
+        print("[Trigger 是否觸發]", matched)
 
-        if any(phrase in user_last_input for phrase in trigger_phrases):
-            print("[🪄 Trigger] 進入房仲海報合成功能")
+        if matched:
+            print("[Trigger] 進入房仲海報合成功能")
 
-            # GPT 幫忙產文案（你也可以用 Gemini 生成）
+            # GPT 幫忙產文案
             title = client.chat.completions.create(
                 model="gpt-4-1106-preview",
                 messages=[
@@ -167,7 +168,7 @@ async def generate_prompt(req: Request):
 
             print("[文案生成]", title, subtitle, cta)
 
-            # 產純色背景（先用 Pillow 產圖）
+            # 產純色背景（用 Pillow 產圖）
             from PIL import Image, ImageDraw, ImageFont
             import uuid, os
             width, height = 1240, 1754
@@ -218,7 +219,6 @@ async def generate_prompt(req: Request):
                 return JSONResponse(content={"error": "圖片上傳 Epson 失敗"}, status_code=500)
 
             response_messages = text_messages + [
-                # {"role": "assistant", "type": "text", "content": f"已根據你的需求合成海報囉：\n {title}\n {subtitle}\na {cta}"},
                 {"role": "assistant", "type": "image", "image_url": image_url}
             ]
             # 如果使用者有上傳圖片，放在最前面
@@ -230,10 +230,6 @@ async def generate_prompt(req: Request):
                 })
             return JSONResponse(content={
                 "new_messages": response_messages
-                    # [
-                    # {"role": "assistant", "type": "text", "content": f"已根據你的需求合成海報囉：\n {title}\n {subtitle}\n {cta}"},
-                    # {"role": "assistant", "type": "image", "image_url": image_url}
-                    # ] 
             })
         
         # Step 2: 使用 GPT-4 轉換為 prompt
@@ -284,7 +280,6 @@ async def generate_prompt(req: Request):
 
         return JSONResponse(content={
             "new_messages": text_messages + [
-                # {"role": "assistant", "type": "text", "content": idea_description},# 顯示 Gemini 回覆
                 {"role": "assistant", "type": "image", "image_url": image_url} # 顯示圖片
             ]
         })
