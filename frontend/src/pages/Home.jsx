@@ -14,6 +14,7 @@ import LoadingIndicator from "@/components/LoadingIndicator";
 import { showSwal } from "@/utils/notification";
 import { generateDialogueToImage } from "@/services/generateService";
 import { uploadImage } from "@/services/illustrateService";
+const S3_BASE_URL = import.meta.env.VITE_S3_BASE_URL;
 
 const Chatbot = () => {
   const navigate = useNavigate();
