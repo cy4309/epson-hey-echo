@@ -13,6 +13,11 @@ from PIL import Image
 import uuid
 import os
 
+import os, sys
+print("CWD =", os.getcwd())
+print("PYTHONPATH =", sys.path)
+print("backend/ content =", os.listdir("backend"))
+
 #初始化 OpenAI and Gemini
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
@@ -206,7 +211,7 @@ async def generate_prompt(req: Request):
             poster.save(filepath)
             
             # 上傳 Epson
-            from s3_uploader import upload_image_to_epsondest  # 放最上面 import
+            from backend.s3_uploader import upload_image_to_epsondest  # 放最上面 import
 
             status, image_url = upload_image_to_epsondest(filepath, filename)
             if status != 200:
@@ -300,7 +305,7 @@ async def upload_image(file: UploadFile = File(...)):
         file_path = os.path.join(UPLOAD_DIR, file_name)
         with open(file_path, "wb") as f:
             f.write(await file.read())
-        from s3_uploader import upload_image_to_epsondest
+        from backend.s3_uploader import upload_image_to_epsondest
         status, image_url = upload_image_to_epsondest(file_path, file_name)
         if status != 200:
             return JSONResponse(content={"error": "上傳 Epson 失敗"}, status_code=500)
@@ -358,7 +363,7 @@ async def generate_multiple_pdfs(
             c.drawString(x, y, content)
             c.save()
 
-            upload_status, upload_response = upload_to_epsondest(file_path, file_name)
+            upload_status, upload_response = pload_image_to_epsondest(file_path, file_name)
             print(f"[INFO] Upload to Epson API: {upload_status} - {upload_response}")
 
             if upload_status != 200:
