@@ -297,7 +297,7 @@ async def generate_prompt(req: Request):
 # API ：上傳圖片
 @app.post("/upload-image")
 async def upload_image(file: UploadFile = File(...)):
-    file_extension = file.fileName.split(".")[-1].lower()
+    file_extension = file.filename.split(".")[-1].lower()
     if file_extension not in ["png", "jpg", "jpeg"]:
         return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
     try:
