@@ -7,10 +7,8 @@ def upload_image_to_epsondest(filepath: str, fileName: str):
         "Authorization": "b1f7690c-ad05-4416-8c42-72df5c38fae2"
     }
     with open(filepath, "rb") as f:
-        # _only = "upload.pdf"
         suffix = os.path.splitext(fileName)[-1]  # 取副檔名
         files = {
-            # "file": (filename, open(filepath, "rb")),
             "file": (fileName, f),
             "fileName": (None, fileName),
             "suffix": (None, suffix)
@@ -24,12 +22,13 @@ def upload_image_to_epsondest(filepath: str, fileName: str):
         response = requests.post(url, headers=headers, files=files)
         try:
             result = response.json()
+            print("[DEBUG] Epson 回應:", result)
         except Exception as e:
                 print("[ERROR] Epson 上傳過程錯誤:", e)
-                return 500, {"error": str(e)}
+                return 500, None
         
-        if result.get("Code") != 10000 or not result.get("Data") or result.get("Data") == "null":
-                print("[ERROR] Epson API 回傳錯誤或空資料:", result)
-                return 400, result
-
+        if result.get("Code") != 10000:
+                    print("[ERROR] Epson 回傳錯誤:", result)
+                    return 400, None
+        print("[WARN] Epson 回傳 null，使用自組 filename:", fileName)
         return 200, fileName  
