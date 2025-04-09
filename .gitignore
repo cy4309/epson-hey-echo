@@ -35,3 +35,6 @@ backend/*.tmp
 # 忽略 backend 的 pdf_files 和 uploads 資料夾
 backend/pdf_files/
 backend/uploads/
+
+# 不忽略 backend/ 目錄內的其他 py 檔案
+!backend/*.py
