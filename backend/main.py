@@ -132,10 +132,10 @@ async def generate_prompt(req: Request):
         ]
         # 先找出使用者最後一則文字訊息
         user_texts = [m["content"] for m in messages if m["role"] == "user" and m["type"] == "text"]
-        user_last_input = user_texts[-1] if user_texts else ""
+        user_all_text = "".join(user_texts)
 
-        matched = any(keyword in user_last_input for keyword in trigger_keywords)
-        print("[Trigger判斷 user_last_input]:", user_last_input)
+        matched = any(keyword in user_all_text for keyword in trigger_keywords)
+        print("[Trigger判斷 user_all_text]:", user_all_text)
         print("[Trigger 是否觸發]", matched)
 
         if matched:
@@ -146,7 +146,7 @@ async def generate_prompt(req: Request):
                 model="gpt-4-1106-preview",
                 messages=[
                     {"role": "system", "content": "你是一位房仲廣告設計師，請產出一個吸睛的房仲主標題，不超過20字，語氣自然口語。"},
-                    {"role": "user", "content": user_last_input}
+                    {"role": "user", "content": user_all_text}
                 ]
             ).choices[0].message.content.strip()
 
@@ -154,7 +154,7 @@ async def generate_prompt(req: Request):
                 model="gpt-4-1106-preview",
                 messages=[
                     {"role": "system", "content": "請補一句說明性副標（最多20字）"},
-                    {"role": "user", "content": user_last_input}
+                    {"role": "user", "content": user_all_text}
                 ]
             ).choices[0].message.content.strip()
 
@@ -162,7 +162,7 @@ async def generate_prompt(req: Request):
                 model="gpt-4-1106-preview",
                 messages=[
                     {"role": "system", "content": "請產出一段房仲廣告常用的聯絡資訊文字（例如：傅樁淵 0988-100-122）"},
-                    {"role": "user", "content": user_last_input}
+                    {"role": "user", "content": user_all_text}
                 ]
             ).choices[0].message.content.strip()
 
