@@ -3,8 +3,10 @@ import os
 #https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/xxx.pdf
 def upload_image_to_epsondest(filepath: str, fileName: str):
     url = "https://imorph.spe3d.co/api/UploadEpson"
+    #測試權限用
     headers = { 
-        "Authorization": "b1f7690c-ad05-4416-8c42-72df5c38fae2"
+        "Authorization": "b1f7690c-ad05-4416-8c42-72df5c38fae2",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"  # 模擬瀏覽器
     }
     with open(filepath, "rb") as f:
         suffix = os.path.splitext(fileName)[-1].replace(".", "")  # 取副檔名
