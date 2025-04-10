@@ -4,14 +4,15 @@ from fastapi.middleware.cors import CORSMiddleware
 # from fastapi.requests import Request
 from pydantic import BaseModel
 from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
+# from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from openai import OpenAI
 from backend.s3_uploader import upload_image_to_epsondest
 import google.generativeai as genai
-from PIL import Image
+from PIL import Image as PILImage, ImageDraw, ImageFont
 import uuid
 import os
+import io
 
 import os, sys
 print("CWD =", os.getcwd())
@@ -25,9 +26,9 @@ print("GEMINI_API_KEY:", os.getenv("GEMINI_API_KEY")[:6])
 
 app = FastAPI()
 UPLOAD_DIR = "uploads"
-PDF_DIR = "pdf_files"
+IMG_DIR = "img_files"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-os.makedirs(PDF_DIR, exist_ok=True)
+os.makedirs(IMG_DIR, exist_ok=True)
 
 #記憶Gemini 對話歷史
 chat_history = []
@@ -212,7 +213,7 @@ async def generate_prompt(req: Request):
             # 儲存圖片
             fileName = f"{uuid.uuid4().hex}.png"
             filepath = os.path.join(UPLOAD_DIR, fileName)
-            poster.save(filepath)
+            poster.save(filepath, format="PNG")
             
             # 上傳 Epson
             from backend.s3_uploader import upload_image_to_epsondest  # 放最上面 import
@@ -293,42 +294,41 @@ async def generate_prompt(req: Request):
 
 
 # API ：上傳圖片
-@app.post("/upload-image")
+@app.post("/upload_image")
 async def upload_image(file: UploadFile = File(...)):
     file_extension = file.filename.split(".")[-1].lower()
     if file_extension not in ["png", "jpg", "jpeg"]:
         return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
-    try:
-        fileName = f"{uuid.uuid4().hex}.{file_extension}"
-        file_path = os.path.join(UPLOAD_DIR, fileName)
-        with open(file_path, "wb") as f:
-            f.write(await file.read())
-        from backend.s3_uploader import upload_image_to_epsondest
-        status, fileName = upload_image_to_epsondest(file_path, fileName)
-        if status != 200:
-            return JSONResponse(content={"error": "上傳 Epson 失敗"}, status_code=500)
-        return {"code": 200, "filename": fileName}
-    except Exception as e:
-        return {"code": 500, "error": str(e)}
+    file_name = f"{uuid.uuid4().hex}.{file_extension}"
+    file_path = os.path.join(UPLOAD_DIR, file_name)
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
+    return JSONResponse(
+        content={
+            "message": "圖片上傳成功",
+            "image_url": f"https://epson-hey-echo.onrender.com/view-image/{file_name}",
+            "filename": file_name,
+            "code": 200
+            })
 
-@app.get("/view-image/{fileName}")
-async def view_image(fileName: str):
-    file_path = os.path.join(UPLOAD_DIR, fileName)
+@app.get("/view-image/{file_name}")
+async def view_image(file_name: str):
+    file_path = os.path.join(UPLOAD_DIR, file_name)
     if not os.path.exists(file_path):
         return JSONResponse(content={"error": "File not found"}, status_code=404)
     return FileResponse(file_path, media_type="image/jpeg")
 
-# API ：生成五個 PDF，每個應用不同排版方式
-@app.post("/generate-multiple-pdfs")
-async def generate_multiple_pdfs(
+# API ：生成五張圖，每個應用不同排版方式
+@app.post("/generate-multiple-images")
+async def generate_multiple_images(
     image_filename: str = Form(...), #檔名成稱
     content: str = Form(...), #文字內容
     font_size: int = Form(18), #字體大小
     code: int = Form(200)
 ):
     try:
-        width, height = A4
-        pdf_urls = []
+        width, height = map(int,A4)
+        img_urls = []
         # 定義五種排版方式的位置
         positions = {
             "topLeft": (40, height - 40),
@@ -341,48 +341,58 @@ async def generate_multiple_pdfs(
         image_path = os.path.join(UPLOAD_DIR, image_filename)
         if not os.path.exists(image_path):
             return JSONResponse(content={"error": "圖片檔案不存在"}, status_code=400)
-        img = ImageReader(image_path)
-        img_width, img_height = Image.open(image_path).size
+        
+        img = PILImage.open(image_path).convert("RGB")
+        img_width, img_height = img.size
+        
         scale = max(width / img_width, height / img_height)
-        new_width = img_width * scale
-        new_height = img_height * scale
-        img_x = (width - new_width) / 2
-        img_y = (height - new_height) / 2
-        # 為每種排版生成獨立的 PDF
+        new_width = int(img_width * scale)
+        new_height = int(img_height * scale)
+        img_resized = img.resize((new_width, new_height))
+
+        # 為每種排版生成獨立的 image
         for layout, (x, y) in positions.items():
-            fileName = f"{uuid.uuid4().hex}_{layout}.pdf"
-            file_path = os.path.join(PDF_DIR, fileName)
-            c = canvas.Canvas(file_path, pagesize=A4)
-            # 設置背景圖
-            c.drawImage(img, img_x, img_y, new_width, new_height, mask="auto")
-            # 在不同位置顯示文字
-            c.setFont("Helvetica-Bold", font_size)
-            c.setFillColorRGB(1, 1, 1)  # 白色文字確保可見
-            c.drawString(x, y, content)
-            c.save()
+            fileName = f"{uuid.uuid4().hex}_{layout}.png"
+            file_path = os.path.join(IMG_DIR, fileName)
+
+            # 建立新的 A4 背景
+            poster = PILImage.new("RGB", (width, height), (255, 255, 255))
+            draw = ImageDraw.Draw(poster)
+
+            # 將背景圖貼上
+            img_x = (width - new_width) // 2
+            img_y = (height - new_height) // 2
+            poster.paste(img_resized, (img_x, img_y))
+
+            # 載入字型
+            try:
+                font = ImageFont.truetype("arial.ttf", font_size)
+            except:
+                font = ImageFont.load_default()
+
+            draw.text((x, y), content, font=font, fill=(255, 255, 255))
+
+            # 儲存並上傳
+            poster.save(file_path, format="PNG")
 
             upload_status, upload_response = upload_image_to_epsondest(file_path, fileName)
             print(f"[INFO] Upload to Epson API: {upload_status} - {upload_response}")
 
             if upload_status != 200:
-                return JSONResponse(content={"error": "上傳 PDF 到 Epson 失敗"}, status_code=500)
-            pdf_urls.append({
-                "layout": layout,
-                # "status": upload_status,
-                "url": upload_response
-            })
+                return JSONResponse(content={"error": "上傳 images 到 Epson 失敗"}, status_code=500)
+            img_urls.append(upload_response)
             os.remove(file_path)
 
         return JSONResponse(content={
-            "pdf_urls": pdf_urls,
+            "img_urls": img_urls,
             "code":200
             })
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-@app.get("/view-pdf/{fileName}")
-async def view_pdf(fileName: str):
-    file_path = os.path.join(PDF_DIR, fileName)
+@app.get("/view-image/{fileName}")
+async def view_img(fileName: str):
+    file_path = os.path.join(IMG_DIR, fileName)
     if not os.path.exists(file_path):
         return JSONResponse(content={"error": "File not found"}, status_code=404)
-    return FileResponse(file_path, media_type="application/pdf")
+    return FileResponse(file_path, media_type="image/png")

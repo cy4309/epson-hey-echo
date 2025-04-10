@@ -7,10 +7,10 @@ def upload_image_to_epsondest(filepath: str, fileName: str):
         "Authorization": "b1f7690c-ad05-4416-8c42-72df5c38fae2"
     }
     with open(filepath, "rb") as f:
-        suffix = os.path.splitext(fileName)[-1]  # 取副檔名
+        suffix = os.path.splitext(fileName)[-1].replace(".", "")  # 取副檔名
         files = {
-            "file": (fileName, f),
-            "fileName": (None, fileName),
+            "file": (fileName, f,"image/png"),  
+            # "filename": (None, fileName),
             "suffix": (None, suffix)
         }
         print("[INFO] Epson 上傳檔案:", fileName)

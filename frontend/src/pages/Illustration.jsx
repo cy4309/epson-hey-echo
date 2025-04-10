@@ -16,7 +16,7 @@ const Illustration = () => {
   const [fileName, setFileName] = useState("");
   const [textContent, setTextContent] = useState("abc");
   const [fontSize, setFontSize] = useState(18);
-  const [pdfUrls, setPdfUrls] = useState([]); //Joyce test
+  const [imgUrls, setImgUrls] = useState([]); //Joyce test
   const handleFileUpload = (e) => {
     // const file = e.target.files?.[0];
     // if (!file) return;
@@ -79,7 +79,7 @@ const Illustration = () => {
       console.log(res);
       if (res.code === 200) {
         showSwal({ isSuccess: true, title: `上傳成功!` });
-        setPdfUrls(res.pdf_urls);
+        setImgUrls(res.img_urls);
       } else {
         showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
       }
@@ -154,9 +154,9 @@ const Illustration = () => {
           {/* <BaseButton className="m-2" label="列印" onClick={submitPrint} /> */}
         </>
       )}
-      {pdfUrls.length > 0 && (
+      {imgUrls.length > 0 && (
         <div className="gap-6 flex justify-center items-center scale-75">
-          {pdfUrls.map((url, index) => (
+          {imgUrls.map((url, index) => (
             <img
               key={index}
               src={`${

@@ -4,7 +4,7 @@ const backendBaseUrl = import.meta.env.VITE_BACKEND_API_BASE_URL;
 export const uploadImage = async (formData) => {
   console.log(formData);
   return await axios
-    .post(`${backendBaseUrl}/upload-image`, formData, {
+    .post(`${backendBaseUrl}/upload_image`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -19,7 +19,7 @@ export const uploadImage = async (formData) => {
 
 export const generateMultiplePdfs = async (payload) => {
   return await axios
-    .post(`${backendBaseUrl}/generate-multiple-pdfs`, payload, {
+    .post(`${backendBaseUrl}/generate-multiple-images`, payload, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
