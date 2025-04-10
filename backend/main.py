@@ -4,12 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 # from fastapi.requests import Request
 from pydantic import BaseModel
 from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
+# from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from openai import OpenAI
 from backend.s3_uploader import upload_image_to_epsondest
 import google.generativeai as genai
-from PIL import Image
+from PIL import Image as PILImage, ImageDraw, ImageFont
 import uuid
 import os
 import io
@@ -327,7 +327,7 @@ async def generate_multiple_images(
     code: int = Form(200)
 ):
     try:
-        width, height = A4
+        width, height = map(int,A4)
         img_urls = []
         # 定義五種排版方式的位置
         positions = {
@@ -341,25 +341,39 @@ async def generate_multiple_images(
         image_path = os.path.join(UPLOAD_DIR, image_filename)
         if not os.path.exists(image_path):
             return JSONResponse(content={"error": "圖片檔案不存在"}, status_code=400)
-        img = ImageReader(image_path)
-        img_width, img_height = Image.open(image_path).size
+        
+        img = PILImage.open(image_path).convert("RGB")
+        img_width, img_height = img.size
+        
         scale = max(width / img_width, height / img_height)
-        new_width = img_width * scale
-        new_height = img_height * scale
-        img_x = (width - new_width) / 2
-        img_y = (height - new_height) / 2
+        new_width = int(img_width * scale)
+        new_height = int(img_height * scale)
+        img_resized = img.resize(new_width, new_height)
+
         # 為每種排版生成獨立的 image
         for layout, (x, y) in positions.items():
             fileName = f"{uuid.uuid4().hex}_{layout}.png"
             file_path = os.path.join(IMG_DIR, fileName)
-            c = canvas.Canvas(file_path, pagesize=A4)
-            # 設置背景圖
-            c.drawImage(img, img_x, img_y, new_width, new_height, mask="auto")
-            # 在不同位置顯示文字
-            c.setFont("Helvetica-Bold", font_size)
-            c.setFillColorRGB(1, 1, 1)  # 白色文字確保可見
-            c.drawString(x, y, content)
-            c.save()
+
+            # 建立新的 A4 背景
+            poster = PILImage.new("RGB", (width, height), (255, 255, 255))
+            draw = ImageDraw.Draw(poster)
+
+            # 將背景圖貼上
+            img_x = (width - new_width) // 2
+            img_y = (height - new_height) // 2
+            poster.paste(img_resized, (img_x, img_y))
+
+            # 載入字型
+            try:
+                font = ImageFont.truetype("arial.ttf", font_size)
+            except:
+                font = ImageFont.load_default()
+
+            draw.text((x, y), content, font=font, fill=(255, 255, 255))
+
+            # 儲存並上傳
+            poster.save(file_path, format="PNG")
 
             upload_status, upload_response = upload_image_to_epsondest(file_path, fileName)
             print(f"[INFO] Upload to Epson API: {upload_status} - {upload_response}")
