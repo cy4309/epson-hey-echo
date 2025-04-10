@@ -239,7 +239,9 @@ async def generate_prompt(req: Request):
         # Step 2: 使用 GPT-4 轉換為 prompt
         try:
             system_msg = """
-            你是一位熟悉房仲廣告與建築攝影的圖像提示詞工程師。根據輸入內容，請撰寫英文 prompt，供 DALL·E 圖像生成。請務必包含明確的主體（如建築、街景、房屋外觀），以利生成高品質、具主體性的圖片。
+            你是一位熟悉房仲廣告與建築攝影的圖像提示詞工程師，根據輸入內容撰寫英文 prompt，供 DALL·E 生成海報背景。
+            圖片需為 A4 尺寸直式排版，有主體建築（現代住宅、公寓、街景）置中，周圍乾淨、可加文字。風格應簡約、寫實、有柔和自然光。
+            不要出現任何文字、UI、LOGO、裝飾框。
 
             【光照效果】
             Soft lighting (柔光), Hard lighting (硬光), Backlighting (逆光), Side lighting (側光), Silhouette (剪影), Diffused light (擴散光), Spotlight (聚光), Rim lighting (邊光), Ambient lighting (環境光), Tyndall Effect (泰因達爾效應), Rayleigh Scattering (瑞利散射), God Rays / Crepuscular Rays (耶穌光/暮光射線), Bokeh (散景), Caustics (焦散效果), Chiaroscuro (明暗對比), Gobo Lighting (戈博照明), Halo Effect (光暈效果), Golden hour (黃金時刻)
@@ -265,8 +267,18 @@ async def generate_prompt(req: Request):
                     {"role": "user", "content": idea_description}
                 ]
             )
-            prompt = gpt_response.choices[0].message.content.strip()
-            print("[GPT prompt]", prompt)
+            idea = gpt_response.choices[0].message.content.strip()
+            print("[GPT refined idea]", idea)
+
+            # 加上固定 prompt 樣板
+            prompt = f"""
+            A vertical real estate poster layout, A4 size.
+            {idea}
+            The image should feature a modern residential building centered in the frame, with space on top and bottom for text.
+            Style: soft lighting, warm tones, realistic architecture photography.
+            Leave blank space. Avoid logos, decorative text, UI elements, or visual clutter.
+            """.strip()
+            print("[Final Prompt to DALL·E]", prompt)
         except Exception as gpt_error:
             return JSONResponse(content={"error": f"GPT 錯誤：{str(gpt_error)}"}, status_code=500)
 
