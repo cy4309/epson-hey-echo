@@ -97,6 +97,7 @@ async def test_gpt():
 async def generate_prompt(req: Request):
     try:
         data = await req.json()
+        print("[DEBUG] raw body:", data)
         messages = data.get("messages", [])
 
         # Step 1: 與Gemini對話

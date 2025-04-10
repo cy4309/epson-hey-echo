@@ -53,7 +53,7 @@ const Chatbot = () => {
       // const updatedMessages = [...messages, newUserMsg, newImageMsg];
       // setMessages(updatedMessages);//@Joyce:測試圖片及訊息上傳
       // setTextAreaValue("");
-
+      console.log("傳給後端的 messages：", updatedMessages);
       const res = await generateDialogueToImage({
         //@Joyce:測試圖片上傳
         messages: updatedMessages,
