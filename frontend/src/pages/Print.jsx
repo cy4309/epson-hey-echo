@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import BaseButton from "@/components/BaseButton";
 import { showSwal } from "@/utils/notification";
@@ -20,6 +20,7 @@ const Print = () => {
   // const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
   const { imageUrl } = location.state || {};
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (imageUrl) {
@@ -66,6 +67,42 @@ const Print = () => {
       localStorage.setItem("uploadedFile", base64);
       setFilePreview(base64);
     };
+  };
+
+  const handleFileUpload = (e) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    const fileType = selectedFile.type;
+    const fileName = selectedFile.name;
+
+    if (fileType.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64File = reader.result;
+        localStorage.setItem("uploadedFile", base64File);
+        localStorage.setItem("uploadedFileName", fileName);
+        localStorage.setItem("uploadedFileType", fileType);
+        // setFile(selectedFile);
+        setFilePreview(URL.createObjectURL(selectedFile));
+      };
+      reader.readAsDataURL(selectedFile);
+    } else if (fileType === "application/pdf") {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64File = reader.result;
+        localStorage.setItem("uploadedFile", base64File);
+        localStorage.setItem("uploadedFileName", fileName);
+        localStorage.setItem("uploadedFileType", fileType);
+        // setFile(selectedFile);
+        setFilePreview(reader.result);
+      };
+      reader.readAsDataURL(selectedFile);
+    } else {
+      showSwal({ isSuccess: false, title: "不支援的文件類型!" });
+    }
+    // setFile(selectedFile);
+    // setFilePreview(URL.createObjectURL(selectedFile));
   };
 
   const executePrint = async () => {
@@ -123,41 +160,7 @@ const Print = () => {
       showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
     }
   };
-  // const handleFileUpload = (e) => {
-  //   const selectedFile = e.target.files[0];
-  //   if (!selectedFile) return;
 
-  //   const fileType = selectedFile.type;
-  //   const fileName = selectedFile.name;
-
-  //   if (fileType.startsWith("image/")) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       const base64File = reader.result;
-  //       localStorage.setItem("uploadedFile", base64File);
-  //       localStorage.setItem("uploadedFileName", fileName);
-  //       localStorage.setItem("uploadedFileType", fileType);
-  //       // setFile(selectedFile);
-  //       setFilePreview(URL.createObjectURL(selectedFile));
-  //     };
-  //     reader.readAsDataURL(selectedFile);
-  //   } else if (fileType === "application/pdf") {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       const base64File = reader.result;
-  //       localStorage.setItem("uploadedFile", base64File);
-  //       localStorage.setItem("uploadedFileName", fileName);
-  //       localStorage.setItem("uploadedFileType", fileType);
-  //       // setFile(selectedFile);
-  //       setFilePreview(reader.result);
-  //     };
-  //     reader.readAsDataURL(selectedFile);
-  //   } else {
-  //     showSwal({ isSuccess: false, title: "不支援的文件類型!" });
-  //   }
-  //   // setFile(selectedFile);
-  //   // setFilePreview(URL.createObjectURL(selectedFile));
-  // };
   const submitFile = async () => {
     // if (!file) return;
     // 從 localStorage 獲取文件數據
@@ -224,6 +227,28 @@ const Print = () => {
             />
           </div>
         )}
+
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept=".png, .jpg, .jpeg, .pdf"
+          className="hidden"
+          onChange={handleFileUpload}
+        />
+        {!filePreview ? (
+          <BaseButton
+            label="上傳圖片"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full m-4 rounded-xl"
+          />
+        ) : (
+          <BaseButton
+            label="重新上傳圖片"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full m-4 rounded-xl"
+          />
+        )}
+
         {filePreview && (
           <BaseButton
             label="執行列印"
