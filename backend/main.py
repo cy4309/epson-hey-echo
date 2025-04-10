@@ -212,7 +212,7 @@ async def generate_prompt(req: Request):
             # 儲存圖片
             fileName = f"{uuid.uuid4().hex}.png"
             filepath = os.path.join(UPLOAD_DIR, fileName)
-            poster.save(filepath)
+            poster.save(filepath, format="PNG")
             
             # 上傳 Epson
             from backend.s3_uploader import upload_image_to_epsondest  # 放最上面 import
@@ -311,13 +311,6 @@ async def upload_image(file: UploadFile = File(...)):
     except Exception as e:
         return {"code": 500, "error": str(e)}
 
-@app.get("/view-image/{fileName}")
-async def view_image(fileName: str):
-    file_path = os.path.join(UPLOAD_DIR, fileName)
-    if not os.path.exists(file_path):
-        return JSONResponse(content={"error": "File not found"}, status_code=404)
-    return FileResponse(file_path, media_type="image/jpeg")
-
 # API ：生成五張圖，每個應用不同排版方式
 @app.post("/generate-multiple-images")
 async def generate_multiple_images(
@@ -379,7 +372,7 @@ async def generate_multiple_images(
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-@app.get("/view-img/{fileName}")
+@app.get("/view-image/{fileName}")
 async def view_img(fileName: str):
     file_path = os.path.join(IMG_DIR, fileName)
     if not os.path.exists(file_path):
