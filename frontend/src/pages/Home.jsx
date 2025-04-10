@@ -37,29 +37,32 @@ const Chatbot = () => {
 
   const handleSendDialog = async () => {
     if (!textAreaValue.trim()) return;
-
     const newUserMsg = { role: "user", type: "text", content: textAreaValue };
-    const updatedMessages = [...messages, newUserMsg];
+    const image_url = await submitFileUpload(); //@Joyce:測試圖片上傳
+    const newImageMsg = { role: "user", type: "image", image_url };
+    const updatedMessages = [...messages, newUserMsg, newImageMsg];
     setMessages(updatedMessages);
     setTextAreaValue("");
     setIsLoading(true);
 
     try {
-      const newUserMsg = { role: "user", type: "text", content: textAreaValue };
-      const image_url = await submitFileUpload(); //@Joyce:測試圖片上傳
+      // const newUserMsg = { role: "user", type: "text", content: textAreaValue };
+      // const image_url = await submitFileUpload(); //@Joyce:測試圖片上傳
       // const res = await generateDialogueToImage(updatedMessages);
-      const newImageMsg = { role: "user", type: "image", image_url };
-      const updatedMessages = [...messages, newUserMsg, newImageMsg];
-      setMessages(updatedMessages);
+      // const newImageMsg = { role: "user", type: "image", image_url };
+      // const updatedMessages = [...messages, newUserMsg, newImageMsg];
+      // setMessages(updatedMessages);//@Joyce:測試圖片及訊息上傳
+      // setTextAreaValue("");
+
       const res = await generateDialogueToImage({
         //@Joyce:測試圖片上傳
         messages: updatedMessages,
         image_url: image_url || "",
       });
-      console.log(res);
+      console.log("後端回傳:",res);
       const newMessages = res.new_messages || [];
       setMessages((prev) => [...prev, ...newMessages]);
-      // submitFileUpload(); //@Joyce:測試圖片上傳，先測一下把圖一同傳入對話裡
+
 
       const imageUrls = res.new_messages
         .filter((msg) => msg.type === "image")
