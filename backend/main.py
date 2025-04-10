@@ -295,21 +295,28 @@ async def generate_prompt(req: Request):
 # API ：上傳圖片
 @app.post("/upload-image")
 async def upload_image(file: UploadFile = File(...)):
-    file_extension = file.filename.split(".")[-1].lower()
-    if file_extension not in ["png", "jpg", "jpeg"]:
-        return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
     try:
-        fileName = f"{uuid.uuid4().hex}.{file_extension}"
+        file_extension = file.filename.split(".")[-1].lower()
+        if file_extension not in ["png", "jpg", "jpeg"]:
+            return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
+        
+        # 讀入圖片並轉換成 RGB 模式（避免透明背景出錯）
+        image_data = await file.read()
+        image = Image.open(io.BytesIO(image_data)).convert("RGB")
+        
+        #轉成 PNG 儲存
+        fileName = f"{uuid.uuid4().hex}.png"
         file_path = os.path.join(UPLOAD_DIR, fileName)
-        with open(file_path, "wb") as f:
-            f.write(await file.read())
+        image.save(file_path, format="PNG")
+        # with open(file_path, "wb") as f:
+        #     f.write(await file.read())
         from backend.s3_uploader import upload_image_to_epsondest
         status, fileName = upload_image_to_epsondest(file_path, fileName)
         if status != 200:
             return JSONResponse(content={"error": "上傳 Epson 失敗"}, status_code=500)
         return {"code": 200, "filename": fileName}
     except Exception as e:
-        return {"code": 500, "error": str(e)}
+            return {"code": 500, "error": str(e)}
 
 # API ：生成五張圖，每個應用不同排版方式
 @app.post("/generate-multiple-images")
