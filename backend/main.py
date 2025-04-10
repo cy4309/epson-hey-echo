@@ -25,9 +25,9 @@ print("GEMINI_API_KEY:", os.getenv("GEMINI_API_KEY")[:6])
 
 app = FastAPI()
 UPLOAD_DIR = "uploads"
-PDF_DIR = "pdf_files"
+IMG_DIR = "img_files"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-os.makedirs(PDF_DIR, exist_ok=True)
+os.makedirs(IMG_DIR, exist_ok=True)
 
 #記憶Gemini 對話歷史
 chat_history = []
@@ -318,9 +318,9 @@ async def view_image(fileName: str):
         return JSONResponse(content={"error": "File not found"}, status_code=404)
     return FileResponse(file_path, media_type="image/jpeg")
 
-# API ：生成五個 PDF，每個應用不同排版方式
-@app.post("/generate-multiple-pdfs")
-async def generate_multiple_pdfs(
+# API ：生成五張圖，每個應用不同排版方式
+@app.post("/generate-multiple-images")
+async def generate_multiple_images(
     image_filename: str = Form(...), #檔名成稱
     content: str = Form(...), #文字內容
     font_size: int = Form(18), #字體大小
@@ -328,7 +328,7 @@ async def generate_multiple_pdfs(
 ):
     try:
         width, height = A4
-        pdf_urls = []
+        img_urls = []
         # 定義五種排版方式的位置
         positions = {
             "topLeft": (40, height - 40),
@@ -348,10 +348,10 @@ async def generate_multiple_pdfs(
         new_height = img_height * scale
         img_x = (width - new_width) / 2
         img_y = (height - new_height) / 2
-        # 為每種排版生成獨立的 PDF
+        # 為每種排版生成獨立的 image
         for layout, (x, y) in positions.items():
-            fileName = f"{uuid.uuid4().hex}_{layout}.pdf"
-            file_path = os.path.join(PDF_DIR, fileName)
+            fileName = f"{uuid.uuid4().hex}_{layout}.png"
+            file_path = os.path.join(IMG_DIR, fileName)
             c = canvas.Canvas(file_path, pagesize=A4)
             # 設置背景圖
             c.drawImage(img, img_x, img_y, new_width, new_height, mask="auto")
@@ -365,24 +365,23 @@ async def generate_multiple_pdfs(
             print(f"[INFO] Upload to Epson API: {upload_status} - {upload_response}")
 
             if upload_status != 200:
-                return JSONResponse(content={"error": "上傳 PDF 到 Epson 失敗"}, status_code=500)
-            pdf_urls.append({
+                return JSONResponse(content={"error": "上傳 images 到 Epson 失敗"}, status_code=500)
+            img_urls.append({
                 "layout": layout,
-                # "status": upload_status,
                 "url": upload_response
             })
             os.remove(file_path)
 
         return JSONResponse(content={
-            "pdf_urls": pdf_urls,
+            "img_urls": img_urls,
             "code":200
             })
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-@app.get("/view-pdf/{fileName}")
-async def view_pdf(fileName: str):
-    file_path = os.path.join(PDF_DIR, fileName)
+@app.get("/view-img/{fileName}")
+async def view_img(fileName: str):
+    file_path = os.path.join(IMG_DIR, fileName)
     if not os.path.exists(file_path):
         return JSONResponse(content={"error": "File not found"}, status_code=404)
-    return FileResponse(file_path, media_type="application/pdf")
+    return FileResponse(file_path, media_type="image/png")
