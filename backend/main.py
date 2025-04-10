@@ -131,11 +131,13 @@ async def generate_prompt(req: Request):
             "合成", "建築","宣傳單"
         ]
         # 先找出使用者最後一則文字訊息
+        print("[所有 messages]", messages)
         user_texts = [m["content"] for m in messages if m["role"] == "user" and m["type"] == "text"]
-        user_all_text = "".join(user_texts)
+        image_texts = [m["content"] for m in messages if m["role"] == "user" and m["type"] == "image"]
+        user_all_text = "".join(user_texts + image_texts).lower().strip()
+        print("[使用者完整訊息]", user_all_text)
 
         matched = any(keyword in user_all_text for keyword in trigger_keywords)
-        print("[Trigger判斷 user_all_text]:", user_all_text)
         print("[Trigger 是否觸發]", matched)
 
         if matched:
