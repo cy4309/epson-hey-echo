@@ -348,7 +348,7 @@ async def generate_multiple_images(
         scale = max(width / img_width, height / img_height)
         new_width = int(img_width * scale)
         new_height = int(img_height * scale)
-        img_resized = img.resize(new_width, new_height)
+        img_resized = img.resize((new_width, new_height))
 
         # 為每種排版生成獨立的 image
         for layout, (x, y) in positions.items():
