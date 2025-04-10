@@ -9,7 +9,7 @@ def upload_image_to_epsondest(filepath: str, fileName: str):
     with open(filepath, "rb") as f:
         suffix = os.path.splitext(fileName)[-1].replace(".", "")  # 取副檔名
         files = {
-            "file": (fileName, f),
+            "file": (fileName, f,"image/png"),  
             "filename": (None, fileName),
             "suffix": (None, suffix)
         }
