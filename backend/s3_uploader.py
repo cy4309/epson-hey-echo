@@ -10,7 +10,7 @@ def upload_image_to_epsondest(filepath: str, fileName: str):
         suffix = os.path.splitext(fileName)[-1].replace(".", "")  # 取副檔名
         files = {
             "file": (fileName, f,"image/png"),  
-            "filename": (None, fileName),
+            # "filename": (None, fileName),
             "suffix": (None, suffix)
         }
         print("[INFO] Epson 上傳檔案:", fileName)
