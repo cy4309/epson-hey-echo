@@ -12,6 +12,7 @@ import google.generativeai as genai
 from PIL import Image
 import uuid
 import os
+import io
 
 import os, sys
 print("CWD =", os.getcwd())
