@@ -367,10 +367,7 @@ async def generate_multiple_images(
 
             if upload_status != 200:
                 return JSONResponse(content={"error": "上傳 images 到 Epson 失敗"}, status_code=500)
-            img_urls.append({
-                "layout": layout,
-                "url": upload_response
-            })
+            img_urls.append(upload_response)
             os.remove(file_path)
 
         return JSONResponse(content={
