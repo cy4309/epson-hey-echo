@@ -14,16 +14,17 @@ import LoadingIndicator from "@/components/LoadingIndicator";
 import { showSwal } from "@/utils/notification";
 import { generateDialogueToImage } from "@/services/generateService";
 import { uploadImage } from "@/services/illustrateService";
-const S3_BASE_URL = import.meta.env.VITE_S3_BASE_URL;
+import { motion } from "framer-motion";
 
 const Chatbot = () => {
+  const S3_BASE_URL = import.meta.env.VITE_S3_BASE_URL;
   const navigate = useNavigate();
+  const { TextArea } = Input;
+  const fileInputRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [textAreaValue, setTextAreaValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerationCompleted, setIsGenerationCompleted] = useState(false);
-  const { TextArea } = Input;
-  const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
   const [imageSelectedToPrint, setImageSelectedToPrint] = useState("");
@@ -59,10 +60,9 @@ const Chatbot = () => {
         messages: updatedMessages,
         image_url: image_url || "",
       });
-      console.log("後端回傳:",res);
+      console.log("後端回傳:", res);
       const newMessages = res.new_messages || [];
       setMessages((prev) => [...prev, ...newMessages]);
-
 
       const imageUrls = res.new_messages
         .filter((msg) => msg.type === "image")
@@ -133,6 +133,12 @@ const Chatbot = () => {
             {/* <h2 className="mb-4 text-xl font-semibold text-center">
                 AI 設計師 · 對話式生圖
               </h2> */}
+            <motion.div
+              className="w-[200px] h-[200px] rounded-full bg-black"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ repeat: Infinity, duration: 2 }}
+            />
             <div className="mb-4 flex justify-center items-center">
               <BaseButton
                 className="ml-2"
