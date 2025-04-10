@@ -274,9 +274,11 @@ async def generate_prompt(req: Request):
             prompt = f"""
             A vertical real estate poster layout, A4 size.
             {idea}
-            The image should feature a modern residential building centered in the frame, with space on top and bottom for text.
-            Style: soft lighting, warm tones, realistic architecture photography.
-            Leave blank space. Avoid logos, decorative text, UI elements, or visual clutter.
+            The image should feature a modern residential building centered in the frame, surrounded by trees or urban scenery. 
+            Leave generous blank space on the top, bottom, and sides for placing text and icons.
+            Do not crop the building at the edges. Ensure the background is clean and minimal.
+            Style: soft lighting, warm tones, realistic photography, uncluttered composition.
+            Do not include any logos, UI elements, decorative borders, or text in the image.
             """.strip()
             print("[Final Prompt to DALL·E]", prompt)
         except Exception as gpt_error:
@@ -288,7 +290,7 @@ async def generate_prompt(req: Request):
                 model="dall-e-3",
                 prompt=prompt,
                 n=1,
-                size="1024x1024"
+                size="2480 × 3508" #A4尺寸
             )
             image_url = img_response.data[0].url
         except Exception as dalle_error:
