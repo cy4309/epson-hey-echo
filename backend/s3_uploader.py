@@ -10,7 +10,7 @@ def upload_image_to_epsondest(filepath: str, fileName: str):
         suffix = os.path.splitext(fileName)[-1].replace(".", "")  # 取副檔名
         files = {
             "file": (fileName, f,"image/png"),  
-            "filename": (None, fileName),
+            "fileName": (None, fileName),
             "suffix": (None, f".{suffix}")
         }
         print("[INFO] Epson 上傳檔案:", fileName)
@@ -18,11 +18,13 @@ def upload_image_to_epsondest(filepath: str, fileName: str):
         print("[INFO] Epson 上傳網址:", url)
         print("[INFO] 檔案後綴名:", suffix)
         print("[DEBUG] 檔案大小:", os.path.getsize(filepath), "bytes")
+
+        response = requests.post(url, headers=headers, files=files)
+        
         print("[DEBUG] Status Code:", response.status_code)
         print("[DEBUG] Response Headers:", response.headers)
         print("[DEBUG] Raw Response Text:", response.text)
-
-        response = requests.post(url, headers=headers, files=files)
+        
         try:
             result = response.json()
             print("[DEBUG] Epson 回應:", result)
