@@ -50,6 +50,7 @@ const Chatbot = () => {
       // const res = await generateDialogueToImage(updatedMessages);
       const newImageMsg = { role: "user", type: "image", image_url };
       const updatedMessages = [...messages, newUserMsg, newImageMsg];
+      setMessages(updatedMessages);
       const res = await generateDialogueToImage({
         //@Joyce:測試圖片上傳
         messages: updatedMessages,
