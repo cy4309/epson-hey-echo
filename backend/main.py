@@ -307,7 +307,7 @@ async def upload_image(file: UploadFile = File(...)):
         status, fileName = upload_image_to_epsondest(file_path, fileName)
         if status != 200:
             return JSONResponse(content={"error": "上傳 Epson 失敗"}, status_code=500)
-        return {"code": 200, "fileName": fileName}
+        return {"code": 200, "filename": fileName}
     except Exception as e:
         return {"code": 500, "error": str(e)}
 
