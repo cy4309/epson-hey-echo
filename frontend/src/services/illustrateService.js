@@ -18,6 +18,12 @@ export const uploadImage = async (formData) => {
 };
 
 export const generateMultiplePdfs = async (payload) => {
+  //@Joyce測試改formData
+  const formData = new FormData();
+  formData.append("image_filename", payload.image_filename);
+  formData.append("content", payload.content);
+  formData.append("font_size", payload.font_size);
+
   return await axios
     .post(`${backendBaseUrl}/generate-multiple-images`, formData, {
       headers: {
