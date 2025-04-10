@@ -114,8 +114,8 @@ export const postFileUpload = async (file) => {
     return { code: 400, msg: "No file provided" };
   }
   console.log(file);
-  const suffix = file.name.split(".").pop();
-  console.log(`suffix: ${suffix}`);
+  // const suffix = file.name.split(".").pop();
+  const suffix = file.type.split("/")[1]; // 取得副檔名
   return await axios
     .post(`${uploadUri}&File=1.${suffix}`, file, {
       headers: {

@@ -174,7 +174,6 @@ const Print = () => {
       // const base64File = localStorage.getItem("uploadedFile");
       // const binaryFile = base64ToBinary(base64File, file.name, file.type);
       const binaryFile = base64ToBinary(base64File, fileName, fileType);
-      console.log(binaryFile);
 
       const res = await postFileUpload(binaryFile);
       console.log(res);
@@ -184,14 +183,14 @@ const Print = () => {
         localStorage.removeItem("uploadedFileName");
         localStorage.removeItem("uploadedFileType");
       } else {
-        showSwal({ isSuccess: false, title: `上傳失敗，請重新上傳!` });
+        showSwal({ isSuccess: false, title: `上傳失敗，請重新執行!` });
         // localStorage.removeItem("uploadedFile");
         // localStorage.removeItem("uploadedFileName");
         // localStorage.removeItem("uploadedFileType");
       }
     } catch (err) {
       console.error(err);
-      showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+      showSwal({ isSuccess: false, title: `執行失敗，請稍後再試!` });
     }
   };
   const base64ToBinary = (base64, fileName, mimeType) => {
