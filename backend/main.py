@@ -294,30 +294,29 @@ async def generate_prompt(req: Request):
 
 
 # API ：上傳圖片
-@app.post("/upload-image")
+@app.post("/upload_image")
 async def upload_image(file: UploadFile = File(...)):
-    try:
-        file_extension = file.filename.split(".")[-1].lower()
-        if file_extension not in ["png", "jpg", "jpeg"]:
-            return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
-        
-        # 讀入圖片並轉換成 RGB 模式（避免透明背景出錯）
-        image_data = await file.read()
-        image = Image.open(io.BytesIO(image_data)).convert("RGB")
-        
-        #轉成 PNG 儲存
-        fileName = f"{uuid.uuid4().hex}.png"
-        file_path = os.path.join(UPLOAD_DIR, fileName)
-        image.save(file_path, format="PNG")
-        # with open(file_path, "wb") as f:
-        #     f.write(await file.read())
-        from backend.s3_uploader import upload_image_to_epsondest
-        status, fileName = upload_image_to_epsondest(file_path, fileName)
-        if status != 200:
-            return JSONResponse(content={"error": "上傳 Epson 失敗"}, status_code=500)
-        return {"code": 200, "filename": fileName}
-    except Exception as e:
-            return {"code": 500, "error": str(e)}
+    file_extension = file.filename.split(".")[-1].lower()
+    if file_extension not in ["png", "jpg", "jpeg"]:
+        return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
+    file_name = f"{uuid.uuid4().hex}.{file_extension}"
+    file_path = os.path.join(UPLOAD_DIR, file_name)
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
+    return JSONResponse(
+        content={
+            "message": "圖片上傳成功",
+            "image_url": f"https://epson-hey-echo.onrender.com/view-image/{file_name}",
+            "filename": file_name,
+            "code": 200
+            })
+
+@app.get("/view-image/{file_name}")
+async def view_image(file_name: str):
+    file_path = os.path.join(UPLOAD_DIR, file_name)
+    if not os.path.exists(file_path):
+        return JSONResponse(content={"error": "File not found"}, status_code=404)
+    return FileResponse(file_path, media_type="image/jpeg")
 
 # API ：生成五張圖，每個應用不同排版方式
 @app.post("/generate-multiple-images")

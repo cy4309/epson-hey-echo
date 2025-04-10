@@ -4,7 +4,7 @@ const backendBaseUrl = import.meta.env.VITE_BACKEND_API_BASE_URL;
 export const uploadImage = async (formData) => {
   console.log(formData);
   return await axios
-    .post(`${backendBaseUrl}/upload-image`, formData, {
+    .post(`${backendBaseUrl}/upload_image`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
