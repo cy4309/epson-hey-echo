@@ -19,7 +19,7 @@ export const uploadImage = async (formData) => {
 
 export const generateMultiplePdfs = async (payload) => {
   return await axios
-    .post(`${backendBaseUrl}/generate-multiple-images`, payload, {
+    .post(`${backendBaseUrl}/generate-multiple-images`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

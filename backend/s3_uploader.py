@@ -1,6 +1,6 @@
 import requests
 import os
-
+#https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/xxx.pdf
 def upload_image_to_epsondest(filepath: str, fileName: str):
     url = "https://imorph.spe3d.co/api/UploadEpson"
     headers = { 
@@ -11,13 +11,16 @@ def upload_image_to_epsondest(filepath: str, fileName: str):
         files = {
             "file": (fileName, f,"image/png"),  
             "filename": (None, fileName),
-            "suffix": (None, suffix)
+            "suffix": (None, f".{suffix}")
         }
         print("[INFO] Epson 上傳檔案:", fileName)
         print("[INFO] Epson 上傳路徑:", filepath)
         print("[INFO] Epson 上傳網址:", url)
         print("[INFO] 檔案後綴名:", suffix)
         print("[DEBUG] 檔案大小:", os.path.getsize(filepath), "bytes")
+        print("[DEBUG] Status Code:", response.status_code)
+        print("[DEBUG] Response Headers:", response.headers)
+        print("[DEBUG] Raw Response Text:", response.text)
 
         response = requests.post(url, headers=headers, files=files)
         try:
