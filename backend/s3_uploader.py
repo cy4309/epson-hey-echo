@@ -1,17 +1,20 @@
 import requests
 import os
-
+#https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/xxx.pdf
 def upload_image_to_epsondest(filepath: str, fileName: str):
     url = "https://imorph.spe3d.co/api/UploadEpson"
+    #測試權限用
     headers = { 
-        "Authorization": "b1f7690c-ad05-4416-8c42-72df5c38fae2"
+        "Authorization": "b1f7690c-ad05-4416-8c42-72df5c38fae2",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"  # 模擬瀏覽器
     }
+    s3_path = f"blender-render/epson/{fileName}"
     with open(filepath, "rb") as f:
         suffix = os.path.splitext(fileName)[-1].replace(".", "")  # 取副檔名
         files = {
             "file": (fileName, f,"image/png"),  
-            # "filename": (None, fileName),
-            "suffix": (None, suffix)
+            "fileName": (None, s3_path),
+            "suffix": (None, f".{suffix}")
         }
         print("[INFO] Epson 上傳檔案:", fileName)
         print("[INFO] Epson 上傳路徑:", filepath)
@@ -20,6 +23,11 @@ def upload_image_to_epsondest(filepath: str, fileName: str):
         print("[DEBUG] 檔案大小:", os.path.getsize(filepath), "bytes")
 
         response = requests.post(url, headers=headers, files=files)
+        
+        print("[DEBUG] Status Code:", response.status_code)
+        print("[DEBUG] Response Headers:", response.headers)
+        print("[DEBUG] Raw Response Text:", response.text)
+        
         try:
             result = response.json()
             print("[DEBUG] Epson 回應:", result)
@@ -31,4 +39,4 @@ def upload_image_to_epsondest(filepath: str, fileName: str):
                     print("[ERROR] Epson 回傳錯誤:", result)
                     return 400, None
         print("[WARN] Epson 回傳 null，使用自組 filename:", fileName)
-        return 200, fileName  
+        return 200,  s3_path  
