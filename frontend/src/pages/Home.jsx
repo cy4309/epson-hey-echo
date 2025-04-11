@@ -5,9 +5,9 @@ import {
   CheckOutlined,
   FormOutlined,
   CloseCircleOutlined,
+  ArrowLeftOutlined,
   ArrowRightOutlined,
   PlusOutlined,
-  ArrowLeftOutlined,
 } from "@ant-design/icons";
 import BaseButton from "@/components/BaseButton";
 import LoadingIndicator from "@/components/LoadingIndicator";
@@ -27,13 +27,18 @@ const Chatbot = () => {
   const [isGenerationCompleted, setIsGenerationCompleted] = useState(false);
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
-  const [imageSelectedToPrint, setImageSelectedToPrint] = useState("");
-  console.log(imageSelectedToPrint);
+  const [imageSelectedToIllustrate, setImageSelectedToIllustrate] = useState(
+    []
+  );
+  // console.log(imageSelectedToPrint);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
-    setImageSelectedToPrint(
-      "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png"
-    );
+    setImageSelectedToIllustrate([
+      "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
+      "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
+      // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
+    ]);
   }, []);
 
   const handleSendDialog = async () => {
@@ -54,7 +59,7 @@ const Chatbot = () => {
       // const updatedMessages = [...messages, newUserMsg, newImageMsg];
       // setMessages(updatedMessages);//@Joyce:測試圖片及訊息上傳
       // setTextAreaValue("");
-      console.log("傳給後端的 messages：", updatedMessages);
+      console.log("傳給後端的 messages:", updatedMessages);
       const res = await generateDialogueToImage({
         //@Joyce:測試圖片上傳
         messages: updatedMessages,
@@ -67,7 +72,7 @@ const Chatbot = () => {
       const imageUrls = res.new_messages
         .filter((msg) => msg.type === "image")
         .map((msg) => msg.image_url);
-      setImageSelectedToPrint(imageUrls[0]); // 取第一張圖片的 URL，只會有一張
+      setImageSelectedToIllustrate(imageUrls);
     } catch (err) {
       console.error(err);
       showSwal({ isSuccess: false, title: `對話失敗，請稍後再試!` });
@@ -251,25 +256,55 @@ const Chatbot = () => {
 
       {isGenerationCompleted && (
         <div className="p-4 w-full max-w-4xl mx-auto border rounded-xl">
-          <BaseButton
-            className="my-4"
-            onClick={() => setIsGenerationCompleted((prev) => !prev)}
-          >
-            <ArrowLeftOutlined />
-            <span className="ml-2">返回</span>
-          </BaseButton>
-          <BaseButton
+          <h2 className="text-center">Which one do you like?</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-center items-center">
+            {imageSelectedToIllustrate.map((imageUrl, index) => (
+              <div
+                key={index}
+                className={`rounded-xl w-full max-w-sm ${
+                  selectedIndex === index ? "bg-green-500" : "bg-red-500"
+                }`}
+                onClick={() => setSelectedIndex(index)}
+              >
+                <img
+                  src={imageUrl}
+                  alt={`Image ${index + 1}`}
+                  className="scale-95 rounded-xl shadow"
+                />
+              </div>
+            ))}
+            {/* </div> */}
+            <BaseButton
+              className="my-4"
+              onClick={() => setIsGenerationCompleted((prev) => !prev)}
+            >
+              <ArrowLeftOutlined />
+              <span className="ml-2">Back</span>
+            </BaseButton>
+            <BaseButton
+              onClick={() =>
+                console.log(imageSelectedToIllustrate[selectedIndex])
+              }
+            >
+              <ArrowRightOutlined />
+              <span className="ml-2">Next</span>
+            </BaseButton>
+          </div>
+
+          {/* <BaseButton
             label="排版"
             className="my-4 w-full"
             onClick={() => navigate("/illustration")}
-          />
-          <BaseButton
+          /> */}
+          {/* <BaseButton
             label="列印"
             className="my-4 w-full"
             onClick={() =>
-              navigate("/print", { state: { imageUrl: imageSelectedToPrint } })
+              navigate("/print", {
+                state: { imageUrl: imageSelectedToIllustrate },
+              })
             }
-          />
+          /> */}
         </div>
       )}
     </>
