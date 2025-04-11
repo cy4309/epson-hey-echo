@@ -313,7 +313,7 @@ async def upload_image(file: UploadFile = File(...)):
     if file_extension not in ["png", "jpg", "jpeg"]:
         return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
     file_name = f"{uuid.uuid4().hex}.{file_extension}"
-    file_path = os.path.join(UPLOAD_DIR, file_name)
+    file_path = os.path.join(IMG_DIR, file_name)
     with open(file_path, "wb") as f:
         f.write(await file.read())
     return JSONResponse(
