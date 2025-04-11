@@ -289,7 +289,7 @@ async def generate_prompt(req: Request):
                 model="dall-e-3",
                 prompt=prompt,
                 n=1,
-                size="2480x3508" #A4尺寸
+                size="1024x1792" #A4尺寸
             )
             image_url = img_response.data[0].url
         except Exception as dalle_error:
@@ -313,7 +313,7 @@ async def upload_image(file: UploadFile = File(...)):
     if file_extension not in ["png", "jpg", "jpeg"]:
         return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
     file_name = f"{uuid.uuid4().hex}.{file_extension}"
-    file_path = os.path.join(UPLOAD_DIR, file_name)
+    file_path = os.path.join(IMG_DIR, file_name)
     with open(file_path, "wb") as f:
         f.write(await file.read())
     return JSONResponse(
@@ -406,7 +406,7 @@ async def generate_multiple_images(
 
 @app.get("/view-image/{fileName}")
 async def view_img(fileName: str):
-    file_path = os.path.join(IMG_DIR, fileName)
+    file_path = os.path.join(UPLOAD_DIR, fileName)
     if not os.path.exists(file_path):
         return JSONResponse(content={"error": "File not found"}, status_code=404)
     return FileResponse(file_path, media_type="image/png")
