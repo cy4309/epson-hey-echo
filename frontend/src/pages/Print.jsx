@@ -63,7 +63,6 @@ const Print = () => {
       const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0);
       const base64 = canvas.toDataURL(`image/${mimeType}`); // 將圖片轉換為 Base64
-      console.log(base64);
       localStorage.setItem("uploadedFile", base64);
       setFilePreview(base64);
     };

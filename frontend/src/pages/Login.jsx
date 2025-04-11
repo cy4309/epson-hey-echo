@@ -6,6 +6,7 @@ import { Canvas } from "@react-three/fiber";
 import { Leva } from "leva";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import Scene from "@/containers/login/geometry/Scene";
+import { motion } from "framer-motion";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -18,15 +19,38 @@ const Login = () => {
     navigate("/");
   };
 
+  const text = [
+    "Hey, I am Echo!",
+    "Your AI designer,",
+    "Design, Generate, Print!",
+  ];
+
   return (
     <>
       <div className="flex flex-col">
+        {text.map((line, i) => (
+          <motion.div
+            key={i}
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: "0%", opacity: 1 }}
+            transition={{
+              duration: 0.8,
+              ease: [0.76, 0, 0.24, 1],
+              delay: i * 0.3,
+            }}
+            className="text-3xl"
+          >
+            {line}
+          </motion.div>
+        ))}
+      </div>
+      {/* <div className="flex flex-col">
         <h1 className="text-2xl">I am your Banner Generator</h1>
         <span>Economy,</span>
         <span>Convenience,</span>
         <span>Home Printing,</span>
         <span>O in one - ECHO!</span>
-      </div>
+      </div> */}
       <div
         className={`w-full h-[50vh] relative ${
           isCanvasLoaded ? "opacity-100" : "opacity-0"
