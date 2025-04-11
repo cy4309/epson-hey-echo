@@ -388,13 +388,14 @@ async def generate_multiple_images(
             # 儲存並上傳
             poster.save(file_path, format="PNG")
 
-            upload_status, upload_response = upload_image_to_epsondest(file_path, fileName)
-            print(f"[INFO] Upload to Epson API: {upload_status} - {upload_response}")
+            # upload_status, upload_response = upload_image_to_epsondest(file_path, fileName)
+            # print(f"[INFO] Upload to Epson API: {upload_status} - {upload_response}")
 
-            if upload_status != 200:
-                return JSONResponse(content={"error": "上傳 images 到 Epson 失敗"}, status_code=500)
-            img_urls.append(upload_response)
-            os.remove(file_path)
+            # if upload_status != 200:
+            #     return JSONResponse(content={"error": "上傳 images 到 Epson 失敗"}, status_code=500)
+            # img_urls.append(upload_response)
+            img_urls.append(f"https://epson-hey-echo.onrender.com/view-image/{fileName}")
+            # os.remove(file_path) #暫時保留圖片讓前端可以讀到
 
         return JSONResponse(content={
             "img_urls": img_urls,
