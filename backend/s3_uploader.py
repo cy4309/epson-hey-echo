@@ -31,15 +31,14 @@ def upload_image_to_epsondest(filepath: str, fileName: str):
         try:
             result = response.json()
             print("[DEBUG] Epson 回應:", result)
+            
+            if result.get("Code") != 10000:
+                print("[ERROR] Epson 回傳錯誤:", result)
+                return 400, None
             if not result.get("Data"):
                 print("[ERROR] Epson 回傳成功但 Data 為 null，請檢查是否真的有上傳")
-
+                return 200, f"blender-render/epson/{fileName}"
+            return 200, result.get("Data")
         except Exception as e:
                 print("[ERROR] Epson 上傳過程錯誤:", e)
                 return 500, None
-        
-        if result.get("Code") != 10000:
-                    print("[ERROR] Epson 回傳錯誤:", result)
-                    return 400, None
-        print("[WARN] Epson 回傳 null，使用自組 filename:", fileName)
-        return 200,  s3_path  
