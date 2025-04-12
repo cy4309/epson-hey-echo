@@ -391,7 +391,7 @@ async def generate_multiple_images(
                 # 載入字型
                 try:
                     font = ImageFont.truetype("arial.ttf", font_size)
-                except:
+                except Exception as font_error:
                     print(f"[WARNING] 字型載入失敗: {font_error}, 使用預設字型")
                     font = ImageFont.load_default()
 
