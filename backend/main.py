@@ -26,9 +26,9 @@ print("GEMINI_API_KEY:", os.getenv("GEMINI_API_KEY")[:6])
 
 app = FastAPI()
 UPLOAD_DIR = "uploads"
-IMG_DIR = "img_files"
+# IMG_DIR = "img_files"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-os.makedirs(IMG_DIR, exist_ok=True)
+# os.makedirs(IMG_DIR, exist_ok=True)
 
 #記憶Gemini 對話歷史
 chat_history = []
@@ -313,7 +313,7 @@ async def upload_image(file: UploadFile = File(...)):
     if file_extension not in ["png", "jpg", "jpeg"]:
         return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
     file_name = f"{uuid.uuid4().hex}.{file_extension}"
-    file_path = os.path.join(IMG_DIR, file_name)
+    file_path = os.path.join(UPLOAD_DIR, file_name)
     with open(file_path, "wb") as f:
         f.write(await file.read())
     return JSONResponse(
@@ -366,7 +366,7 @@ async def generate_multiple_images(
         # 為每種排版生成獨立的 image
         for layout, (x, y) in positions.items():
             fileName = f"{uuid.uuid4().hex}_{layout}.png"
-            file_path = os.path.join(IMG_DIR, fileName)
+            file_path = os.path.join(UPLOAD_DIR, fileName)
 
             # 建立新的 A4 背景
             poster = PILImage.new("RGB", (width, height), (255, 255, 255))
@@ -387,14 +387,16 @@ async def generate_multiple_images(
 
             # 儲存並上傳
             poster.save(file_path, format="PNG")
-
-            # upload_status, upload_response = upload_image_to_epsondest(file_path, fileName)
-            # print(f"[INFO] Upload to Epson API: {upload_status} - {upload_response}")
-
-            # if upload_status != 200:
-            #     return JSONResponse(content={"error": "上傳 images 到 Epson 失敗"}, status_code=500)
-            # img_urls.append(upload_response)
-            img_urls.append(f"https://epson-hey-echo.onrender.com/view-image/{fileName}")
+            # 上傳到 S3
+            upload_status, upload_response = upload_image_to_epsondest(file_path, fileName)
+            print(f"[INFO] Upload to Epson API: {upload_status} - {upload_response}")
+            if upload_status != 200:
+                return JSONResponse(content={"error": "上傳 images 到 Epson 失敗"}, status_code=500)
+            
+            # 回傳 S3 連結
+            s3_url = f"https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/{s3_path}"
+            img_urls.append(s3_url)
+            # img_urls.append(f"https://epson-hey-echo.onrender.com/view-image/{fileName}")
             # os.remove(file_path) #暫時保留圖片讓前端可以讀到
 
         return JSONResponse(content={
