@@ -405,7 +405,7 @@ async def generate_multiple_images(
                 try:
                     upload_status, upload_url = upload_image_to_epsondest(file_path, fileName)
                     print(f"[INFO] 上傳結果: 狀態={upload_status}, URL={upload_url}")
-                    if upload_status == 200 and upload_url:
+                    if upload_status == 200 and upload_url and upload_url != "null":
                         if upload_url.startswith('http'):
                             img_url = upload_url
                         else:
