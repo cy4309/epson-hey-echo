@@ -13,7 +13,7 @@ def upload_image_to_epsondest(filepath: str, fileName: str):
         suffix = os.path.splitext(fileName)[-1].replace(".", "")  # 取副檔名
         files = {
             "file": (fileName, f,"image/png"),  
-            "fileName": (None, s3_path),
+            "fileName": (None, fileName),
             "suffix": (None, f".{suffix}")
         }
         print("[INFO] Epson 上傳檔案:", fileName)
@@ -31,6 +31,9 @@ def upload_image_to_epsondest(filepath: str, fileName: str):
         try:
             result = response.json()
             print("[DEBUG] Epson 回應:", result)
+            if not result.get("Data"):
+                print("[ERROR] Epson 回傳成功但 Data 為 null，請檢查是否真的有上傳")
+
         except Exception as e:
                 print("[ERROR] Epson 上傳過程錯誤:", e)
                 return 500, None
