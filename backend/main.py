@@ -340,7 +340,7 @@ async def generate_multiple_images(
     code: int = Form(200)
 ):
     try:
-        width, height = map(int,A4)
+        width, height = 595, 842
         img_urls = []
         # 定義五種排版方式的位置
         positions = {
@@ -355,54 +355,90 @@ async def generate_multiple_images(
         if not os.path.exists(image_path):
             return JSONResponse(content={"error": "圖片檔案不存在"}, status_code=400)
         
-        img = PILImage.open(image_path).convert("RGB")
-        img_width, img_height = img.size
+        # 對結果進行更詳細的打印
+        print(f"[INFO] 開始處理圖片: {image_path}")
+        print(f"[INFO] 圖片存在: {os.path.exists(image_path)}")
+        print(f"[INFO] 文字內容: {content}")
         
-        scale = max(width / img_width, height / img_height)
-        new_width = int(img_width * scale)
-        new_height = int(img_height * scale)
-        img_resized = img.resize((new_width, new_height))
+        successful_urls = []
+        errors = []
+        
 
         # 為每種排版生成獨立的 image
         for layout, (x, y) in positions.items():
-            fileName = f"{uuid.uuid4().hex}_{layout}.png"
-            file_path = os.path.join(UPLOAD_DIR, fileName)
-
-            # 建立新的 A4 背景
-            poster = PILImage.new("RGB", (width, height), (255, 255, 255))
-            draw = ImageDraw.Draw(poster)
-
-            # 將背景圖貼上
-            img_x = (width - new_width) // 2
-            img_y = (height - new_height) // 2
-            poster.paste(img_resized, (img_x, img_y))
-
-            # 載入字型
             try:
-                font = ImageFont.truetype("arial.ttf", font_size)
-            except:
-                font = ImageFont.load_default()
+                fileName = f"{uuid.uuid4().hex}_{layout}.png"
+                file_path = os.path.join(UPLOAD_DIR, fileName)
+                print(f"[INFO] 處理排版 {layout}, 儲存到 {file_path}")
 
-            draw.text((x, y), content, font=font, fill=(255, 255, 255))
+                img = PILImage.open(image_path).convert("RGB")
+                img_width, img_height = img.size
+                # 調整圖片大小以適應A4
+                scale = max(width / img_width, height / img_height)
+                new_width = int(img_width * scale)
+                new_height = int(img_height * scale)
+                img_resized = img.resize((new_width, new_height))
+                
+                # 建立新的 A4 背景
+                poster = PILImage.new("RGB", (width, height), (255, 255, 255))
+                draw = ImageDraw.Draw(poster)
 
-            # 儲存並上傳
-            poster.save(file_path, format="PNG")
-            # 上傳到 S3
-            upload_status, upload_response = upload_image_to_epsondest(file_path, fileName)
-            print(f"[INFO] Upload to Epson API: {upload_status} - {upload_response}")
-            if upload_status != 200:
-                return JSONResponse(content={"error": "上傳 images 到 Epson 失敗"}, status_code=500)
-            
-            # 回傳 S3 連結
-            s3_url = f"https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/{s3_path}"
-            img_urls.append(s3_url)
-            # img_urls.append(f"https://epson-hey-echo.onrender.com/view-image/{fileName}")
-            # os.remove(file_path) #暫時保留圖片讓前端可以讀到
+                # 將背景圖貼上
+                img_x = (width - new_width) // 2
+                img_y = (height - new_height) // 2
+                poster.paste(img_resized, (img_x, img_y))
 
-        return JSONResponse(content={
-            "img_urls": img_urls,
+                # 載入字型
+                try:
+                    font = ImageFont.truetype("arial.ttf", font_size)
+                except:
+                    print(f"[WARNING] 字型載入失敗: {font_error}, 使用預設字型")
+                    font = ImageFont.load_default()
+
+                draw.text((x, y), content, font=font, fill=(255, 255, 255))
+
+                # 儲存並上傳
+                poster.save(file_path, format="PNG")
+                print(f"[INFO] 成功儲存圖片: {file_path}")
+                
+                # 上傳到 S3
+                try:
+                    upload_status, upload_url = upload_image_to_epsondest(file_path, fileName)
+                    print(f"[INFO] 上傳結果: 狀態={upload_status}, URL={upload_url}")
+                    if upload_status == 200 and upload_url:
+                        if upload_url.startswith('http'):
+                            img_url = upload_url
+                        else:
+                            img_url = f"https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/{upload_url}"
+                        
+                        successful_urls.append(img_url)
+                        print(f"[INFO] 添加URL: {img_url}")
+                    else:
+                        # 如果上傳失敗，使用本地URL
+                        local_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
+                        successful_urls.append(local_url)
+                        print(f"[INFO] 上傳失敗，使用本地URL: {local_url}")
+                except Exception as upload_error:
+                    print(f"[ERROR] 上傳圖片失敗: {upload_error}")
+                    local_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
+                    successful_urls.append(local_url)
+                    errors.append(f"排版 {layout} 上傳失敗: {str(upload_error)}")
+                    
+            except Exception as layout_error:
+                print(f"[ERROR] 處理排版 {layout} 時出錯: {layout_error}")
+                errors.append(f"排版 {layout} 處理失敗: {str(layout_error)}")
+                continue
+                        
+        response_content ={
+            "img_urls": successful_urls,
             "code":200
-            })
+            }
+        
+        if errors:
+            response_content["errors"] = errors
+            
+        print(f"[INFO] 完成處理，返回 {len(successful_urls)} 個URL")
+        return JSONResponse(content=response_content)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
