@@ -314,12 +314,22 @@ async def generate_prompt(req: Request):
                         size="1024x1792" #A4尺寸
                     )
                     image_url = img_response.data[0].url
+                    # Gemini 設計師風格說話
+                    model = genai.GenerativeModel('gemini-2.0-flash')
+                    chat = model.start_chat(history = chat_history)
+                    response = chat.send_message("你是專業的平面設計師，請用親切但專業的語氣，告訴我你會怎麼構思這個畫面。不要條列，像是你正在跟團隊講話一樣。不用條列，只要簡短描述就好。")
+                    idea_description = response.text.strip()
+                    chat_history.append({"role": "model", "parts": [idea_description]})
+                    print("[Gemini idea]", idea_description)
+
+                    segments = [s.strip() for s in idea_description.replace("\n", "").split("。") if s.strip()]
+                    text_messages = [{"role": "assistant", "type": "text", "style":"designer", "content": s + "。"} for s in segments]
+                                        
                 except Exception as dalle_error:
                     return JSONResponse(content={"error": f"DALL·E 錯誤：{str(dalle_error)}"}, status_code=500)
 
                 return JSONResponse(content={
-                    "new_messages": [
-                        {"role": "assistant", "type": "text", "content": "以下是您請求的海報設計圖："},
+                    "new_messages": text_messages + [
                         {"role": "assistant", "type": "image", "image_url": image_url} # 顯示圖片
                     ]
                 })
