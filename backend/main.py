@@ -176,7 +176,7 @@ async def generate_prompt(req: Request):
                 model="gpt-4-1106-preview",
                 messages=[
                     {"role": "system", "content": "你是一位房仲廣告設計師，請產出一個吸睛的房仲主標題，不超過20字，語氣自然口語。"},
-                    {"role": "user", "content": user_all_text}
+                    {"role": "user", "content": user_text}
                 ]
             ).choices[0].message.content.strip()
 
@@ -184,7 +184,7 @@ async def generate_prompt(req: Request):
                 model="gpt-4-1106-preview",
                 messages=[
                     {"role": "system", "content": "請補一句說明性副標（最多20字）"},
-                    {"role": "user", "content": user_all_text}
+                    {"role": "user", "content": user_text}
                 ]
             ).choices[0].message.content.strip()
 
@@ -192,7 +192,7 @@ async def generate_prompt(req: Request):
                 model="gpt-4-1106-preview",
                 messages=[
                     {"role": "system", "content": "請產出一段房仲廣告常用的聯絡資訊文字（例如：傅樁淵 0988-100-122）"},
-                    {"role": "user", "content": user_all_text}
+                    {"role": "user", "content": user_text}
                 ]
             ).choices[0].message.content.strip()
 

@@ -5,13 +5,13 @@ const backendBaseUrl = import.meta.env.VITE_BACKEND_API_BASE_URL;
 export const generateDialogueToImage = async (updatedMessages) => {
   return await axios
     .post(
-      `${backendBaseUrl}/multi-dialogue-to-image`,
+      `${backendBaseUrl}/multi-dialogue-to-image`, updatedMessages,
       {
         headers: {
           "Content-Type": "application/json",
         },
-      },
-      JSON.stringify({ messages: updatedMessages })
+      }
+      // JSON.stringify({ messages: updatedMessages })
     )
     .then((res) => {
       return res.data;
