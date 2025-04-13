@@ -45,8 +45,16 @@ const Chatbot = () => {
     if (!textAreaValue.trim()) return;
     const newUserMsg = { role: "user", type: "text", content: textAreaValue };
     const image_url = await submitFileUpload(); //@Joyce:測試圖片上傳
-    const newImageMsg = { role: "user", type: "image", image_url };
-    const updatedMessages = [...messages, newUserMsg, newImageMsg];
+    // const newImageMsg = { role: "user", type: "image", image_url };
+    const fileName = file?.name || "";
+    const confirmMsg = {//Joyce測試用
+      role: "assistant",
+      type: "text",
+      content: file
+        ? `我已收到你的圖片（${fileName}），馬上幫你處理唷～`
+        : `收到囉，我會根據你的描述來設計圖像！`,
+    };
+    const updatedMessages = [...messages, newUserMsg, confirmMsg];
     setMessages(updatedMessages);
     setTextAreaValue("");
     setIsLoading(true);
