@@ -15,7 +15,7 @@ const Illustration = () => {
   const [isUploaded, setIsUploaded] = useState(false);
   const [fileName, setFileName] = useState("");
   const [textContent, setTextContent] = useState("abc");
-  const [fontSize, setFontSize] = useState(18);
+  const [fontSize, setFontSize] = useState(30);
   const [imgUrls, setImgUrls] = useState([]); //Joyce test
   const handleFileUpload = (e) => {
     // const file = e.target.files?.[0];
