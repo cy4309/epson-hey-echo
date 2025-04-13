@@ -254,7 +254,7 @@ async def generate_prompt(req: Request):
                 return JSONResponse(content={
                     "new_messages": response_messages
                 })
-            elif user_text:    
+        elif user_text:
                 print("[Fallback] 沒有圖片或不合成，進入 DALL·E 圖像生成邏輯")
                 # Step 2: 使用 GPT-4 轉換為 prompt
                 try:
