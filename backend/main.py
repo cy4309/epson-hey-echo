@@ -132,211 +132,191 @@ async def generate_prompt(req: Request):
                 image_url = data.get("image_url")
                 combined_text += f"{role}: {msg['content']}\n"
 
-        # model = genai.GenerativeModel('gemini-2.0-flash')
-        # chat = model.start_chat(history = chat_history)
-        
-        # response = chat.send_message("你是專門設計房仲文宣的設計師。請用自然的聊天語氣，告訴我你會怎麼設計這張房仲宣傳海報，可以提到主體（像是建築物、街景）、氣氛、色調和視覺重點。簡短描述就好，不用條列。")
-        # idea_description = response.text.strip()
-        # chat_history.append({"role": "model", "parts": [idea_description]})
-        # print("[Gemini idea]", idea_description)
-        
-        # segments = [s.strip() for s in idea_description.replace("\n", "").split("。") if s.strip()]
-        # text_messages = [{"role": "assistant", "type": "text", "content": s + "。"} for s in segments] #回複訊息
-        # image_url = data.get("image_url")       
-        # if image_url:
-        #     text_messages.insert(0,{
-        #         "role": "user",
-        #         "type": "image",
-        #         "image_url": image_url
-        #     })
-        
         # 如果包含指定關鍵語句，走「合成房仲海報邏輯」
         trigger_keywords = ["合成", "建築","宣傳單"]
-        # print("[所有 messages]", messages)
-        # matched = any(keyword in user_text for keyword in trigger_keywords) and image_url
-        # print("[Trigger 是否觸發]", matched, "，有圖片:", bool(image_url))
-        
-        # image_texts = [
-        #     m["content"] or m.get["image_url", ""] 
-        #     for m in messages if m.get ("role") == "user" and m.get("type") == "image"
-        #     ]
-        # print("[INFO] 解析 image_texts:", image_texts)
         user_text = combined_text.lower().strip()
+        has_trigger = any(keyword in user_text for keyword in trigger_keywords)
+        has_image = bool(image_url)
         print("[使用者訊息]", user_text)
+        print("[Trigger 判斷]", has_trigger, "| 有圖片:", has_image)
         
-        matched = any(keyword in user_text for keyword in trigger_keywords) and (image_url)
-        print("[Trigger 是否觸發]", matched,".有圖片", bool(image_url))
+        if has_trigger and has_image:
+            matched = any(keyword in user_text for keyword in trigger_keywords) and (image_url)
+            print("[Trigger 是否觸發]", matched,".有圖片", bool(image_url))
 
-        if matched:
-            print("[Trigger] 進入房仲海報合成功能")
+            if matched:
+                print("[Trigger] 進入房仲海報合成功能")
 
-            # GPT 產文案
-            title = client.chat.completions.create(
-                model="gpt-4-1106-preview",
-                messages=[
-                    {"role": "system", "content": "你是一位房仲廣告設計師，請產出一個吸睛的房仲主標題，不超過20字，語氣自然口語。"},
-                    {"role": "user", "content": user_text}
-                ]
-            ).choices[0].message.content.strip()
+                # GPT 產文案
+                title = client.chat.completions.create(
+                    model="gpt-4-1106-preview",
+                    messages=[
+                        {"role": "system", "content": "你是專門設計房仲文宣的設計師。請用自然的聊天語氣，告訴我你會怎麼設計這張房仲宣傳海報，可以提到主體（像是建築物、街景）、氣氛、色調和視覺重點。簡短描述就好，不用條列。"},
+                        {"role": "user", "content": user_text}
+                    ]
+                ).choices[0].message.content.strip()
 
-            subtitle = client.chat.completions.create(
-                model="gpt-4-1106-preview",
-                messages=[
-                    {"role": "system", "content": "請補一句說明性副標（最多20字）"},
-                    {"role": "user", "content": user_text}
-                ]
-            ).choices[0].message.content.strip()
+                subtitle = client.chat.completions.create(
+                    model="gpt-4-1106-preview",
+                    messages=[
+                        {"role": "system", "content": "請補一句說明性副標（最多20字）"},
+                        {"role": "user", "content": user_text}
+                    ]
+                ).choices[0].message.content.strip()
 
-            cta = client.chat.completions.create(
-                model="gpt-4-1106-preview",
-                messages=[
-                    {"role": "system", "content": "請產出一段房仲廣告常用的聯絡資訊文字（例如：傅樁淵 0988-100-122）"},
-                    {"role": "user", "content": user_text}
-                ]
-            ).choices[0].message.content.strip()
+                cta = client.chat.completions.create(
+                    model="gpt-4-1106-preview",
+                    messages=[
+                        {"role": "system", "content": "請產出一段房仲廣告常用的聯絡資訊文字（例如：傅樁淵 0988-100-122）"},
+                        {"role": "user", "content": user_text}
+                    ]
+                ).choices[0].message.content.strip()
 
-            print("[文案生成]", title, subtitle, cta)
+                print("[文案生成]", title, subtitle, cta)
 
-            # 產純色背景（用 Pillow 產圖）
-            width, height = 1240, 1754
-            bg_color = "#264432"
-            bottom_color = "#F8F1D7"
-            poster = PILImage.new("RGB", (width, height), bg_color)
-            draw = ImageDraw.Draw(poster)
-            draw.rectangle([0, height * 0.75, width, height], fill=bottom_color)
+                # 產純色背景（用 Pillow 產圖）
+                width, height = 1240, 1754
+                bg_color = "#264432"
+                bottom_color = "#F8F1D7"
+                poster = PILImage.new("RGB", (width, height), bg_color)
+                draw = ImageDraw.Draw(poster)
+                draw.rectangle([0, height * 0.75, width, height], fill=bottom_color)
 
-            # 疊建築圖
-            if image_url:
+                # 疊建築圖
+                if image_url:
+                    try:
+                        fg = PILImage.open(image_path).convert("RGBA")
+                        print(f"[INFO] 成功加載圖片: {image_path}")
+
+                        # resize + paste
+                        ratio = width * 0.8 / fg.width
+                        fg_resized = fg.resize((int(fg.width * ratio), int(fg.height * ratio)))
+                        x = (width - fg_resized.width) // 2
+                        y = int(height * 0.35 - fg_resized.height / 2)
+                        poster.paste(fg_resized, (x, y), fg_resized)
+                        print("[INFO] 圖片成功合成到海报")
+                    except Exception as img_error:
+                        print(f"[ERROR] 圖片處理失败: {img_error}")
+                        return JSONResponse(content={"error": f"圖片處理失败: {str(img_error)}"}, status_code=500)
+
+                # 加上文字
                 try:
-                    fg = PILImage.open(image_path).convert("RGBA")
-                    print(f"[INFO] 成功加載圖片: {image_path}")
+                    font_h1 = ImageFont.truetype("arial.ttf", 72)
+                    font_h2 = ImageFont.truetype("arial.ttf", 40)
+                    font_cta = ImageFont.truetype("arial.ttf", 36)
+                except:
+                    font_h1 = font_h2 = font_cta = ImageFont.load_default()
 
-                    # resize + paste
-                    ratio = width * 0.8 / fg.width
-                    fg_resized = fg.resize((int(fg.width * ratio), int(fg.height * ratio)))
-                    x = (width - fg_resized.width) // 2
-                    y = int(height * 0.35 - fg_resized.height / 2)
-                    poster.paste(fg_resized, (x, y), fg_resized)
-                    print("[INFO] 圖片成功合成到海报")
-                except Exception as img_error:
-                    print(f"[ERROR] 圖片處理失败: {img_error}")
-                    return JSONResponse(content={"error": f"圖片處理失败: {str(img_error)}"}, status_code=500)
+                draw.text((80, 60), title, font=font_h1, fill="#F8F1D7")
+                draw.text((80, height * 0.75 + 40), subtitle, font=font_h2, fill="#264432")
+                draw.text((80, height * 0.75 + 120), cta, font=font_cta, fill="#264432")
 
-            # 加上文字
-            try:
-                font_h1 = ImageFont.truetype("arial.ttf", 72)
-                font_h2 = ImageFont.truetype("arial.ttf", 40)
-                font_cta = ImageFont.truetype("arial.ttf", 36)
-            except:
-                font_h1 = font_h2 = font_cta = ImageFont.load_default()
-
-            draw.text((80, 60), title, font=font_h1, fill="#F8F1D7")
-            draw.text((80, height * 0.75 + 40), subtitle, font=font_h2, fill="#264432")
-            draw.text((80, height * 0.75 + 120), cta, font=font_cta, fill="#264432")
-
-            # 儲存圖片
-            fileName = f"{uuid.uuid4().hex}.png"
-            filepath = os.path.join(UPLOAD_DIR, fileName)
-            poster.save(filepath, format="PNG")
-            print(f"[INFO] 成功儲存宣傳單: {filepath}")
-            
-            # 上傳 Epson
-            try:
-                status, image_url = upload_image_to_epsondest(filepath, fileName)
-                if status != 200 or not image_url or image_url == "null":
-                    print(f"[WARNING] 上傳Epson失敗或回傳 URL 無效，使用本地 URL")
+                # 儲存圖片
+                fileName = f"{uuid.uuid4().hex}.png"
+                filepath = os.path.join(UPLOAD_DIR, fileName)
+                poster.save(filepath, format="PNG")
+                print(f"[INFO] 成功儲存宣傳單: {filepath}")
+                
+                # 上傳 Epson
+                try:
+                    status, image_url = upload_image_to_epsondest(filepath, fileName)
+                    if status != 200 or not image_url or image_url == "null":
+                        print(f"[WARNING] 上傳Epson失敗或回傳 URL 無效，使用本地 URL")
+                        image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
+                    response_messages = [
+                        {"role": "assistant", "type": "text", "content": "以下為您生成的房仲宣傳單"},
+                        {"role": "assistant", "type": "image", "image_url": image_url}
+                    ]
+                    print(f"[INFO] 上傳结果: 狀態={status}, URL={image_url}")
+                    
+                    if status != 200:
+                        print(f"[WARNING] 上傳Epson失敗，使用本地URL")
+                        image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
+                except Exception as upload_error:
+                    print(f"[ERROR] 上傳到Epson失敗: {upload_error}")
                     image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
-                response_messages = [
+                    # 回復設計理念
+                    model = genai.GenerativeModel('gemini-2.0-flash')
+                    response = model.generate_content("請用簡短文字介紹這張房仲海報的設計思路和特色，不超過50字")
+                    idea_description = response.text.strip()
+                    print("[Gemini response]", idea_description)
+                    
+                    response_messages = [
                     {"role": "assistant", "type": "text", "content": "以下為您生成的房仲宣傳單"},
                     {"role": "assistant", "type": "image", "image_url": image_url}
-                ]
-                print(f"[INFO] 上傳结果: 狀態={status}, URL={image_url}")
-                
-                if status != 200:
-                    # 如果上传失败，使用本地URL
-                    print(f"[WARNING] 上傳Epson失敗，使用本地URL")
-                    image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
-            except Exception as upload_error:
-                print(f"[ERROR] 上傳到Epson失敗: {upload_error}")
-                image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
-                # 回復設計理念
-                model = genai.GenerativeModel('gemini-2.0-flash')
-                response = model.generate_content("請用簡短文字介紹這張房仲海報的設計思路和特色，不超過50字")
-                idea_description = response.text.strip()
-                print("[Gemini response]", idea_description)
-                
-                response_messages = [
-                {"role": "assistant", "type": "text", "content": "以下為您生成的房仲宣傳單"},
-                {"role": "assistant", "type": "image", "image_url": image_url}
-                ]
-            return JSONResponse(content={
-                "new_messages": response_messages
-            })
-        
-        # Step 2: 使用 GPT-4 轉換為 prompt
-        try:
-            system_msg = """
-            你是一位熟悉房仲廣告與建築攝影的圖像提示詞工程師，根據輸入內容撰寫英文 prompt，供 DALL·E 生成海報背景。
-            圖片需為 A4 尺寸直式排版，有主體建築（現代住宅、公寓、街景）置中，周圍乾淨、可加文字。風格應簡約、寫實、有柔和自然光。
-            不要出現任何文字、UI、LOGO、裝飾框。
+                    ]
+                return JSONResponse(content={
+                    "new_messages": response_messages
+                })
+            else:    
+                print("[Fallback] 沒有圖片或不合成，進入 DALL·E 圖像生成邏輯")
+                # Step 2: 使用 GPT-4 轉換為 prompt
+                try:
+                    system_msg = """
+                    你是一位熟悉房仲廣告與建築攝影的圖像提示詞工程師，根據輸入內容撰寫英文 prompt，供 DALL·E 生成海報背景。
+                    圖片需為 A4 尺寸直式排版，有主體建築（現代住宅、公寓、街景）置中，周圍乾淨、可加文字。風格應簡約、寫實、有柔和自然光。
+                    不要出現任何文字、UI、LOGO、裝飾框。
 
-            【光照效果】
-            Soft lighting (柔光), Hard lighting (硬光), Backlighting (逆光), Side lighting (側光), Silhouette (剪影), Diffused light (擴散光), Spotlight (聚光), Rim lighting (邊光), Ambient lighting (環境光), Tyndall Effect (泰因達爾效應), Rayleigh Scattering (瑞利散射), God Rays / Crepuscular Rays (耶穌光/暮光射線), Bokeh (散景), Caustics (焦散效果), Chiaroscuro (明暗對比), Gobo Lighting (戈博照明), Halo Effect (光暈效果), Golden hour (黃金時刻)
+                    【光照效果】
+                    Soft lighting (柔光), Hard lighting (硬光), Backlighting (逆光), Side lighting (側光), Silhouette (剪影), Diffused light (擴散光), Spotlight (聚光), Rim lighting (邊光), Ambient lighting (環境光), Tyndall Effect (泰因達爾效應), Rayleigh Scattering (瑞利散射), God Rays / Crepuscular Rays (耶穌光/暮光射線), Bokeh (散景), Caustics (焦散效果), Chiaroscuro (明暗對比), Gobo Lighting (戈博照明), Halo Effect (光暈效果), Golden hour (黃金時刻)
 
-            【色彩色調】
-            Saturated (飽和), Desaturated (去飽和), High Contrast (高對比度), Low Contrast (低對比度), Vibrant (鮮豔), Muted (柔和), Warm Tones (暖色調), Cool Tones (冷色調), Monochromatic (單色調), Duotone (雙色調), Sepia (棕褐色調), Cross Processing (交叉沖印), HDR Toning (HDR調色), Tint (色調添加), Lomo Effect (LOMO效果), Bleach Bypass (漂白繞過), Cyanotype (藍印法), Grain / Film Grain (顆粒感/膠片顆粒), Analog (類比效果)
+                    【色彩色調】
+                    Saturated (飽和), Desaturated (去飽和), High Contrast (高對比度), Low Contrast (低對比度), Vibrant (鮮豔), Muted (柔和), Warm Tones (暖色調), Cool Tones (冷色調), Monochromatic (單色調), Duotone (雙色調), Sepia (棕褐色調), Cross Processing (交叉沖印), HDR Toning (HDR調色), Tint (色調添加), Lomo Effect (LOMO效果), Bleach Bypass (漂白繞過), Cyanotype (藍印法), Grain / Film Grain (顆粒感/膠片顆粒), Analog (類比效果)
 
-            【渲染與質感】
-            Polaroid Effect (拍立得效果), Octane Render (Octane渲染器), 4K Resolution (4K解析度), Texture Mapping (紋理映射), HDR (High Dynamic Range, 高動態範圍), Matte Painting (數碼彩繪), Glossy Finish (光澤表面), Roughness / Bump Mapping (粗糙度/凸起映射), Cinema 4D (C4D), Blender (混合器), Maya, Arnold Renderer (阿諾德渲染器), V-Ray (V-Ray渲染器), Substance Painter (Substance繪畫器), Quixel Mixer (Quixel混合器), Houdini (胡迪尼)
-            
-            【構圖技巧與方法】
-            Rule of Thirds (三分法則), Leading Lines (引導線), Framing (框架法), Symmetry and Patterns (對稱與圖案), Depth of Field (景深), Negative Space (負空間), Golden Ratio (黃金比例), Focus on Eye Level (注視點層次), Diagonal Composition (對角線構圖), Juxtaposition (並置), Point of View (視點), Color Contrast (色彩對比), Isolation (孤立), S-Curve (S型曲線), Frame Within a Frame (框中框), Dynamic Tension (動態張力), Balance (平衡), Repetition (重複), Vanishing Point (消失點), Selective Focus (選擇性對焦), Symmetry and Asymmetry (對稱與不對稱), High Angle and Low Angle (高角度與低角度)
+                    【渲染與質感】
+                    Polaroid Effect (拍立得效果), Octane Render (Octane渲染器), 4K Resolution (4K解析度), Texture Mapping (紋理映射), HDR (High Dynamic Range, 高動態範圍), Matte Painting (數碼彩繪), Glossy Finish (光澤表面), Roughness / Bump Mapping (粗糙度/凸起映射), Cinema 4D (C4D), Blender (混合器), Maya, Arnold Renderer (阿諾德渲染器), V-Ray (V-Ray渲染器), Substance Painter (Substance繪畫器), Quixel Mixer (Quixel混合器), Houdini (胡迪尼)
+                    
+                    【構圖技巧與方法】
+                    Rule of Thirds (三分法則), Leading Lines (引導線), Framing (框架法), Symmetry and Patterns (對稱與圖案), Depth of Field (景深), Negative Space (負空間), Golden Ratio (黃金比例), Focus on Eye Level (注視點層次), Diagonal Composition (對角線構圖), Juxtaposition (並置), Point of View (視點), Color Contrast (色彩對比), Isolation (孤立), S-Curve (S型曲線), Frame Within a Frame (框中框), Dynamic Tension (動態張力), Balance (平衡), Repetition (重複), Vanishing Point (消失點), Selective Focus (選擇性對焦), Symmetry and Asymmetry (對稱與不對稱), High Angle and Low Angle (高角度與低角度)
 
-            【構圖技巧與視角】
-            Bird's-eye view (鳥瞰圖), Aerial view (空拍視角), First-person view (第一人稱視角), Third-person view (第三人稱視角), Front (正面視角), Side (側面視角), Top-down (俯視視角), Close-up (近距離拍攝), Medium shot (中距離拍攝), Wide shot (遠距離拍攝), Wide-angle lens (廣角鏡頭), Telephoto lens (長焦鏡頭), Fisheye lens (魚眼鏡頭), Narrow field of view (窄視野), Wide field of view (寬視野), One-point perspective (一點透視), Two-point perspective (兩點透視), Three-point perspective (三點透視)
-            
-            請注意：生成的 prompt 最終會用於設計房仲海報，畫面要適合作為廣告主視覺，建議避免過度抽象或無主體的構圖。
-            """
-            gpt_response = client.chat.completions.create(
-                model="gpt-4-1106-preview",
-                messages=[
-                    {"role": "system", "content": system_msg},
-                    {"role": "user", "content": idea_description}
-                ]
-            )
-            idea = gpt_response.choices[0].message.content.strip()
-            print("[GPT refined idea]", idea)
+                    【構圖技巧與視角】
+                    Bird's-eye view (鳥瞰圖), Aerial view (空拍視角), First-person view (第一人稱視角), Third-person view (第三人稱視角), Front (正面視角), Side (側面視角), Top-down (俯視視角), Close-up (近距離拍攝), Medium shot (中距離拍攝), Wide shot (遠距離拍攝), Wide-angle lens (廣角鏡頭), Telephoto lens (長焦鏡頭), Fisheye lens (魚眼鏡頭), Narrow field of view (窄視野), Wide field of view (寬視野), One-point perspective (一點透視), Two-point perspective (兩點透視), Three-point perspective (三點透視)
+                    
+                    請注意：生成的 prompt 最終會用於設計房仲海報，畫面要適合作為廣告主視覺，建議避免過度抽象或無主體的構圖。
+                    """
+                    gpt_response = client.chat.completions.create(
+                        model="gpt-4-1106-preview",
+                        messages=[
+                            {"role": "system", "content": system_msg},
+                            {"role": "user", "content": user_text}
+                        ]
+                    )
+                    idea = gpt_response.choices[0].message.content.strip()
+                    print("[GPT refined idea]", idea)
 
-            # 加上固定 prompt 樣板
-            prompt = f"""
-            A vertical A4 real estate poster background layout. 
-            The main subject is a modern residential building, but it should appear small in the frame, centered with generous margin around all sides. 
-            The scene must leave clean, blank space at the top, bottom, and sides for inserting text and icons.
-            No text, no logos, no decorations. 
-            Do not crop the building at the edges — the subject must be framed cleanly with breathing space.
-            Style: professional real estate photography, warm tone, soft natural light, minimal background, uncluttered street.
-            """.strip()
-            print("[Final Prompt to DALL·E]", prompt)
-        except Exception as gpt_error:
-            return JSONResponse(content={"error": f"GPT 錯誤：{str(gpt_error)}"}, status_code=500)
+                    # 加上固定 prompt 樣板
+                    prompt = f"""
+                    A vertical A4 real estate poster background layout. 
+                    The main subject is a modern residential building, but it should appear small in the frame, centered with generous margin around all sides. 
+                    The scene must leave clean, blank space at the top, bottom, and sides for inserting text and icons.
+                    No text, no logos, no decorations. 
+                    Do not crop the building at the edges — the subject must be framed cleanly with breathing space.
+                    Style: professional real estate photography, warm tone, soft natural light, minimal background, uncluttered street.
+                    
+                    {idea}
+                    """.strip()
+                    print("[Final Prompt to DALL·E]", prompt)
+                except Exception as gpt_error:
+                    return JSONResponse(content={"error": f"GPT 錯誤：{str(gpt_error)}"}, status_code=500)
 
-        # Step 3: 使用 DALL·E 生成圖片
-        try:
-            img_response = client.images.generate(
-                model="dall-e-3",
-                prompt=prompt,
-                n=1,
-                size="1024x1792" #A4尺寸
-            )
-            image_url = img_response.data[0].url
-        except Exception as dalle_error:
-            return JSONResponse(content={"error": f"DALL·E 錯誤：{str(dalle_error)}"}, status_code=500)
+                # Step 3: 使用 DALL·E 生成圖片
+                try:
+                    img_response = client.images.generate(
+                        model="dall-e-3",
+                        prompt=prompt,
+                        n=1,
+                        size="1024x1792" #A4尺寸
+                    )
+                    image_url = img_response.data[0].url
+                except Exception as dalle_error:
+                    return JSONResponse(content={"error": f"DALL·E 錯誤：{str(dalle_error)}"}, status_code=500)
 
-        return JSONResponse(content={
-            "new_messages": text_messages + [
-                {"role": "assistant", "type": "image", "image_url": image_url} # 顯示圖片
-            ]
-        })
+                return JSONResponse(content={
+                    "new_messages": [
+                        {"role": "assistant", "type": "text", "content": "以下是您請求的海報設計圖："},
+                        {"role": "assistant", "type": "image", "image_url": image_url} # 顯示圖片
+                    ]
+                })
         
     except Exception as e:
         print("[ERROR] generate-image:", e)
