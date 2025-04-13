@@ -10,8 +10,7 @@ from openai import OpenAI
 from backend.s3_uploader import upload_image_to_epsondest
 import google.generativeai as genai
 from PIL import Image as PILImage, ImageDraw, ImageFont
-import uuid
-import os
+import uuid,os
 import io
 
 import os, sys
@@ -199,8 +198,6 @@ async def generate_prompt(req: Request):
             print("[文案生成]", title, subtitle, cta)
 
             # 產純色背景（用 Pillow 產圖）
-            from PIL import Image, ImageDraw, ImageFont
-            import uuid, os
             width, height = 1240, 1754
             bg_color = "#264432"
             bottom_color = "#F8F1D7"
