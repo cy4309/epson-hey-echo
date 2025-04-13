@@ -135,9 +135,14 @@ async def generate_prompt(req: Request):
         # 先找出使用者最後一則文字訊息
         print("[所有 messages]", messages)
         user_texts = [m["content"] for m in messages if m["role"] == "user" and m["type"] == "text"]
-        image_texts = [m["content"] for m in messages if m["role"] == "user" and m["type"] == "image"]
+        image_texts = [
+            m["content"] or m.get["image_url", ""] 
+            for m in messages if m.get ("role") == "user" and m.get("type") == "image"
+            ]
+        print("[INFO] 解析 image_texts:", image_texts)
         user_all_text = "".join(user_texts + image_texts).lower().strip()
         print("[使用者完整訊息]", user_all_text)
+        
 
         matched = any(keyword in user_all_text for keyword in trigger_keywords)
         print("[Trigger 是否觸發]", matched)
@@ -344,11 +349,11 @@ async def generate_multiple_images(
         img_urls = []
         # 定義五種排版方式的位置
         positions = {
-            "topLeft": (40, height - 40),
-            "topRight": (width - 140, height - 40),
+            "topLeft": (40, 40),
+            "topRight": (width - 140, 40),
             "center": (width / 2 - 50, height / 2),
-            "bottomLeft": (40, 40),
-            "bottomRight": (width - 140, 40)
+            "bottomLeft": (40, height - 40),
+            "bottomRight": (width - 140, height - 40),
         }
 
         image_path = os.path.join(UPLOAD_DIR, image_filename)
