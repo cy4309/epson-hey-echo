@@ -159,9 +159,7 @@ const Illustration = () => {
           {imgUrls.map((url, index) => (
             <img
               key={index}
-              src={`${
-                import.meta.env.VITE_BACKEND_S3_API_BASE_URL
-              }/${fileName}`}
+              src={url}
               className="h-[400px] rounded-xl shadow"
               // title={`pdf-preview-${index}`}
             />
