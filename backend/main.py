@@ -201,7 +201,7 @@ async def generate_prompt(req: Request):
             width, height = 1240, 1754
             bg_color = "#264432"
             bottom_color = "#F8F1D7"
-            poster = Image.new("RGB", (width, height), bg_color)
+            poster = PILImage.new("RGB", (width, height), bg_color)
             draw = ImageDraw.Draw(poster)
             draw.rectangle([0, height * 0.75, width, height], fill=bottom_color)
 
@@ -209,7 +209,7 @@ async def generate_prompt(req: Request):
             if image_url:
                 try:
                     fg = PILImage.open(image_path).convert("RGBA")
-                    print(f"[INFO] 成功加载图片: {image_path}")
+                    print(f"[INFO] 成功加載圖片: {image_path}")
 
                     # resize + paste
                     ratio = width * 0.8 / fg.width
@@ -217,10 +217,10 @@ async def generate_prompt(req: Request):
                     x = (width - fg_resized.width) // 2
                     y = int(height * 0.35 - fg_resized.height / 2)
                     poster.paste(fg_resized, (x, y), fg_resized)
-                    print("[INFO] 成功将图片合成到海报")
+                    print("[INFO] 圖片成功合成到海报")
                 except Exception as img_error:
-                    print(f"[ERROR] 图片处理失败: {img_error}")
-                    return JSONResponse(content={"error": f"图片处理失败: {str(img_error)}"}, status_code=500)
+                    print(f"[ERROR] 圖片處理失败: {img_error}")
+                    return JSONResponse(content={"error": f"圖片處理失败: {str(img_error)}"}, status_code=500)
 
             # 加上文字
             try:
@@ -243,7 +243,11 @@ async def generate_prompt(req: Request):
             # 上傳 Epson
             try:
                 status, image_url = upload_image_to_epsondest(filepath, fileName)
-                print(f"[INFO] 上传结果: 状态={status}, URL={image_url}")
+                response_messages = [
+                    {"role": "assistant", "type": "text", "content": "以下為您生成的房仲宣傳單"},
+                    {"role": "assistant", "type": "image", "image_url": image_url}
+                ]
+                print(f"[INFO] 上傳结果: 狀態={status}, URL={image_url}")
                 
                 if status != 200:
                     # 如果上传失败，使用本地URL
