@@ -102,6 +102,8 @@ async def generate_prompt(req: Request):
         
         #處理圖片url
         image_url = data.get("image_url")
+        if image_url in [None, "", "undefined"]:
+            image_url = None
         print("[原始 image_url]", image_url)
         
         if image_url and isinstance(image_url, str):
