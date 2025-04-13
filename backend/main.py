@@ -134,7 +134,11 @@ async def generate_prompt(req: Request):
 
         # 如果包含指定關鍵語句，走「合成房仲海報邏輯」
         trigger_keywords = ["合成", "建築","宣傳單"]
-        user_text = combined_text.lower().strip()
+        # user_text = combined_text.lower().strip()
+        user_text ="\n".join([
+            msg["content"] for msg in messages 
+            if msg["type"] == "text" and msg["role"] == "user"
+        ]).strip().lower()
         has_trigger = any(keyword in user_text for keyword in trigger_keywords)
         has_image = bool(image_url)
         print("[使用者訊息]", user_text)
