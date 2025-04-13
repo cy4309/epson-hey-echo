@@ -100,6 +100,29 @@ async def generate_prompt(req: Request):
         data = await req.json()
         print("[DEBUG] raw body:", data)
         messages = data.get("messages", [])
+        
+        #處理圖片url
+        image_url = data.get("image_url")
+        print("[原始 image_url]", image_url)
+        
+        if image_url and isinstance(image_url, str):
+            if image_url.startswith("undefined"):
+                # 去除undefined
+                image_filename = image_url.replace("undefined", "")
+                print(f"[INFO] image_url，從{image_url} 到 {image_filename}")
+            else:
+                image_filename = image_url.split("/")[-1] if "/" in image_url else image_url
+                
+            # 檢查文件是否存在
+            image_path = os.path.join(UPLOAD_DIR, image_filename)
+            print(f"[INFO] 檢查除片文件: {image_path}, 存在: {os.path.exists(image_path)}")
+            
+            if os.path.exists(image_path):
+                data["image_url"] = f"https://epson-hey-echo.onrender.com/view-image/{image_filename}"
+                print(f"[INFO] 更新image_url為: {data['image_url']}")
+            else:
+                print(f"[ERROR] 圖片文件不存在: {image_path}")
+                return JSONResponse(content={"error": "圖片文件不存在"}, status_code=404)
 
         # Step 1: 與Gemini對話
         combined_text = ""
@@ -108,49 +131,47 @@ async def generate_prompt(req: Request):
                 role = "User" if msg["role"] == "user" else "model"
                 chat_history.append({"role": role, "parts": [msg["content"]]})
                 image_url = data.get("image_url")
-                # combined_text += f"{role}: {msg['content']}\n"
+                combined_text += f"{role}: {msg['content']}\n"
 
-        model = genai.GenerativeModel('gemini-2.0-flash')
-        chat = model.start_chat(history = chat_history)
+        # model = genai.GenerativeModel('gemini-2.0-flash')
+        # chat = model.start_chat(history = chat_history)
         
-        response = chat.send_message("你是專門設計房仲文宣的設計師。請用自然的聊天語氣，告訴我你會怎麼設計這張房仲宣傳海報，可以提到主體（像是建築物、街景）、氣氛、色調和視覺重點。簡短描述就好，不用條列。")
-        idea_description = response.text.strip()
-        chat_history.append({"role": "model", "parts": [idea_description]})
-        print("[Gemini idea]", idea_description)
+        # response = chat.send_message("你是專門設計房仲文宣的設計師。請用自然的聊天語氣，告訴我你會怎麼設計這張房仲宣傳海報，可以提到主體（像是建築物、街景）、氣氛、色調和視覺重點。簡短描述就好，不用條列。")
+        # idea_description = response.text.strip()
+        # chat_history.append({"role": "model", "parts": [idea_description]})
+        # print("[Gemini idea]", idea_description)
         
-        segments = [s.strip() for s in idea_description.replace("\n", "").split("。") if s.strip()]
-        text_messages = [{"role": "assistant", "type": "text", "content": s + "。"} for s in segments] #回複訊息
-        image_url = data.get("image_url")
-        if image_url:
-            text_messages.insert(0,{
-                "role": "user",
-                "type": "image",
-                "image_url": image_url
-            })
+        # segments = [s.strip() for s in idea_description.replace("\n", "").split("。") if s.strip()]
+        # text_messages = [{"role": "assistant", "type": "text", "content": s + "。"} for s in segments] #回複訊息
+        # image_url = data.get("image_url")       
+        # if image_url:
+        #     text_messages.insert(0,{
+        #         "role": "user",
+        #         "type": "image",
+        #         "image_url": image_url
+        #     })
         
         # 如果包含指定關鍵語句，走「合成房仲海報邏輯」
-        trigger_keywords = [
-            "合成", "建築","宣傳單"
-        ]
-        # 先找出使用者最後一則文字訊息
-        print("[所有 messages]", messages)
-        user_texts = [m["content"] for m in messages if m["role"] == "user" and m["type"] == "text"]
-        image_texts = [
-            m["content"] or m.get["image_url", ""] 
-            for m in messages if m.get ("role") == "user" and m.get("type") == "image"
-            ]
-        print("[INFO] 解析 image_texts:", image_texts)
-        user_all_text = "".join(user_texts + image_texts).lower().strip()
-        print("[使用者完整訊息]", user_all_text)
+        trigger_keywords = ["合成", "建築","宣傳單"]
+        # print("[所有 messages]", messages)
+        # matched = any(keyword in user_text for keyword in trigger_keywords) and image_url
+        # print("[Trigger 是否觸發]", matched, "，有圖片:", bool(image_url))
         
-
-        matched = any(keyword in user_all_text for keyword in trigger_keywords)
-        print("[Trigger 是否觸發]", matched)
+        # image_texts = [
+        #     m["content"] or m.get["image_url", ""] 
+        #     for m in messages if m.get ("role") == "user" and m.get("type") == "image"
+        #     ]
+        # print("[INFO] 解析 image_texts:", image_texts)
+        user_text = combined_text.lower().strip()
+        print("[使用者訊息]", user_text)
+        
+        matched = any(keyword in user_text for keyword in trigger_keywords) and (image_url)
+        print("[Trigger 是否觸發]", matched,".有圖片", bool(image_url))
 
         if matched:
             print("[Trigger] 進入房仲海報合成功能")
 
-            # GPT 幫忙產文案
+            # GPT 產文案
             title = client.chat.completions.create(
                 model="gpt-4-1106-preview",
                 messages=[
@@ -188,20 +209,21 @@ async def generate_prompt(req: Request):
             draw.rectangle([0, height * 0.75, width, height], fill=bottom_color)
 
             # 疊建築圖
-            from io import BytesIO
-            import requests
-
-            image_url = data.get("image_url")
             if image_url:
-                r = requests.get(image_url)
-                fg = Image.open(BytesIO(r.content)).convert("RGBA")
+                try:
+                    fg = PILImage.open(image_path).convert("RGBA")
+                    print(f"[INFO] 成功加载图片: {image_path}")
 
-                # resize + paste
-                ratio = width * 0.8 / fg.width
-                fg_resized = fg.resize((int(fg.width * ratio), int(fg.height * ratio)))
-                x = (width - fg_resized.width) // 2
-                y = int(height * 0.35 - fg_resized.height / 2)
-                poster.paste(fg_resized, (x, y), fg_resized)
+                    # resize + paste
+                    ratio = width * 0.8 / fg.width
+                    fg_resized = fg.resize((int(fg.width * ratio), int(fg.height * ratio)))
+                    x = (width - fg_resized.width) // 2
+                    y = int(height * 0.35 - fg_resized.height / 2)
+                    poster.paste(fg_resized, (x, y), fg_resized)
+                    print("[INFO] 成功将图片合成到海报")
+                except Exception as img_error:
+                    print(f"[ERROR] 图片处理失败: {img_error}")
+                    return JSONResponse(content={"error": f"图片处理失败: {str(img_error)}"}, status_code=500)
 
             # 加上文字
             try:
@@ -219,24 +241,30 @@ async def generate_prompt(req: Request):
             fileName = f"{uuid.uuid4().hex}.png"
             filepath = os.path.join(UPLOAD_DIR, fileName)
             poster.save(filepath, format="PNG")
+            print(f"[INFO] 成功儲存宣傳單: {filepath}")
             
             # 上傳 Epson
-            from backend.s3_uploader import upload_image_to_epsondest  # 放最上面 import
-
-            status, image_url = upload_image_to_epsondest(filepath, fileName)
-            if status != 200:
-                return JSONResponse(content={"error": "圖片上傳 Epson 失敗"}, status_code=500)
-
-            response_messages = text_messages + [
+            try:
+                status, image_url = upload_image_to_epsondest(filepath, fileName)
+                print(f"[INFO] 上传结果: 状态={status}, URL={image_url}")
+                
+                if status != 200:
+                    # 如果上传失败，使用本地URL
+                    print(f"[WARNING] 上傳Epson失敗，使用本地URL")
+                    image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
+            except Exception as upload_error:
+                print(f"[ERROR] 上傳到Epson失敗: {upload_error}")
+                image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
+                # 回復設計理念
+                model = genai.GenerativeModel('gemini-2.0-flash')
+                response = model.generate_content("請用簡短文字介紹這張房仲海報的設計思路和特色，不超過50字")
+                idea_description = response.text.strip()
+                print("[Gemini response]", idea_description)
+                
+                response_messages = [
+                {"role": "assistant", "type": "text", "content": "以下為您生成的房仲宣傳單"},
                 {"role": "assistant", "type": "image", "image_url": image_url}
-            ]
-            # 如果使用者有上傳圖片，放在最前面
-            if data.get("image_url"):
-                response_messages.insert(0, {
-                    "role": "user",
-                    "type": "image",
-                    "image_url": data["image_url"]
-                })
+                ]
             return JSONResponse(content={
                 "new_messages": response_messages
             })
