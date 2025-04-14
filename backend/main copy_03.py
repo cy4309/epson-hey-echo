@@ -228,7 +228,7 @@ async def generate_prompt(req: Request):
                     status, image_url = upload_image_to_epsondest(filepath, fileName)
                     if status != 200 or not image_url or image_url == "null":
                         print(f"[WARNING] 上傳Epson失敗或回傳 URL 無效，使用本地 URL")
-
+                        
                         image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
                     response_messages = [
                         {"role": "assistant", "type": "text", "content": "以下為您生成的房仲宣傳單"},
@@ -409,7 +409,6 @@ async def generate_multiple_images(
                 img_width, img_height = img.size
                 # 調整圖片大小以適應A4
                 scale = max(width / img_width, height / img_height)
-                adjusted_font_size = int(font_size * scale * 0.8) #調整字體大小
                 new_width = int(img_width * scale)
                 new_height = int(img_height * scale)
                 img_resized = img.resize((new_width, new_height))
@@ -425,7 +424,7 @@ async def generate_multiple_images(
 
                 # 載入字型
                 try:
-                    font = ImageFont.truetype("arial.ttf", adjusted_font_size)
+                    font = ImageFont.truetype("arial.ttf", font_size)
                 except Exception as font_error:
                     print(f"[WARNING] 字型載入失敗: {font_error}, 使用預設字型")
                     font = ImageFont.load_default()
@@ -440,18 +439,12 @@ async def generate_multiple_images(
                 try:
                     upload_status, upload_url = upload_image_to_epsondest(file_path, fileName)
                     print(f"[INFO] 上傳結果: 狀態={upload_status}, URL={upload_url}")
-                    if upload_status == 200 and upload_url:
-                        if upload_url.startswith("http") and "s3.ap-northeast-1.amazonaws.com" in upload_url:
-                            img_url = upload_url  # 直接是合法 URL
-                        elif "blender-render/epson" in upload_url:  # 只是一段 key
-                            img_url = f"https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/{upload_url}"
-                        elif upload_url == "null" or upload_url.strip() == "":
-                            print("[WARN] Epson 回傳 'null'，使用 fallback")
-                            img_url = f"https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/{fileName}"
+                    if upload_status == 200 and upload_url and upload_url != "null":
+                        if upload_url.startswith('http'):
+                            img_url = upload_url
                         else:
-                            print("[WARN] URL 格式未知，仍嘗試用 fallback URL")
-                            img_url = f"https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/{fileName}"
-
+                            img_url = f"https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/{upload_url}"
+                        
                         successful_urls.append(img_url)
                         print(f"[INFO] 添加URL: {img_url}")
                     else:
