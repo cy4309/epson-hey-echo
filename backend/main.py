@@ -409,7 +409,7 @@ async def generate_multiple_images(
                 img_width, img_height = img.size
                 # 調整圖片大小以適應A4
                 scale = max(width / img_width, height / img_height)
-                adjusted_font_size = int(font_size * scale * 0.8) #調整字體大小
+                # adjusted_font_size = int(font_size * scale * 0.8) #調整字體大小
                 new_width = int(img_width * scale)
                 new_height = int(img_height * scale)
                 img_resized = img.resize((new_width, new_height))
@@ -425,7 +425,7 @@ async def generate_multiple_images(
 
                 # 載入字型
                 try:
-                    font = ImageFont.truetype("arial.ttf", adjusted_font_size)
+                    font = ImageFont.truetype("arial.ttf", font_size)
                 except Exception as font_error:
                     print(f"[WARNING] 字型載入失敗: {font_error}, 使用預設字型")
                     font = ImageFont.load_default()
