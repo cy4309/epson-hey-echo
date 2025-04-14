@@ -359,8 +359,8 @@ async def upload_image(file: UploadFile = File(...)):
     #     return JSONResponse(content={"error": "圖片格式錯誤或損毀，請重新上傳"}, status_code=400)
     
     with open(file_path, "wb") as f:
-        # f.write(await file.read())
-        f.write(contents)
+        f.write(await file.read())
+        # f.write(contents)
         
     return JSONResponse(
         content={
