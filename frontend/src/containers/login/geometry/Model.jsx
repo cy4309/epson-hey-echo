@@ -2,15 +2,13 @@ import { forwardRef, useEffect, useRef } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
 import PropTypes from "prop-types";
 
-const Model = forwardRef(({ url, position, rotation }) => {
+const Model = forwardRef(({ url, animationName, position, rotation }) => {
   const { scene, animations } = useGLTF(url);
   const group = useRef();
   const { actions } = useAnimations(animations, group);
 
   useEffect(() => {
     if (actions) {
-      // console.log("Available animations:", Object.keys(actions));
-      const animationName = "picbox-ani";
       if (actions[animationName]) {
         actions[animationName].reset().play();
         // console.log(`Playing animation: ${animationName}`);
@@ -41,6 +39,7 @@ Model.displayName = "Model";
 
 Model.propTypes = {
   url: PropTypes.string.isRequired,
+  animationName: PropTypes.string.isRequired,
   position: PropTypes.arrayOf(PropTypes.number),
   rotation: PropTypes.arrayOf(PropTypes.number),
 };

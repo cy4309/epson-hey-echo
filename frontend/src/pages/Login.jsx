@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BaseButton from "@/components/BaseButton";
 import { useNavigate } from "react-router-dom";
 import { showSwal } from "@/utils/notification";
@@ -11,7 +11,19 @@ import { motion } from "framer-motion";
 const Login = () => {
   const navigate = useNavigate();
   const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
-  const modelUrl = "/picbox3.glb";
+  // const modelUrl = "/picbox3.glb";
+  const modelUrl = "/Robot_To_C.glb";
+
+  // {picboxAni: "picbox-ani", Default: "Default", Sad: "Sad"}
+  const [animationName, setAnimationName] = useState("");
+
+  useEffect(() => {
+    if (localStorage.getItem("darkMode") === "true") {
+      setAnimationName("Sad");
+    } else {
+      setAnimationName("Default");
+    }
+  }, [animationName]);
 
   const handleLogin = (taskName, userName) => {
     localStorage.setItem("userName", userName);
@@ -87,7 +99,7 @@ const Login = () => {
           }}
           onCreated={() => setIsCanvasLoaded(true)}
         >
-          <Scene modelUrl={modelUrl} />
+          <Scene modelUrl={modelUrl} animationName={animationName} />
         </Canvas>
       </div>
       {/* <div className="absolute inset-0 flex flex-col justify-center items-center space-y-4"> */}

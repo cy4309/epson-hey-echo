@@ -6,7 +6,7 @@ import { useControls } from "leva";
 import { Perf } from "r3f-perf";
 import { GenerateImageModel } from "./GenerateImageModel";
 
-const Scene = ({ modelUrl }) => {
+const Scene = ({ modelUrl, animationName }) => {
   // const generateImageModelRef = useRef(null);
 
   const { performance } = useControls("Monitoring", {
@@ -43,6 +43,7 @@ const Scene = ({ modelUrl }) => {
 
       <GenerateImageModel
         url={modelUrl}
+        animationName={animationName}
         // ref={generateImageModelRef}
         rotation={rotation}
       />
@@ -52,6 +53,7 @@ const Scene = ({ modelUrl }) => {
 
 Scene.propTypes = {
   modelUrl: PropTypes.string.isRequired,
+  animationName: PropTypes.string.isRequired,
 };
 
 export default Scene;

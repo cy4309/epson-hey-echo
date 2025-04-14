@@ -2,17 +2,25 @@ import { forwardRef, Suspense } from "react";
 import PropTypes from "prop-types";
 import Model from "./Model";
 
-export const GenerateImageModel = forwardRef(({ url, rotation }) => {
-  return (
-    <Suspense fallback={null}>
-      <Model url={url} position={[0, 0, 0]} rotation={rotation} />
-    </Suspense>
-  );
-});
+export const GenerateImageModel = forwardRef(
+  ({ url, animationName, rotation }) => {
+    return (
+      <Suspense fallback={null}>
+        <Model
+          url={url}
+          animationName={animationName}
+          position={[0, 0, 0]}
+          rotation={rotation}
+        />
+      </Suspense>
+    );
+  }
+);
 
 GenerateImageModel.displayName = "GenerateImageModel";
 GenerateImageModel.propTypes = {
   url: PropTypes.string.isRequired,
+  animationName: PropTypes.string.isRequired,
   rotation: PropTypes.arrayOf(PropTypes.number),
 };
 

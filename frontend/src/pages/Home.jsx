@@ -41,6 +41,7 @@ const Home = () => {
   const [fileName, setFileName] = useState("");
   const [textContent, setTextContent] = useState("abc");
   const [fontSize, setFontSize] = useState(30);
+  // const [imgUrls, setImgUrls] = useState([]);
 
   const handleSendDialog = async () => {
     if (!textAreaValue.trim()) return;
@@ -145,7 +146,6 @@ const Home = () => {
       const formData = new FormData();
       const fileName = url.substring(url.lastIndexOf("/") + 1); // 從 URL 提取檔案名稱
       formData.append("file", blob, fileName);
-      console.log(formData);
       return formData;
     } catch (error) {
       console.error("轉換 URL 為 FormData 時發生錯誤:", error);

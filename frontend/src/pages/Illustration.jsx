@@ -173,6 +173,7 @@ import { useLocation } from "react-router-dom";
 const Illustration = () => {
   const location = useLocation();
   const { imgUrls } = location.state || {};
+  console.log(imgUrls);
 
   if (!imgUrls || imgUrls.length === 0) {
     return <p>沒有可用的圖片，請返回重新生成。</p>;
