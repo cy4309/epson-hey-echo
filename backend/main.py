@@ -348,6 +348,8 @@ async def upload_image(file: UploadFile = File(...)):
         return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
     file_name = f"{uuid.uuid4().hex}.{file_extension}"
     file_path = os.path.join(UPLOAD_DIR, file_name)
+    
+    contents = await file.read()
     #驗證圖像
     try:
         image = PILImage.open(io.BytesIO(contents))
@@ -357,7 +359,9 @@ async def upload_image(file: UploadFile = File(...)):
         return JSONResponse(content={"error": "圖片格式錯誤或損毀，請重新上傳"}, status_code=400)
     
     with open(file_path, "wb") as f:
-        f.write(await file.read())
+        # f.write(await file.read())
+        f.write(contents)
+        
     return JSONResponse(
         content={
             "message": "圖片上傳成功",
