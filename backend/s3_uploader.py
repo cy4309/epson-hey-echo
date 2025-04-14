@@ -8,7 +8,7 @@ def upload_image_to_epsondest(filepath: str, fileName: str):
         "Authorization": "b1f7690c-ad05-4416-8c42-72df5c38fae2",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"  # 模擬瀏覽器
     }
-    s3_path = f"blender-render/epson/{fileName}"
+    s3_path = f"https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/{fileName}"
     with open(filepath, "rb") as f:
         suffix = os.path.splitext(fileName)[-1].replace(".", "")  # 取副檔名
         files = {
