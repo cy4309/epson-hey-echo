@@ -37,7 +37,7 @@ def upload_image_to_epsondest(filepath: str, fileName: str):
                 return 400, None
             if not result.get("Data"):
                 print("[ERROR] Epson 回傳成功但 Data 為 null，請檢查是否真的有上傳")
-                return 200, f"blender-render/epson/{fileName}"
+                return 200, f"https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/{fileName}"
             return 200, result.get("Data")
         except Exception as e:
                 print("[ERROR] Epson 上傳過程錯誤:", e)
