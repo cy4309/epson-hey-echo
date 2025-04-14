@@ -9,7 +9,7 @@ from reportlab.lib.utils import ImageReader
 from openai import OpenAI
 from backend.s3_uploader import upload_image_to_epsondest
 import google.generativeai as genai
-from PIL import Image as PILImage, ImageDraw, ImageFont, UnidentifiedImageError
+from PIL import Image as PILImage, ImageDraw, ImageFont
 import uuid,os
 import io
 
@@ -349,14 +349,14 @@ async def upload_image(file: UploadFile = File(...)):
     file_name = f"{uuid.uuid4().hex}.{file_extension}"
     file_path = os.path.join(UPLOAD_DIR, file_name)
     
-    contents = await file.read()
-    #驗證圖像
-    try:
-        image = PILImage.open(io.BytesIO(contents))
-        image.verify()  # 這個會拋出錯誤如果不是合法圖片
-    except UnidentifiedImageError:
-        print(f"[ERROR] 上傳失敗：無法識別圖片 {file.filename}")
-        return JSONResponse(content={"error": "圖片格式錯誤或損毀，請重新上傳"}, status_code=400)
+    # contents = await file.read()
+    # #驗證圖像
+    # try:
+    #     image = PILImage.open(io.BytesIO(contents))
+    #     image.verify()  # 這個會拋出錯誤如果不是合法圖片
+    # except UnidentifiedImageError:
+    #     print(f"[ERROR] 上傳失敗：無法識別圖片 {file.filename}")
+    #     return JSONResponse(content={"error": "圖片格式錯誤或損毀，請重新上傳"}, status_code=400)
     
     with open(file_path, "wb") as f:
         # f.write(await file.read())
