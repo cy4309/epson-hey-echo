@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Input } from "antd";
 import { useNavigate } from "react-router-dom";
 import {
@@ -13,10 +13,13 @@ import BaseButton from "@/components/BaseButton";
 import LoadingIndicator from "@/components/LoadingIndicator";
 import { showSwal } from "@/utils/notification";
 import { generateDialogueToImage } from "@/services/generateService";
-import { uploadImage } from "@/services/illustrateService";
+import {
+  uploadImage,
+  generateMultiplePdfs,
+} from "@/services/illustrateService";
 // import { motion } from "framer-motion";
 
-const Chatbot = () => {
+const Home = () => {
   const S3_BASE_URL = import.meta.env.VITE_S3_BASE_URL;
   const navigate = useNavigate();
   const { TextArea } = Input;
@@ -27,27 +30,25 @@ const Chatbot = () => {
   const [isGenerationCompleted, setIsGenerationCompleted] = useState(false);
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
-  const [imageSelectedToIllustrate, setImageSelectedToIllustrate] = useState(
-    []
-  );
-  // console.log(imageSelectedToPrint);
+  const [imageSelectedToIllustrate, setImageSelectedToIllustrate] = useState([
+    "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
+    "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
+    // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png"
+  ]);
+  // console.log(imageSelectedToIllustrate);
   const [selectedIndex, setSelectedIndex] = useState(0);
-
-  useEffect(() => {
-    setImageSelectedToIllustrate([
-      "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
-      "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
-      // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
-    ]);
-  }, []);
+  const [isOpenForm, setIsOpenForm] = useState(false);
+  const [fileName, setFileName] = useState("");
+  const [textContent, setTextContent] = useState("abc");
+  const [fontSize, setFontSize] = useState(30);
 
   const handleSendDialog = async () => {
     if (!textAreaValue.trim()) return;
     const newUserMsg = { role: "user", type: "text", content: textAreaValue };
-    const image_url = await submitFileUpload(); //@Joyce:測試圖片上傳
-    // const newImageMsg = { role: "user", type: "image", image_url }; //Joyce測試用
-    const fileName = file?.name || "";
-    //Joyce測試回話開場
+    const image_url = await submitFileUpload();
+    // const newImageMsg = { role: "user", type: "image", image_url };
+    // const fileName = file?.name || "";
+    //測試回話開場
     const confirmMsg = {
       role: "assistant",
       type: "text",
@@ -70,7 +71,6 @@ const Chatbot = () => {
       // setTextAreaValue("");
       console.log("傳給後端的 messages:", updatedMessages);
       const res = await generateDialogueToImage({
-        //@Joyce:測試圖片上傳
         messages: updatedMessages,
         image_url: image_url || "",
       });
@@ -99,10 +99,10 @@ const Chatbot = () => {
       console.log(res);
       if (res.code === 200) {
         showSwal({ isSuccess: true, title: `上傳成功!` });
-        const filename = res.filename; // @Joyce:測試圖片上傳
-        const url = `${S3_BASE_URL}${filename}`; // @Joyce:測試圖片上傳
+        const filename = res.filename;
+        const url = `${S3_BASE_URL}${filename}`;
         removeFile();
-        return url; // @Joyce:測試圖片上傳
+        return url;
         // setIsUploaded(true);
         // setFileName(res.filename);
       } else {
@@ -134,6 +134,79 @@ const Chatbot = () => {
     setFile(null);
     setFilePreview("");
     fileInputRef.current.value = null;
+  };
+
+  const convertUrlToFormData = async (url) => {
+    try {
+      const response = await fetch(url, { mode: "no-cors" });
+      const blob = await response.blob();
+
+      // 創建 FormData 並附加圖片
+      const formData = new FormData();
+      const fileName = url.substring(url.lastIndexOf("/") + 1); // 從 URL 提取檔案名稱
+      formData.append("file", blob, fileName);
+      console.log(formData);
+      return formData;
+    } catch (error) {
+      console.error("轉換 URL 為 FormData 時發生錯誤:", error);
+      throw error;
+    }
+  };
+
+  const submitSelectedImage = async () => {
+    const selectedImageUrl = imageSelectedToIllustrate[selectedIndex];
+    try {
+      // 將 URL 轉換為 FormData
+      const formData = await convertUrlToFormData(selectedImageUrl);
+
+      // 將 FormData 發送到後端
+      const res = await uploadImage(formData);
+      console.log("上傳圖片結果:", res);
+
+      if (res.code === 200) {
+        showSwal({ isSuccess: true, title: `上傳成功!` });
+        setFileName(res.filename);
+        setIsOpenForm(true);
+        // navigate("/illustration", {
+        //   state: { imageUrl: selectedImageUrl },
+        // });
+      } else {
+        showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+      }
+    } catch (error) {
+      console.error("上傳圖片時發生錯誤:", error);
+      showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+    }
+  };
+
+  const submitFile = async () => {
+    if (!textContent || !fontSize) {
+      showSwal({ isSuccess: false, title: `請輸入文字內容和字體大小` });
+      return;
+    }
+    const payload = {
+      image_filename: fileName,
+      content: textContent,
+      font_size: fontSize,
+    };
+    console.log(payload);
+
+    try {
+      const res = await generateMultiplePdfs(payload);
+      console.log(res);
+      if (res.code === 200) {
+        showSwal({ isSuccess: true, title: `上傳成功!` });
+        // setImgUrls(res.img_urls);
+        navigate("/illustration", {
+          state: { imgUrls: res.img_urls }, // 將後端返回的圖片 URL 傳遞到 /illustration 頁面
+        });
+      } else {
+        showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+      }
+    } catch (err) {
+      console.error(err);
+      showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+    }
   };
 
   // if (isLoading) {
@@ -290,15 +363,34 @@ const Chatbot = () => {
               <ArrowLeftOutlined />
               <span className="ml-2">Back</span>
             </BaseButton>
-            <BaseButton
-              onClick={() =>
-                console.log(imageSelectedToIllustrate[selectedIndex])
-              }
-            >
+            <BaseButton onClick={submitSelectedImage}>
               <ArrowRightOutlined />
               <span className="ml-2">Next</span>
             </BaseButton>
           </div>
+
+          {isOpenForm && (
+            <>
+              <Input
+                name="text"
+                placeholder="輸入文字內容"
+                className="m-2"
+                size="large"
+                value={textContent}
+                onChange={(e) => setTextContent(e.target.value)}
+              />
+              <Input
+                name="text"
+                placeholder="字體大小"
+                className="m-2"
+                size="large"
+                value={fontSize}
+                onChange={(e) => setFontSize(Number(e.target.value))}
+              />
+              <BaseButton className="m-2" label="送出" onClick={submitFile} />
+              {/* <BaseButton className="m-2" label="列印" onClick={submitPrint} /> */}
+            </>
+          )}
 
           {/* <BaseButton
             label="排版"
@@ -320,4 +412,4 @@ const Chatbot = () => {
   );
 };
 
-export default Chatbot;
+export default Home;
