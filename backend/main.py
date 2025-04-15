@@ -267,7 +267,7 @@ async def generate_prompt(req: Request):
                     # 加上固定 prompt 樣板
                     prompt = """
                     Centered composition with clean empty margins. 
-                    No text, no UI, no border, no background, no color palettes, no mockups. 
+                    No text, no UI.
                     Only the illustration itself on a plain background.
                     """.strip()
 
