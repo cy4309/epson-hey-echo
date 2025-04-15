@@ -9,7 +9,7 @@ from reportlab.lib.utils import ImageReader
 from openai import OpenAI
 from backend.s3_uploader import upload_image_to_epsondest
 import google.generativeai as genai
-from PIL import Image as PILImage, ImageDraw, ImageFont, UnidentifiedImageError
+from PIL import Image as PILImage, ImageDraw, ImageFont
 import uuid,os,io
 
 import os, sys
@@ -349,20 +349,20 @@ async def upload_image(file: UploadFile = File(...)):
     file_path = os.path.join(UPLOAD_DIR, file_name)
     
     # #驗證圖像
-    try:
-        contents = await file.read()
-        image = PILImage.open(io.BytesIO(contents))
-        image.verify()  # 這個會拋出錯誤如果不是合法圖片
-    except UnidentifiedImageError:
-        print(f"[ERROR] 上傳失敗：無法識別圖片 {file.filename}")
-        return JSONResponse(content={"error": "圖片格式錯誤或損毀，請重新上傳"}, status_code=400)
-    except Exception as e:
-        print(f"[ERROR] 驗證圖片時出錯: {e}")
-        return JSONResponse(content={"error": "圖片上傳異常，請稍後再試"}, status_code=500)
+    # try:
+    #     contents = await file.read()
+    #     image = PILImage.open(io.BytesIO(contents))
+    #     image.verify()  # 這個會拋出錯誤如果不是合法圖片
+    # except UnidentifiedImageError:
+    #     print(f"[ERROR] 上傳失敗：無法識別圖片 {file.filename}")
+    #     return JSONResponse(content={"error": "圖片格式錯誤或損毀，請重新上傳"}, status_code=400)
+    # except Exception as e:
+    #     print(f"[ERROR] 驗證圖片時出錯: {e}")
+    #     return JSONResponse(content={"error": "圖片上傳異常，請稍後再試"}, status_code=500)
     
     with open(file_path, "wb") as f:
-        # f.write(await file.read())
-        f.write(contents)
+        f.write(await file.read())
+        # f.write(contents)
         
     return JSONResponse(
         content={
