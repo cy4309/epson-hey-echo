@@ -10,7 +10,7 @@ from openai import OpenAI
 from backend.s3_uploader import upload_image_to_epsondest
 import google.generativeai as genai
 from PIL import Image as PILImage, ImageDraw, ImageFont
-import uuid,os,io
+import uuid,os,io,requests
 
 import os, sys
 print("CWD =", os.getcwd())
