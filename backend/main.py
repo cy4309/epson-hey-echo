@@ -237,7 +237,7 @@ async def generate_prompt(req: Request):
 
                     請從以下分類中，各選擇 1-2 種風格，並以逗號句式組成一段描述，供 DALL·E 使用：
                     【插畫與風格類型】
-                    Flat Illustration (扁平插畫), Watercolor Illustration (水彩插畫), Vector Art (向量圖風), Paper-cut Style (紙雕風格), Collage Style (拼貼風), Editorial Illustration (編輯插畫), Isometric Design (等距構圖), Retro Graphic Design (復古平面設計), Mid-century Modern (中世紀現代風), Japanese Minimalist (日系極簡), Scandinavian Style (北歐風格), Children’s Book Illustration (童書插畫風), Line Art (線條插畫), Cutout Shapes (剪紙構成)
+                    Flat Illustration (扁平插畫), Watercolor Illustration (水彩插畫), Vector Art (向量圖風), Paper-cut Style (紙雕風格), Collage Style (拼貼風), Editorial Illustration (編輯插畫), Isometric Design (等距構圖), Retro Graphic Design (復古平面設計), Mid-century Modern (中世紀現代風), Japanese Minimalist (日系極簡), Scandinavian Style (北歐風格), Children’s Book Illustration (童書插畫風), Line Art (線條插畫), Cutout Shapes (剪紙構成),editorial print design(印刷設計)
 
                     【色彩色調】
                     Muted Colors (柔和色系), Pastel Tones (粉彩色調), Earthy Tones (大地色系), Warm Palette (暖色系), Cool Palette (冷色系), Monochrome Design (單色設計), Duotone Graphic (雙色設計), Limited Color Palette (限制配色), High Contrast Colors (高對比色), Color Blocking (色塊構成)
@@ -266,10 +266,12 @@ async def generate_prompt(req: Request):
 
                     # 加上固定 prompt 樣板
                     prompt = f"""
-                    A vertical A4 layout real estate poster.
-                    The scene should be styled as: {idea}
-                    The composition must leave clean space for text at the top and bottom.
-                    No text, no logo, no letters. Just the scene with a clear visual focus.
+                    A flat graphic design illustration in vertical A4 layout.
+                    No perspective, no shadows, no 3D effects.
+                    Use a paper-cut style or flat illustration style.
+                    Keep it minimal and centered. Include generous margin space for text and icons.
+                    No text, no logo, no UI elements.
+                    Color tone: pastel or earthy palette.
                     """.strip()
 
                     print("[Final Prompt to DALL·E]", prompt)
