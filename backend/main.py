@@ -263,20 +263,21 @@ async def generate_prompt(req: Request):
                     圖片需為 A4 尺寸直式排版，有主體建築（現代住宅、公寓、街景）置中，周圍乾淨、可加文字。風格應簡約、寫實、有柔和自然光。
                     不要出現任何文字、UI、LOGO、裝飾框。
 
-                    【光照效果】
-                    Soft lighting (柔光), Hard lighting (硬光), Backlighting (逆光), Side lighting (側光), Silhouette (剪影), Diffused light (擴散光), Spotlight (聚光), Rim lighting (邊光), Ambient lighting (環境光), Tyndall Effect (泰因達爾效應), Rayleigh Scattering (瑞利散射), God Rays / Crepuscular Rays (耶穌光/暮光射線), Bokeh (散景), Caustics (焦散效果), Chiaroscuro (明暗對比), Gobo Lighting (戈博照明), Halo Effect (光暈效果), Golden hour (黃金時刻)
+                    【插畫與風格類型】
+                    Flat Illustration (扁平插畫), Watercolor Illustration (水彩插畫), Vector Art (向量圖風), Paper-cut Style (紙雕風格), Collage Style (拼貼風), Editorial Illustration (編輯插畫), Isometric Design (等距構圖), Retro Graphic Design (復古平面設計), Mid-century Modern (中世紀現代風), Japanese Minimalist (日系極簡), Scandinavian Style (北歐風格), Children’s Book Illustration (童書插畫風), Line Art (線條插畫), Cutout Shapes (剪紙構成)
 
                     【色彩色調】
-                    Saturated (飽和), Desaturated (去飽和), High Contrast (高對比度), Low Contrast (低對比度), Vibrant (鮮豔), Muted (柔和), Warm Tones (暖色調), Cool Tones (冷色調), Monochromatic (單色調), Duotone (雙色調), Sepia (棕褐色調), Cross Processing (交叉沖印), HDR Toning (HDR調色), Tint (色調添加), Lomo Effect (LOMO效果), Bleach Bypass (漂白繞過), Cyanotype (藍印法), Grain / Film Grain (顆粒感/膠片顆粒), Analog (類比效果)
-
-                    【渲染與質感】
-                    Polaroid Effect (拍立得效果), Octane Render (Octane渲染器), 4K Resolution (4K解析度), Texture Mapping (紋理映射), HDR (High Dynamic Range, 高動態範圍), Matte Painting (數碼彩繪), Glossy Finish (光澤表面), Roughness / Bump Mapping (粗糙度/凸起映射), Cinema 4D (C4D), Blender (混合器), Maya, Arnold Renderer (阿諾德渲染器), V-Ray (V-Ray渲染器), Substance Painter (Substance繪畫器), Quixel Mixer (Quixel混合器), Houdini (胡迪尼)
-                    
+                    Muted Colors (柔和色系), Pastel Tones (粉彩色調), Earthy Tones (大地色系), Warm Palette (暖色系), Cool Palette (冷色系), Monochrome Design (單色設計), Duotone Graphic (雙色設計), Limited Color Palette (限制配色), High Contrast Colors (高對比色), Color Blocking (色塊構成)
+                                        
                     【構圖技巧與方法】
-                    Rule of Thirds (三分法則), Leading Lines (引導線), Framing (框架法), Symmetry and Patterns (對稱與圖案), Depth of Field (景深), Negative Space (負空間), Golden Ratio (黃金比例), Focus on Eye Level (注視點層次), Diagonal Composition (對角線構圖), Juxtaposition (並置), Point of View (視點), Color Contrast (色彩對比), Isolation (孤立), S-Curve (S型曲線), Frame Within a Frame (框中框), Dynamic Tension (動態張力), Balance (平衡), Repetition (重複), Vanishing Point (消失點), Selective Focus (選擇性對焦), Symmetry and Asymmetry (對稱與不對稱), High Angle and Low Angle (高角度與低角度)
+                    Centered Composition (中心構圖), Symmetry & Asymmetry (對稱與非對稱), Negative Space Usage (負空間運用), Grid-based Layout (網格系統排版), Focal Object Emphasis (視覺焦點集中), Repetition of Shapes (形狀重複), Framing with Shapes (幾何框架構圖), Abstract Geometric Layout (幾何抽象構圖), Minimalist Structure (極簡結構), Layered Cutout Composition (分層紙雕構圖), Organic Flow Composition (有機流動構圖)
 
                     【構圖技巧與視角】
-                    Bird's-eye view (鳥瞰圖), Aerial view (空拍視角), First-person view (第一人稱視角), Third-person view (第三人稱視角), Front (正面視角), Side (側面視角), Top-down (俯視視角), Close-up (近距離拍攝), Medium shot (中距離拍攝), Wide shot (遠距離拍攝), Wide-angle lens (廣角鏡頭), Telephoto lens (長焦鏡頭), Fisheye lens (魚眼鏡頭), Narrow field of view (窄視野), Wide field of view (寬視野), One-point perspective (一點透視), Two-point perspective (兩點透視), Three-point perspective (三點透視)
+                    Top-down View (俯視構圖), Flat Lay Design (平鋪構圖), Front View (正面構圖), Isometric Perspective (等距視角), Center-aligned View (置中構圖), Symmetrical Balance (視覺平衡), Minimal Depth (無透視層次), Single Object Focus (單物主角)
+
+                    【附加風格提示（可混搭）】
+                    No Text, No Letters, No Logos (無文字、無字母、無標誌), Poster Composition (海報感排版), Flyer Proportions (傳單比例), Clean Background (淨白或純色背景), Design for Print (印刷設計用途), Soft Texture Overlay (柔和紋理疊加), High Resolution Illustration (高解析插畫)
+
                     
                     請注意：生成的 prompt 最終會用於設計房仲海報，畫面要適合作為廣告主視覺，建議避免過度抽象或無主體的構圖。
                     """
