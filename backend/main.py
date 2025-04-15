@@ -132,31 +132,6 @@ async def generate_prompt(req: Request):
         # 更新 image_url 為 local view-image API
         data["image_url"] = f"https://epson-hey-echo.onrender.com/view-image/{image_filename}"
         
-    #     #處理圖片url
-    #     image_url = data.get("image_url")
-    #     if image_url in [None, "", "undefined"]:
-    #         image_url = None
-    #     print("[原始 image_url]", image_url)
-        
-    #     if image_url and isinstance(image_url, str):
-    #         if image_url.startswith("undefined"):
-    #             # 去除undefined
-    #             image_filename = image_url.replace("undefined", "")
-    #             print(f"[INFO] image_url，從{image_url} 到 {image_filename}")
-    #         else:
-    #             image_filename = image_url.split("/")[-1] if "/" in image_url else image_url
-                
-    #         # 檢查文件是否存在
-    #         image_path = os.path.join(UPLOAD_DIR, image_filename)
-    #         print(f"[INFO] 檢查除片文件: {image_path}, 存在: {os.path.exists(image_path)}")
-            
-    #         if os.path.exists(image_path):
-    #             data["image_url"] = f"https://epson-hey-echo.onrender.com/view-image/{image_filename}"
-    #             print(f"[INFO] 更新image_url為: {data['image_url']}")
-    #         else:
-    #             print(f"[ERROR] 圖片文件不存在: {image_path}")
-    #             return JSONResponse(content={"error": "圖片文件不存在"}, status_code=404)
-
         # Step 1: 與Gemini對話
         combined_text = ""
         for msg in messages:
