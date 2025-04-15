@@ -182,10 +182,6 @@ async def generate_prompt(req: Request):
                 except:
                     font_h1 = font_h2 = font_cta = ImageFont.load_default()
 
-                # draw.text((80, 60), title, font=font_h1, fill="#F8F1D7")
-                # draw.text((80, height * 0.75 + 40), subtitle, font=font_h2, fill="#264432")
-                # draw.text((80, height * 0.75 + 120), cta, font=font_cta, fill="#264432")
-
                 # 儲存圖片
                 fileName = f"{uuid.uuid4().hex}.png"
                 filepath = os.path.join(UPLOAD_DIR, fileName)
@@ -229,30 +225,41 @@ async def generate_prompt(req: Request):
                 # Step 2: 使用 GPT-4 轉換為 prompt
                 try:
                     system_msg = """
-                    你是一位熟悉房仲廣告與建築攝影的圖像提示詞工程師，根據輸入內容撰寫英文 prompt，供 DALL·E 生成海報背景。
+                    # 你是一位熟悉房仲廣告與建築攝影的圖像提示詞工程師，根據輸入內容撰寫英文 prompt，供 DALL·E 生成海報背景。
                     
-                    圖片需求：
-                    - A4 尺寸、直式構圖
-                    - 無文字、LOGO、裝飾元素
+                    # 圖片需求：
+                    # - A4 尺寸、直式構圖
+                    # - 無文字、LOGO、裝飾元素
 
-                    請從以下分類中，各選擇 1-2 種風格，並以逗號句式組成一段描述，供 DALL·E 使用：
-                    【插畫與風格類型】
-                    Flat Illustration (扁平插畫), Watercolor Illustration (水彩插畫), Vector Art (向量圖風), Paper-cut Style (紙雕風格), Collage Style (拼貼風), Editorial Illustration (編輯插畫), Isometric Design (等距構圖), Retro Graphic Design (復古平面設計), Mid-century Modern (中世紀現代風), Japanese Minimalist (日系極簡), Scandinavian Style (北歐風格), Children’s Book Illustration (童書插畫風), Line Art (線條插畫), Cutout Shapes (剪紙構成),editorial print design(印刷設計)
+                    # 請從以下分類中，各選擇 1-2 種風格，並以逗號句式組成一段描述，供 DALL·E 使用：
+                    # 【插畫與風格類型】
+                    # Flat Illustration (扁平插畫), Watercolor Illustration (水彩插畫), Vector Art (向量圖風), Paper-cut Style (紙雕風格), Collage Style (拼貼風), Editorial Illustration (編輯插畫), Isometric Design (等距構圖), Retro Graphic Design (復古平面設計), Mid-century Modern (中世紀現代風), Japanese Minimalist (日系極簡), Scandinavian Style (北歐風格), Children’s Book Illustration (童書插畫風), Line Art (線條插畫), Cutout Shapes (剪紙構成),editorial print design(印刷設計)
 
-                    【色彩色調】
-                    Muted Colors (柔和色系), Pastel Tones (粉彩色調), Earthy Tones (大地色系), Warm Palette (暖色系), Cool Palette (冷色系), Monochrome Design (單色設計), Duotone Graphic (雙色設計), Limited Color Palette (限制配色), High Contrast Colors (高對比色), Color Blocking (色塊構成)
+                    # 【色彩色調】
+                    # Muted Colors (柔和色系), Pastel Tones (粉彩色調), Earthy Tones (大地色系), Warm Palette (暖色系), Cool Palette (冷色系), Monochrome Design (單色設計), Duotone Graphic (雙色設計), Limited Color Palette (限制配色), High Contrast Colors (高對比色), Color Blocking (色塊構成)
                                         
-                    【構圖技巧與方法】
-                    Centered Composition (中心構圖), Symmetry & Asymmetry (對稱與非對稱), Negative Space Usage (負空間運用), Grid-based Layout (網格系統排版), Focal Object Emphasis (視覺焦點集中), Repetition of Shapes (形狀重複), Framing with Shapes (幾何框架構圖), Abstract Geometric Layout (幾何抽象構圖), Minimalist Structure (極簡結構), Layered Cutout Composition (分層紙雕構圖), Organic Flow Composition (有機流動構圖)
+                    # 【構圖技巧與方法】
+                    # Centered Composition (中心構圖), Symmetry & Asymmetry (對稱與非對稱), Negative Space Usage (負空間運用), Grid-based Layout (網格系統排版), Focal Object Emphasis (視覺焦點集中), Repetition of Shapes (形狀重複), Framing with Shapes (幾何框架構圖), Abstract Geometric Layout (幾何抽象構圖), Minimalist Structure (極簡結構), Layered Cutout Composition (分層紙雕構圖), Organic Flow Composition (有機流動構圖)
 
-                    【構圖技巧與視角】
-                    Top-down View (俯視構圖), Flat Lay Design (平鋪構圖), Front View (正面構圖), Isometric Perspective (等距視角), Center-aligned View (置中構圖), Symmetrical Balance (視覺平衡), Minimal Depth (無透視層次), Single Object Focus (單物主角)
+                    # 【構圖技巧與視角】
+                    # Top-down View (俯視構圖), Flat Lay Design (平鋪構圖), Front View (正面構圖), Isometric Perspective (等距視角), Center-aligned View (置中構圖), Symmetrical Balance (視覺平衡), Minimal Depth (無透視層次), Single Object Focus (單物主角)
 
-                    【附加風格提示（可混搭）】
-                    No Text, No Letters, No Logos (無文字、無字母、無標誌), Poster Composition (海報感排版), Flyer Proportions (傳單比例), Clean Background (淨白或純色背景), Design for Print (印刷設計用途), Soft Texture Overlay (柔和紋理疊加), High Resolution Illustration (高解析插畫)
+                    # 【附加風格提示（可混搭）】
+                    # No Text, No Letters, No Logos (無文字、無字母、無標誌), Poster Composition (海報感排版), Flyer Proportions (傳單比例), Clean Background (淨白或純色背景), Design for Print (印刷設計用途), Soft Texture Overlay (柔和紋理疊加), High Resolution Illustration (高解析插畫)
 
                     
-                    請注意：生成的 prompt 最終會用於設計平面海報，畫面要適合作為廣告主視覺，建議避免過度抽象或無主體的構圖。
+                    # 請注意：生成的 prompt 最終會用於設計平面海報，畫面要適合作為廣告主視覺，建議避免過度抽象或無主體的構圖。
+                    你是一位平面設計專家，擅長撰寫 DALL·E 圖像生成提示詞，用於產出單一主圖的扁平設計插畫（例如咖啡廳宣傳、商品視覺、房地產廣告等）。
+
+                    請根據使用者描述產出**一段英文 prompt**，用於生成一張 A4 尺寸的直式圖像，風格應符合以下條件：
+
+                    - Flat illustration / Paper-cut / Minimalist / Editorial design 風格
+                    - 不要有 3D 效果、光影或透視
+                    - 不要出現 mockup、展示板、背景紙張、陰影、邊框、配色球、UI 元素
+                    - 僅顯示主圖主體本身，構圖乾淨，四周保留排版空間
+                    - 色系建議使用：warm palette, earthy tones, or pastel tones
+
+                    請以一句完整自然的英文描述輸出 prompt，不要中英混排，不要加上任何補充說明。
                     """
                     gpt_response = client.chat.completions.create(
                         model="gpt-4-1106-preview",
