@@ -185,17 +185,17 @@ async def generate_prompt(req: Request):
                     status, image_url = upload_image_to_epsondest(filepath, fileName)
                     if status != 200 or not image_url or image_url == "null":
                         print(f"[WARNING] 上傳Epson失敗或回傳 URL 無效，使用本地 URL")
-
                         image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
                     response_messages = [
                         {"role": "assistant", "type": "text", "content": "以下為您生成的房仲宣傳單"},
                         {"role": "assistant", "type": "image", "image_url": image_url}
                     ]
                     print(f"[INFO] 上傳结果: 狀態={status}, URL={image_url}")
-                    
-                    if status != 200:
-                        print(f"[WARNING] 上傳Epson失敗，使用本地URL")
-                        image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
+                    return JSONResponse(content={"new_messages": response_messages})
+
+                    # if status != 200:
+                    #     print(f"[WARNING] 上傳Epson失敗，使用本地URL")
+                    #     image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
                 except Exception as upload_error:
                     print(f"[ERROR] 上傳到Epson失敗: {upload_error}")
                     image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
