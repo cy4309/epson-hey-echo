@@ -137,28 +137,14 @@ const Home = () => {
     fileInputRef.current.value = null;
   };
 
-  const convertUrlToFormData = async (url) => {
-    try {
-      const response = await fetch(url, { mode: "no-cors" });
-      const blob = await response.blob();
-
-      // 創建 FormData 並附加圖片
-      const formData = new FormData();
-      const fileName = url.substring(url.lastIndexOf("/") + 1); // 從 URL 提取檔案名稱
-      formData.append("file", blob, fileName);
-      return formData;
-    } catch (error) {
-      console.error("轉換 URL 為 FormData 時發生錯誤:", error);
-      throw error;
-    }
-  };
-
   const submitSelectedImage = async () => {
     const selectedImageUrl = imageSelectedToIllustrate[selectedIndex];
+    console.log(selectedImageUrl);
     try {
       // 將 URL 轉換為 FormData
-      const formData = await convertUrlToFormData(selectedImageUrl);
-
+      // const formData = await convertUrlToFormData(selectedImageUrl);
+      const formData = new FormData();
+      formData.append("image_url", selectedImageUrl);
       // 將 FormData 發送到後端
       const res = await uploadImage(formData);
       console.log("上傳圖片結果:", res);
@@ -178,6 +164,24 @@ const Home = () => {
       showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
     }
   };
+
+  // const convertUrlToFormData = async (url) => {
+  //   try {
+  //     const response = await fetch(url);
+  //     const blob = await response.blob();
+
+  //     const formData = new FormData();
+  //     const fileName = url.substring(url.lastIndexOf("/") + 1); // 從 URL 提取檔案名稱
+  //     formData.append("file", blob, fileName);
+  //     for (const [key, value] of formData.entries()) {
+  //       console.log(`${key}:`, value);
+  //     }
+  //     return formData;
+  //   } catch (error) {
+  //     console.error("轉換 URL 為 FormData 時發生錯誤:", error);
+  //     throw error;
+  //   }
+  // };
 
   const submitFile = async () => {
     if (!textContent || !fontSize) {
