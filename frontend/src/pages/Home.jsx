@@ -110,6 +110,12 @@ const Home = () => {
         .filter((msg) => msg.type === "image")
         .map((msg) => msg.image_url);
       setImageSelectedToIllustrate(imageUrls);
+
+      // Joyce測試自動開啟填表單流程
+      if (res.next_step === "await_flyer_info" && res.image_filename) {
+        setFileName(res.image_filename);
+        setIsOpenForm(true);
+      }
     } catch (err) {
       console.error(err);
       showSwal({ isSuccess: false, title: `對話失敗，請稍後再試!` });

@@ -191,7 +191,12 @@ async def generate_prompt(req: Request):
                         {"role": "assistant", "type": "image", "image_url": image_url}
                     ]
                     print(f"[INFO] 上傳结果: 狀態={status}, URL={image_url}")
-                    return JSONResponse(content={"new_messages": response_messages})
+                    # return JSONResponse(content={"new_messages": response_messages})
+                    return JSONResponse(content={
+                        "new_messages": response_messages,
+                        "image_filename": fileName,
+                        "next_step": "await_flyer_info"
+                    })
 
                     # if status != 200:
                     #     print(f"[WARNING] 上傳Epson失敗，使用本地URL")
