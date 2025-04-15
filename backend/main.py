@@ -320,36 +320,35 @@ async def generate_prompt(req: Request):
 
 # API ：上傳圖片
 @app.post("/upload_image")
-async def upload_image(file: UploadFile = File(...)):
-    file_extension = file.filename.split(".")[-1].lower()
-    if file_extension not in ["png", "jpg", "jpeg"]:
-        return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
-    file_name = f"{uuid.uuid4().hex}.{file_extension}"
-    file_path = os.path.join(UPLOAD_DIR, file_name)
-    
-    # #驗證圖像
-    # try:
-    #     contents = await file.read()
-    #     image = PILImage.open(io.BytesIO(contents))
-    #     image.verify()  # 這個會拋出錯誤如果不是合法圖片
-    # except UnidentifiedImageError:
-    #     print(f"[ERROR] 上傳失敗：無法識別圖片 {file.filename}")
-    #     return JSONResponse(content={"error": "圖片格式錯誤或損毀，請重新上傳"}, status_code=400)
-    # except Exception as e:
-    #     print(f"[ERROR] 驗證圖片時出錯: {e}")
-    #     return JSONResponse(content={"error": "圖片上傳異常，請稍後再試"}, status_code=500)
-    
-    with open(file_path, "wb") as f:
-        f.write(await file.read())
-        # f.write(contents)
+async def upload_image(file: UploadFile = File(None), image_url: str = Form(None)):
+    if file:
+        file_extension = file.filename.split(".")[-1].lower()
+        if file_extension not in ["png", "jpg", "jpeg"]:
+            return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
+        file_name = f"{uuid.uuid4().hex}.{file_extension}"
+        file_path = os.path.join(UPLOAD_DIR, file_name)
         
-    return JSONResponse(
-        content={
-            "message": "圖片上傳成功",
-            "image_url": f"https://epson-hey-echo.onrender.com/view-image/{file_name}",
-            "filename": file_name,
-            "code": 200
+        with open(file_path, "wb") as f:
+            f.write(await file.read())
+            
+        return JSONResponse(
+            content={
+                "message": "圖片上傳成功",
+                "image_url": f"https://epson-hey-echo.onrender.com/view-image/{file_name}",
+                "filename": file_name,
+                "code": 200
+                })
+    elif image_url:
+        file_name = image_url.split("/")[-1] 
+        print("[INFO] submitSelectedImage 傳來的圖片 URL:", image_url)
+        return JSONResponse(
+            content={
+                "message": "我已收到你選擇的圖片",
+                "filename": file_name,
+                "code": 200
             })
+    else:
+        return JSONResponse(content={"error": "請上傳圖片或提供圖片 URL"}, status_code=400)
 
 @app.get("/view-image/{file_name}")
 async def view_image(file_name: str):
