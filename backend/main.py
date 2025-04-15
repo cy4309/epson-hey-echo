@@ -10,8 +10,7 @@ import google.generativeai as genai
 from PIL import Image as PILImage, ImageDraw, ImageFont
 import uuid,os,io,re,requests
 
-from flyer.flyer_generator import generate_real_flyer
-from flyer.flyer_generator import generate_flyer_from_talk
+from flyer_generator import generate_real_flyer,generate_flyer_from_talk
 
 import os, sys
 print("CWD =", os.getcwd())
