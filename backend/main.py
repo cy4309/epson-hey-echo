@@ -265,11 +265,12 @@ async def generate_prompt(req: Request):
                     print("[GPT refined idea]", idea)
 
                     # 加上固定 prompt 樣板
-                    prompt = """
-                    Centered composition with clean empty margins. 
-                    No text, no UI.
-                    Only the illustration itself on a plain background.
-                    """.strip()
+                    # prompt = """
+                    # A vertical A4 real estate poster background layout.
+                    # Centered composition with clean empty margins. 
+                    # No text, no UI.
+                    # Only the illustration itself on a plain background.
+                    # """.strip()
 
                     print("[Final Prompt to DALL·E]", prompt)
                 except Exception as gpt_error:
