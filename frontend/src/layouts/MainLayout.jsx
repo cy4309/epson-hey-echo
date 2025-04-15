@@ -7,6 +7,7 @@ const MainLayout = () => {
   // useVh();
   return (
     <div className="w-full min-h-screen flex flex-col justify-center items-center bg-white text-black dark:bg-primary dark:text-white">
+      {/* wrap */}
       {/* h-[100dvh] */}
       <Header />
       {/* <main className="p-4 w-full flex-grow flex flex-col justify-center items-center"> */}

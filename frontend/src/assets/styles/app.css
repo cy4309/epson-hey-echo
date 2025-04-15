@@ -5,6 +5,11 @@ body {
   /* color: #374151; */
 }
 
+/* .wrap {
+  height: calc(var(--vh, 1vh) * 100);
+  max-height: -webkit-fill-available;
+} */
+
 .loader {
   width: fit-content;
   font-weight: bold;

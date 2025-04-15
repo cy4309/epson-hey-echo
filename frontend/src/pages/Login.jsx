@@ -12,16 +12,22 @@ const Login = () => {
   const navigate = useNavigate();
   const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
   // const modelUrl = "/picbox3.glb";
-  const modelUrl = "/Robot_To_C.glb";
+  // const modelUrl = "/Robot_To_C.glb";
+  // const modelUrl = "/Robot_To_C_250415_01.glb";
+  // const modelUrl = "/Robot_To_C_250415_02.glb";
+  const modelUrl = "/Robot_To_C_250415_02_noGlass.glb";
 
-  // {picboxAni: "picbox-ani", Default: "Default", Sad: "Sad"}
+  // {picboxAni: "picbox-ani", Default: "Default", Sad: "Sad, Bored: "Bored", Dance: "Dance", Thinking: "Thinking"}
   const [animationName, setAnimationName] = useState("");
 
   useEffect(() => {
-    if (localStorage.getItem("darkMode") === "true") {
-      setAnimationName("Sad");
-    } else {
-      setAnimationName("Default");
+    if (localStorage.getItem("darkMode") === "false") {
+      // setAnimationName("picboxAni");
+      // setAnimationName("Default");
+      // setAnimationName("Sad");
+      // setAnimationName("Bored");
+      // setAnimationName("Dance");
+      setAnimationName("Thinking");
     }
   }, [animationName]);
 
@@ -92,10 +98,11 @@ const Login = () => {
             outputColorSpace: SRGBColorSpace,
           }}
           camera={{
-            fov: 3,
+            fov: 1,
             near: 0.1,
             far: 500,
-            position: [1, 12, 20],
+            // position: [1, 12, 20],
+            position: [1, 48, 72],
           }}
           onCreated={() => setIsCanvasLoaded(true)}
         >

@@ -1,7 +1,7 @@
 import BaseButton from "@/components/BaseButton";
 import { useDispatch } from "react-redux";
 import { toggleDarkMode } from "@/stores/features/styleSlice";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { SunOutlined, LogoutOutlined } from "@ant-design/icons";
 // import { CaretLeftOutlined } from "@ant-design/icons";
 // import Login from "@/containers/Login";
@@ -13,10 +13,6 @@ import picboxAvatar from "@/assets/images/picbox-avatar.png";
 const Nav = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  // const location = useLocation();
-  // const isHomePage = location.pathname === "/";
-  // const [isLoginOpen, setIsLoginOpen] = useState(false);
-  // const isAuthenticated = localStorage.getItem("userName");
 
   const [openMenu, setOpenMenu] = useState(false);
 

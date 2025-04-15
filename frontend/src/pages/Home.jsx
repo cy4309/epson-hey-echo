@@ -33,7 +33,7 @@ const Home = () => {
   const [imageSelectedToIllustrate, setImageSelectedToIllustrate] = useState([
     "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
     "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
-    // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png"
+    "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
   ]);
   // console.log(imageSelectedToIllustrate);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -343,11 +343,14 @@ const Home = () => {
       {isGenerationCompleted && (
         <div className="p-4 w-full max-w-4xl mx-auto border rounded-xl">
           <h2 className="text-center">Which one do you like?</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-center items-center">
+          <div className="w-full flex flex-wrap justify-center items-center">
+            {/* imageSelectedToIllustrate.length === 1
+                ? "flex justify-center items-center border-blue-500 border-2"
+                : "grid grid-cols-2 sm:grid-cols-2 gap-4 justify-center items-center border-yellow-500 border-2" */}
             {imageSelectedToIllustrate.map((imageUrl, index) => (
               <div
                 key={index}
-                className={`rounded-xl w-full max-w-sm ${
+                className={`rounded-xl w-2/3 ${
                   selectedIndex === index ? "bg-green-500" : "bg-red-500"
                 }`}
                 onClick={() => setSelectedIndex(index)}
@@ -359,18 +362,20 @@ const Home = () => {
                 />
               </div>
             ))}
-            {/* </div> */}
-            <BaseButton
-              className="my-4"
-              onClick={() => setIsGenerationCompleted((prev) => !prev)}
-            >
-              <ArrowLeftOutlined />
-              <span className="ml-2">Back</span>
-            </BaseButton>
-            <BaseButton onClick={submitSelectedImage}>
-              <ArrowRightOutlined />
-              <span className="ml-2">Next</span>
-            </BaseButton>
+
+            <div className="flex justify-center items-center mt-4">
+              <BaseButton
+                className="my-4"
+                onClick={() => setIsGenerationCompleted((prev) => !prev)}
+              >
+                <ArrowLeftOutlined />
+                <span className="ml-2">Back</span>
+              </BaseButton>
+              <BaseButton onClick={submitSelectedImage}>
+                <ArrowRightOutlined />
+                <span className="ml-2">Next</span>
+              </BaseButton>
+            </div>
           </div>
 
           {isOpenForm && (

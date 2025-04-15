@@ -1,11 +1,11 @@
-import { useState, useRef } from "react";
-import BaseButton from "@/components/BaseButton";
-import {
-  uploadImage,
-  generateMultiplePdfs,
-} from "@/services/illustrateService";
-import { showSwal } from "@/utils/notification";
-import { Input } from "antd";
+// import { useState, useRef } from "react";
+// import BaseButton from "@/components/BaseButton";
+// import {
+//   uploadImage,
+//   generateMultiplePdfs,
+// } from "@/services/illustrateService";
+// import { showSwal } from "@/utils/notification";
+// import { Input } from "antd";
 import { useLocation } from "react-router-dom";
 
 // const Illustration = () => {
