@@ -266,15 +266,12 @@ async def generate_prompt(req: Request):
 
                     # 加上固定 prompt 樣板
                     prompt = f"""
-                    A vertical A4 real estate poster background layout. 
-                    The main subject is a modern residential building, but it should appear small in the frame, centered with generous margin around all sides. 
-                    The scene must leave clean, blank space at the top, bottom, and sides for inserting text and icons.
-                    No text, no logos, no decorations. 
-                    Do not crop the building at the edges — the subject must be framed cleanly with breathing space.
-                    Style: professional real estate photography, warm tone, soft natural light, minimal background, uncluttered street.
-                    
-                    {idea}
+                    A vertical A4 layout real estate poster.
+                    The scene should be styled as: {idea}
+                    The composition must leave clean space for text at the top and bottom.
+                    No text, no logo, no letters. Just the scene with a clear visual focus.
                     """.strip()
+
                     print("[Final Prompt to DALL·E]", prompt)
                 except Exception as gpt_error:
                     return JSONResponse(content={"error": f"GPT 錯誤：{str(gpt_error)}"}, status_code=500)
