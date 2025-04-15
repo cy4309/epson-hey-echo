@@ -377,9 +377,32 @@ async def generate_multiple_images(
             "bottomRight": (width - 140, height - 40),
         }
 
-        image_path = os.path.join(UPLOAD_DIR, image_filename)
-        if not os.path.exists(image_path):
-            return JSONResponse(content={"error": "圖片檔案不存在"}, status_code=400)
+        # image_path = os.path.join(UPLOAD_DIR, image_filename)
+        # if not os.path.exists(image_path):
+        #     return JSONResponse(content={"error": "圖片檔案不存在"}, status_code=400)
+        # 如果 image_filename 是一整串 URL，嘗試從遠端下載圖檔
+        if image_filename.startswith("http"):
+            print(f"[INFO] image_filename 是 URL: {image_filename}")
+            try:
+                response = requests.get(image_filename)
+                if response.status_code == 200:
+                    ext = image_filename.split("?")[0].split(".")[-1]
+                    tmp_filename = f"{uuid.uuid4().hex}.{ext}"
+                    image_path = os.path.join(UPLOAD_DIR, tmp_filename)
+                    with open(image_path, "wb") as f:
+                        f.write(response.content)
+                    print(f"[INFO] 已從 URL 儲存圖片為本地: {image_path}")
+                else:
+                    return JSONResponse(content={"error": "無法從 URL 取得圖片"}, status_code=400)
+            except Exception as e:
+                print(f"[ERROR] 圖片下載失敗: {e}")
+                return JSONResponse(content={"error": "圖片下載失敗"}, status_code=500)
+        else:
+            # 原本邏輯保留
+            image_path = os.path.join(UPLOAD_DIR, image_filename)
+            if not os.path.exists(image_path):
+                return JSONResponse(content={"error": "圖片檔案不存在"}, status_code=400)
+
         
         # 對結果進行更詳細的打印
         print(f"[INFO] 開始處理圖片: {image_path}")
