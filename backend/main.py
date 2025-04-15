@@ -246,7 +246,7 @@ async def generate_prompt(req: Request):
 
                         You should write prompts that sound like the following:
 
-                        "Create a vertical A4 flat illustration in a minimalist and editorial design style, featuring the exterior of a festive coffee shop decorated with Christmas ornaments and warm lights. Use a warm palette with muted earthy tones. Ensure a clean composition with ample negative space for future layout. Do not include color swatches, palettes, sample blocks, or reference panels. No mockup elements like frames, desks, or stationery."
+                        "Create a vertical A4 flat illustration in a minimalist and editorial design style, featuring the exterior of a festive coffee shop decorated with Christmas ornaments and warm lights. Use a warm palette with muted earthy tones. Ensure a clean composition with ample negative space for future layout. Do not include any color swatches, palette strips, sample color blocks, or reference bars anywhere in the image.The image should be a full-scene illustration only — no surrounding borders, no background canvas colors, and no external framing or margin graphics."
 
                         Always follow this sentence style. Describe the main subject clearly, specify visual style and color tone, and end with layout clarity instructions.
 
