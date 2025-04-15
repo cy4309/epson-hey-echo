@@ -149,60 +149,30 @@ async def generate_prompt(req: Request):
             matched = any(keyword in user_text for keyword in trigger_keywords) and (image_url)
             print("[Trigger 是否觸發]", matched,".有圖片", bool(image_url))
 
-            if matched:
-                print("[Trigger] 進入房仲海報合成功能")
+            # 產純色背景（用 Pillow 產圖）
+            width, height = 1240, 1754
+            bg_color = "#264432"
+            bottom_color = "#F8F1D7"
+            poster = PILImage.new("RGB", (width, height), bg_color)
+            draw = ImageDraw.Draw(poster)
+            draw.rectangle([0, height * 0.75, width, height], fill=bottom_color)        
 
-                # GPT 產文案
-                title = client.chat.completions.create(
-                    model="gpt-4-1106-preview",
-                    messages=[
-                        {"role": "system", "content": "你是專門設計房仲文宣的設計師。請用自然的聊天語氣，告訴我你會怎麼設計這張房仲宣傳海報，可以提到主體（像是建築物、街景）、氣氛、色調和視覺重點。簡短描述就好，不用條列。"},
-                        {"role": "user", "content": user_text}
-                    ]
-                ).choices[0].message.content.strip()
+            # 疊建築圖
+            if image_url:
+                try:
+                    fg = PILImage.open(image_path).convert("RGBA")
+                    print(f"[INFO] 成功加載圖片: {image_path}")
 
-                subtitle = client.chat.completions.create(
-                    model="gpt-4-1106-preview",
-                    messages=[
-                        {"role": "system", "content": "請補一句說明性副標（最多20字）"},
-                        {"role": "user", "content": user_text}
-                    ]
-                ).choices[0].message.content.strip()
-
-                cta = client.chat.completions.create(
-                    model="gpt-4-1106-preview",
-                    messages=[
-                        {"role": "system", "content": "請產出一段房仲廣告常用的聯絡資訊文字（例如：傅樁淵 0988-100-122）"},
-                        {"role": "user", "content": user_text}
-                    ]
-                ).choices[0].message.content.strip()
-
-                print("[文案生成]", title, subtitle, cta)
-
-                # 產純色背景（用 Pillow 產圖）
-                width, height = 1240, 1754
-                bg_color = "#264432"
-                bottom_color = "#F8F1D7"
-                poster = PILImage.new("RGB", (width, height), bg_color)
-                draw = ImageDraw.Draw(poster)
-                draw.rectangle([0, height * 0.75, width, height], fill=bottom_color)
-
-                # 疊建築圖
-                if image_url:
-                    try:
-                        fg = PILImage.open(image_path).convert("RGBA")
-                        print(f"[INFO] 成功加載圖片: {image_path}")
-
-                        # resize + paste
-                        ratio = width * 0.8 / fg.width
-                        fg_resized = fg.resize((int(fg.width * ratio), int(fg.height * ratio)))
-                        x = (width - fg_resized.width) // 2
-                        y = int(height * 0.35 - fg_resized.height / 2)
-                        poster.paste(fg_resized, (x, y), fg_resized)
-                        print("[INFO] 圖片成功合成到海报")
-                    except Exception as img_error:
-                        print(f"[ERROR] 圖片處理失败: {img_error}")
-                        return JSONResponse(content={"error": f"圖片處理失败: {str(img_error)}"}, status_code=500)
+                    # resize + paste
+                    ratio = width * 0.8 / fg.width
+                    fg_resized = fg.resize((int(fg.width * ratio), int(fg.height * ratio)))
+                    x = (width - fg_resized.width) // 2
+                    y = int(height * 0.35 - fg_resized.height / 2)
+                    poster.paste(fg_resized, (x, y), fg_resized)
+                    print("[INFO] 圖片成功合成到海报")
+                except Exception as img_error:
+                    print(f"[ERROR] 圖片處理失败: {img_error}")
+                    return JSONResponse(content={"error": f"圖片處理失败: {str(img_error)}"}, status_code=500)
 
                 # 加上文字
                 try:
@@ -212,9 +182,9 @@ async def generate_prompt(req: Request):
                 except:
                     font_h1 = font_h2 = font_cta = ImageFont.load_default()
 
-                draw.text((80, 60), title, font=font_h1, fill="#F8F1D7")
-                draw.text((80, height * 0.75 + 40), subtitle, font=font_h2, fill="#264432")
-                draw.text((80, height * 0.75 + 120), cta, font=font_cta, fill="#264432")
+                # draw.text((80, 60), title, font=font_h1, fill="#F8F1D7")
+                # draw.text((80, height * 0.75 + 40), subtitle, font=font_h2, fill="#264432")
+                # draw.text((80, height * 0.75 + 120), cta, font=font_cta, fill="#264432")
 
                 # 儲存圖片
                 fileName = f"{uuid.uuid4().hex}.png"
@@ -260,9 +230,12 @@ async def generate_prompt(req: Request):
                 try:
                     system_msg = """
                     你是一位熟悉房仲廣告與建築攝影的圖像提示詞工程師，根據輸入內容撰寫英文 prompt，供 DALL·E 生成海報背景。
-                    圖片需為 A4 尺寸直式排版，有主體建築（現代住宅、公寓、街景）置中，周圍乾淨、可加文字。風格應簡約、寫實、有柔和自然光。
-                    不要出現任何文字、UI、LOGO、裝飾框。
+                    
+                    圖片需求：
+                    - A4 尺寸、直式構圖
+                    - 無文字、LOGO、裝飾元素
 
+                    請從以下分類中，各選擇 1-2 種風格，並以逗號句式組成一段描述，供 DALL·E 使用：
                     【插畫與風格類型】
                     Flat Illustration (扁平插畫), Watercolor Illustration (水彩插畫), Vector Art (向量圖風), Paper-cut Style (紙雕風格), Collage Style (拼貼風), Editorial Illustration (編輯插畫), Isometric Design (等距構圖), Retro Graphic Design (復古平面設計), Mid-century Modern (中世紀現代風), Japanese Minimalist (日系極簡), Scandinavian Style (北歐風格), Children’s Book Illustration (童書插畫風), Line Art (線條插畫), Cutout Shapes (剪紙構成)
 
@@ -279,7 +252,7 @@ async def generate_prompt(req: Request):
                     No Text, No Letters, No Logos (無文字、無字母、無標誌), Poster Composition (海報感排版), Flyer Proportions (傳單比例), Clean Background (淨白或純色背景), Design for Print (印刷設計用途), Soft Texture Overlay (柔和紋理疊加), High Resolution Illustration (高解析插畫)
 
                     
-                    請注意：生成的 prompt 最終會用於設計房仲海報，畫面要適合作為廣告主視覺，建議避免過度抽象或無主體的構圖。
+                    請注意：生成的 prompt 最終會用於設計平面海報，畫面要適合作為廣告主視覺，建議避免過度抽象或無主體的構圖。
                     """
                     gpt_response = client.chat.completions.create(
                         model="gpt-4-1106-preview",
