@@ -352,7 +352,7 @@ async def upload_image(file: UploadFile = File(None), image_url: str = Form(None
         #測試直接將 image_url 存近upload_dir
         try:
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36'
+                "User-Agent": "Mozilla/5.0"
             }
             response = requests.get(image_url, headers=headers)
 
