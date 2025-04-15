@@ -241,13 +241,13 @@ async def generate_prompt(req: Request):
 
                     # 請從以下分類中，各選擇 1-2 種風格，並以逗號句式組成一段描述，供 DALL·E 使用：
                     # 【插畫與風格類型】
-                    # Flat Illustration (扁平插畫), Watercolor Illustration (水彩插畫), Vector Art (向量圖風), Paper-cut Style (紙雕風格), Collage Style (拼貼風), Editorial Illustration (編輯插畫), Isometric Design (等距構圖), Retro Graphic Design (復古平面設計), Mid-century Modern (中世紀現代風), Japanese Minimalist (日系極簡), Scandinavian Style (北歐風格), Children’s Book Illustration (童書插畫風), Line Art (線條插畫), Cutout Shapes (剪紙構成),editorial print design(印刷設計)
+                    # Flat Illustration (扁平插畫), Watercolor Illustration (水彩插畫), Collage Style (拼貼風), Editorial Illustration (編輯插畫), Isometric Design (等距構圖), Retro Graphic Design (復古平面設計), Mid-century Modern (中世紀現代風), Japanese Minimalist (日系極簡), Scandinavian Style (北歐風格), Children’s Book Illustration (童書插畫風),editorial print design(印刷設計)
 
                     # 【色彩色調】
-                    # Muted Colors (柔和色系), Pastel Tones (粉彩色調), Earthy Tones (大地色系), Warm Palette (暖色系), Cool Palette (冷色系), Monochrome Design (單色設計), Duotone Graphic (雙色設計), Limited Color Palette (限制配色), High Contrast Colors (高對比色), Color Blocking (色塊構成)
+                    # Muted Colors (柔和色系), Pastel Tones (粉彩色調), Earthy Tones (大地色系), Warm Palette (暖色系), Cool Palette (冷色系), Monochrome Design (單色設計), Duotone Graphic (雙色設計), Limited Color Palette (限制配色), High Contrast Colors (高對比色)
                                         
                     # 【構圖技巧與方法】
-                    # Centered Composition (中心構圖), Symmetry & Asymmetry (對稱與非對稱), Negative Space Usage (負空間運用), Grid-based Layout (網格系統排版), Focal Object Emphasis (視覺焦點集中), Repetition of Shapes (形狀重複), Framing with Shapes (幾何框架構圖), Abstract Geometric Layout (幾何抽象構圖), Minimalist Structure (極簡結構), Layered Cutout Composition (分層紙雕構圖), Organic Flow Composition (有機流動構圖)
+                    # Centered Composition (中心構圖), Symmetry & Asymmetry (對稱與非對稱), Negative Space Usage (負空間運用), Grid-based Layout (網格系統排版), Focal Object Emphasis (視覺焦點集中), Repetition of Shapes (形狀重複), Framing with Shapes (幾何框架構圖), Abstract Geometric Layout (幾何抽象構圖), Minimalist Structure (極簡結構), Organic Flow Composition (有機流動構圖)
 
                     # 【構圖技巧與視角】
                     # Top-down View (俯視構圖), Flat Lay Design (平鋪構圖), Front View (正面構圖), Isometric Perspective (等距視角), Center-aligned View (置中構圖), Symmetrical Balance (視覺平衡), Minimal Depth (無透視層次), Single Object Focus (單物主角)
