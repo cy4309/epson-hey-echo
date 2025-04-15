@@ -265,7 +265,8 @@ async def generate_prompt(req: Request):
                     print("[GPT refined idea]", idea)
 
                     # 加上固定 prompt 樣板
-                    # prompt = """
+                    prompt = idea
+                    # """
                     # A vertical A4 real estate poster background layout.
                     # Centered composition with clean empty margins. 
                     # No text, no UI.
