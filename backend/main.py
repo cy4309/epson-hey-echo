@@ -6,11 +6,12 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
 from openai import OpenAI
 from backend.s3_uploader import upload_image_to_epsondest
+from backend.flyer_generator import generate_real_flyer,generate_flyer_from_talk
+
 import google.generativeai as genai
 from PIL import Image as PILImage, ImageDraw, ImageFont
 import uuid,os,io,re,requests
 
-from flyer_generator import generate_real_flyer,generate_flyer_from_talk
 
 import os, sys
 print("CWD =", os.getcwd())

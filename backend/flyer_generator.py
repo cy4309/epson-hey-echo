@@ -75,7 +75,7 @@ async def generate_real_flyer(
         "url": f"https://epson-hey-echo.onrender.com/view-image/{file_name}"
     })
 
-@app.post("/generate_real_estate_flyer_from_talk")
+@app.post("/generate_real_flyer_from_talk")
 async def generate_flyer_from_talk(request: Request):
     data = await request.json()
     messages = data.get("messages", [])
