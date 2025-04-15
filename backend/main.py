@@ -336,6 +336,7 @@ async def upload_image(file: UploadFile = File(None), image_url: str = Form(None
                 "message": "圖片上傳成功",
                 "image_url": f"https://epson-hey-echo.onrender.com/view-image/{file_name}",
                 "filename": file_name,
+                "image_url": image_url,
                 "code": 200
                 })
     elif image_url:
