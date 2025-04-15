@@ -9,9 +9,8 @@ from reportlab.lib.utils import ImageReader
 from openai import OpenAI
 from backend.s3_uploader import upload_image_to_epsondest
 import google.generativeai as genai
-from PIL import Image as PILImage, ImageDraw, ImageFont
-import uuid,os
-import io
+from PIL import Image as PILImage, ImageDraw, ImageFont, UnidentifiedImageError
+import uuid,os,io
 
 import os, sys
 print("CWD =", os.getcwd())
@@ -348,8 +347,23 @@ async def upload_image(file: UploadFile = File(...)):
         return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
     file_name = f"{uuid.uuid4().hex}.{file_extension}"
     file_path = os.path.join(UPLOAD_DIR, file_name)
+    
+    # #驗證圖像
+    try:
+        contents = await file.read()
+        image = PILImage.open(io.BytesIO(contents))
+        image.verify()  # 這個會拋出錯誤如果不是合法圖片
+    except UnidentifiedImageError:
+        print(f"[ERROR] 上傳失敗：無法識別圖片 {file.filename}")
+        return JSONResponse(content={"error": "圖片格式錯誤或損毀，請重新上傳"}, status_code=400)
+    except Exception as e:
+        print(f"[ERROR] 驗證圖片時出錯: {e}")
+        return JSONResponse(content={"error": "圖片上傳異常，請稍後再試"}, status_code=500)
+    
     with open(file_path, "wb") as f:
-        f.write(await file.read())
+        # f.write(await file.read())
+        f.write(contents)
+        
     return JSONResponse(
         content={
             "message": "圖片上傳成功",
@@ -409,7 +423,7 @@ async def generate_multiple_images(
                 img_width, img_height = img.size
                 # 調整圖片大小以適應A4
                 scale = max(width / img_width, height / img_height)
-                adjusted_font_size = int(font_size * scale * 0.8) #調整字體大小
+                # adjusted_font_size = int(font_size * scale * 0.8) #調整字體大小
                 new_width = int(img_width * scale)
                 new_height = int(img_height * scale)
                 img_resized = img.resize((new_width, new_height))
@@ -425,7 +439,7 @@ async def generate_multiple_images(
 
                 # 載入字型
                 try:
-                    font = ImageFont.truetype("arial.ttf", adjusted_font_size)
+                    font = ImageFont.truetype("arial.ttf", font_size)
                 except Exception as font_error:
                     print(f"[WARNING] 字型載入失敗: {font_error}, 使用預設字型")
                     font = ImageFont.load_default()
