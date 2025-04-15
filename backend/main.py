@@ -401,7 +401,7 @@ async def view_image(file_name: str):
 async def generate_multiple_images(
     image_filename: str = Form(...), #檔名成稱
     content: str = Form(...), #文字內容
-    font_size: int = Form(30), #字體大小
+    font_size: int = Form(60), #字體大小
     code: int = Form(200)
 ):
     try:
