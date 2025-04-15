@@ -241,16 +241,16 @@ async def generate_prompt(req: Request):
                         - No text, logos, UI elements, mockups, shadows, or depth effects
                         - Clean composition with generous negative space for future text
                         - Colors: warm palette, earthy tones, or pastel duotone
+                        - No mockup scenes: absolutely avoid desks, frames, stationery, interior furniture, plants, or decorative layouts
+                        - Do not include color swatches, palettes, sample blocks, or reference panels
 
                         You should write prompts that sound like the following:
 
-                        "Create an A4 size vertical flat illustration in a minimalist and editorial design style, featuring a cozy modern living room interior, with a warm palette and earthy tones, ensuring a clean composition with ample space around for future text layout."
+                        "Create a vertical A4 flat illustration in a minimalist and editorial design style, featuring the exterior of a festive coffee shop decorated with Christmas ornaments and warm lights. Use a warm palette with muted earthy tones. Ensure a clean composition with ample negative space for future layout. Do not include color swatches, palettes, sample blocks, or reference panels. No mockup elements like frames, desks, or stationery."
 
-                        Always follow this sentence style. Describe the subject clearly, add color tone preference, and end with a note on clean layout and print suitability.
+                        Always follow this sentence style. Describe the main subject clearly, specify visual style and color tone, and end with layout clarity instructions.
 
-                        Now based on the user's input, write a single-sentence prompt in this tone and structure. No explanation. No extra notes.
-                        Explicitly avoid any mockup-like scene, such as desks, frames, pencils, flowers, or room setups.
-
+                        Now, based on the user’s input, write one complete sentence in this style. No explanation. No additional notes.
                         """
                     gpt_response = client.chat.completions.create(
                         model="gpt-4-1106-preview",
