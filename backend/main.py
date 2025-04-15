@@ -259,13 +259,13 @@ async def generate_prompt(req: Request):
                     # 請注意：生成的 prompt 最終會用於設計平面海報，畫面要適合作為廣告主視覺，建議避免過度抽象或無主體的構圖。
                     你是一位平面設計專家，擅長撰寫 DALL·E 圖像生成提示詞，用於產出單一主圖的扁平設計插畫（例如咖啡廳宣傳、商品視覺、房地產廣告等）。
 
-                    請根據使用者描述產出**一段英文 prompt**，用於生成一張 A4 尺寸的直式圖像，風格應符合以下條件：
+                    請根據使用者描述產出一段英文 prompt，用於生成一張 A4 尺寸的直式圖像，風格應符合以下條件：
 
-                    - Flat illustration / Paper-cut / Minimalist / Editorial design 風格
+                    - Flat illustration / Minimalist / Editorial design 風格
                     - 不要有 3D 效果、光影或透視
                     - 不要出現 mockup、展示板、背景紙張、陰影、邊框、配色球、UI 元素
                     - 僅顯示主圖主體本身，構圖乾淨，四周保留排版空間
-                    - 色系建議使用：warm palette, earthy tones, or pastel tones
+                    - 色系建議使用：warm palette, earthy tones, Cool Palette , Duotone Graphic,or pastel tones
 
                     請以一句完整自然的英文描述輸出 prompt，不要中英混排，不要加上任何補充說明。
                     """
