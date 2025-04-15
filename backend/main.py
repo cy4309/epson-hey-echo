@@ -1,16 +1,17 @@
 from fastapi import FastAPI, File, UploadFile, Form, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-# from fastapi.requests import Request
 from pydantic import BaseModel
 from reportlab.lib.pagesizes import A4
-# from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from openai import OpenAI
 from backend.s3_uploader import upload_image_to_epsondest
 import google.generativeai as genai
 from PIL import Image as PILImage, ImageDraw, ImageFont
 import uuid,os,io,re,requests
+
+from flyer.flyer_generator import generate_real_flyer
+from flyer.flyer_generator import generate_flyer_from_talk
 
 import os, sys
 print("CWD =", os.getcwd())
@@ -24,9 +25,7 @@ print("GEMINI_API_KEY:", os.getenv("GEMINI_API_KEY")[:6])
 
 app = FastAPI()
 UPLOAD_DIR = "uploads"
-# IMG_DIR = "img_files"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-# os.makedirs(IMG_DIR, exist_ok=True)
 
 #記憶Gemini 對話歷史
 chat_history = []
@@ -146,6 +145,7 @@ async def generate_prompt(req: Request):
         print("[Trigger 判斷]", has_trigger, "| 有圖片:", has_image)
         
         if has_trigger and has_image:
+            
             matched = any(keyword in user_text for keyword in trigger_keywords) and (image_url)
             print("[Trigger 是否觸發]", matched,".有圖片", bool(image_url))
 
@@ -173,14 +173,6 @@ async def generate_prompt(req: Request):
                 except Exception as img_error:
                     print(f"[ERROR] 圖片處理失败: {img_error}")
                     return JSONResponse(content={"error": f"圖片處理失败: {str(img_error)}"}, status_code=500)
-
-                # 加上文字
-                try:
-                    font_h1 = ImageFont.truetype("arial.ttf", 72)
-                    font_h2 = ImageFont.truetype("arial.ttf", 40)
-                    font_cta = ImageFont.truetype("arial.ttf", 36)
-                except:
-                    font_h1 = font_h2 = font_cta = ImageFont.load_default()
 
                 # 儲存圖片
                 fileName = f"{uuid.uuid4().hex}.png"
@@ -212,14 +204,25 @@ async def generate_prompt(req: Request):
                     response = model.generate_content("請用簡短文字介紹這張房仲海報的設計思路和特色，不超過50字")
                     idea_description = response.text.strip()
                     print("[Gemini response]", idea_description)
-                    
+                    # 測試引導
                     response_messages = [
-                    {"role": "assistant", "type": "text", "content": "以下為您生成的房仲宣傳單"},
-                    {"role": "assistant", "type": "image", "image_url": image_url}
+                        {"role": "assistant", "type": "image", "image_url": image_url},
+                        {"role": "assistant", "type": "text", "content": "這是建築圖片底圖，請補上主標題、坪數、總價與聯絡資訊，我會幫您合成完整房仲宣傳單！"}
                     ]
-                return JSONResponse(content={
-                    "new_messages": response_messages
-                })
+
+                    return JSONResponse(content={
+                        "new_messages": response_messages,
+                        "image_filename": image_filename,
+                        "next_step": "await_flyer_info"
+                    })
+
+                #     response_messages = [
+                #     {"role": "assistant", "type": "text", "content": "以下為您生成的房仲宣傳單"},
+                #     {"role": "assistant", "type": "image", "image_url": image_url}
+                #     ]
+                # return JSONResponse(content={
+                #     "new_messages": response_messages
+                # })
         elif user_text:
                 print("[Fallback] 沒有圖片或不合成，進入 DALL·E 圖像生成邏輯")
                 # Step 2: 使用 GPT-4 轉換為 prompt
@@ -317,8 +320,6 @@ async def generate_prompt(req: Request):
         print("[ERROR] generate-image:", e)
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-
-# API ：上傳圖片
 @app.post("/upload_image")
 async def upload_image(file: UploadFile = File(None), image_url: str = Form(None)):
     if file:
@@ -350,7 +351,7 @@ async def upload_image(file: UploadFile = File(None), image_url: str = Form(None
     #         })
     # else:
     #     return JSONResponse(content={"error": "請上傳圖片或提供圖片 URL"}, status_code=400)
-        #測試直接將 image_url 存近upload_dir
+        #直接將 image_url 存近upload_dir
         try:
             headers = {
                 "User-Agent": "Mozilla/5.0"
