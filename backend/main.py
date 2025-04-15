@@ -265,13 +265,13 @@ async def generate_prompt(req: Request):
                     print("[GPT refined idea]", idea)
 
                     # 加上固定 prompt 樣板
-                    prompt = f"""
-                    A flat graphic design illustration in vertical A4 layout.
-                    No perspective, no shadows, no 3D effects.
-                    Use a paper-cut style or flat illustration style.
-                    Keep it minimal and centered. Include generous margin space for text and icons.
-                    No text, no logo, no UI elements.
-                    Color tone: pastel or earthy palette.
+                    prompt = """
+                    A flat paper-cut illustration of a seaside scene with palm trees, rocks, and a calm sea.
+                    Style: paper-cut, flat illustration.
+                    Color tone: warm pastel tones, minimal color palette.
+                    Centered composition with clean empty margins. 
+                    No text, no UI, no border, no background, no color palettes, no mockups. 
+                    Only the illustration itself on a plain background.
                     """.strip()
 
                     print("[Final Prompt to DALL·E]", prompt)
