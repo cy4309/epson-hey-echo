@@ -249,6 +249,8 @@ async def generate_prompt(req: Request):
                         Always follow this sentence style. Describe the subject clearly, add color tone preference, and end with a note on clean layout and print suitability.
 
                         Now based on the user's input, write a single-sentence prompt in this tone and structure. No explanation. No extra notes.
+                        Explicitly avoid any mockup-like scene, such as desks, frames, pencils, flowers, or room setups.
+
                         """
                     gpt_response = client.chat.completions.create(
                         model="gpt-4-1106-preview",
