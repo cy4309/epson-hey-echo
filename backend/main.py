@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Form, Request,Body
+from fastapi import FastAPI, File, UploadFile, Form, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 # from fastapi.requests import Request
@@ -10,7 +10,7 @@ from openai import OpenAI
 from backend.s3_uploader import upload_image_to_epsondest
 import google.generativeai as genai
 from PIL import Image as PILImage, ImageDraw, ImageFont
-import uuid,os,io,requests
+import uuid,os,io,re
 
 import os, sys
 print("CWD =", os.getcwd())
@@ -96,42 +96,34 @@ async def test_gpt():
 async def generate_prompt(req: Request):
     try:
         data = await req.json()
-        messages = data.get("messages", [])
         print("[DEBUG] raw body:", data)
-
-        image_url = data.get("image_url")
-        image_filename = None
-        if image_url and isinstance(image_url, str):
-            if image_url.startswith("http"):
-                try:
-                    response = requests.get(image_url)
-                    if response.status_code == 200:
-                        suffix = image_url.split(".")[-1].split("?")[0]
-                        image_filename = f"{uuid.uuid4().hex}.{suffix}"
-                        image_path = os.path.join(UPLOAD_DIR, image_filename)
-                        with open(image_path, "wb") as f:
-                            f.write(response.content)
-                        print(f"[INFO] 已從 {image_url} 快取圖片為: {image_filename}")
-                    else:
-                        print(f"[ERROR] 外部圖片下載失敗: {image_url}")
-                        return JSONResponse(content={"error": "外部圖片下載失敗"}, status_code=400)
-                except Exception as download_err:
-                    print(f"[ERROR] 圖片下載錯誤: {download_err}")
-                    return JSONResponse(content={"error": "圖片下載錯誤"}, status_code=500)
-            else:
-                # 原本邏輯：處理內部已存在檔案
-                image_filename = image_url.replace("undefined", "") if image_url.startswith("undefined") else image_url.split("/")[-1]
-                image_path = os.path.join(UPLOAD_DIR, image_filename)
-                if not os.path.exists(image_path):
-                    print(f"[ERROR] 圖片文件不存在: {image_path}")
-                    return JSONResponse(content={"error": "圖片文件不存在"}, status_code=404)
-        else:
-            print(f"[ERROR] 無效的 image_url: {image_url}")
-            return JSONResponse(content={"error": "無效的圖片網址"}, status_code=400)
-
-        # 更新 image_url 為 local view-image API
-        data["image_url"] = f"https://epson-hey-echo.onrender.com/view-image/{image_filename}"
+        messages = data.get("messages", [])
         
+        #處理圖片url
+        image_url = data.get("image_url")
+        if image_url in [None, "", "undefined"]:
+            image_url = None
+        print("[原始 image_url]", image_url)
+        
+        if image_url and isinstance(image_url, str):
+            if image_url.startswith("undefined"):
+                # 去除undefined
+                image_filename = image_url.replace("undefined", "")
+                print(f"[INFO] image_url，從{image_url} 到 {image_filename}")
+            else:
+                image_filename = image_url.split("/")[-1] if "/" in image_url else image_url
+                
+            # 檢查文件是否存在
+            image_path = os.path.join(UPLOAD_DIR, image_filename)
+            print(f"[INFO] 檢查除片文件: {image_path}, 存在: {os.path.exists(image_path)}")
+            
+            if os.path.exists(image_path):
+                data["image_url"] = f"https://epson-hey-echo.onrender.com/view-image/{image_filename}"
+                print(f"[INFO] 更新image_url為: {data['image_url']}")
+            else:
+                print(f"[ERROR] 圖片文件不存在: {image_path}")
+                return JSONResponse(content={"error": "圖片文件不存在"}, status_code=404)
+
         # Step 1: 與Gemini對話
         combined_text = ""
         for msg in messages:
@@ -364,29 +356,6 @@ async def view_image(file_name: str):
     if not os.path.exists(file_path):
         return JSONResponse(content={"error": "File not found"}, status_code=404)
     return FileResponse(file_path, media_type="image/jpeg")
-
-#轉存前端傳來的圖片
-@app.post("/cache-image")
-async def cache_image(image_url: str = Body(...)):
-    try:
-        response = requests.get(image_url)
-        if response.status_code == 200:
-            if response.status_code != 200:
-                return JSONResponse(content={"error": "圖片下載失敗"}, status_code=400)
-        
-        suffix = image_url.split(".")[-1].split("?")[0]
-        file_name = f"{uuid.uuid4().hex}.{suffix}"
-        file_path = os.path.join(UPLOAD_DIR, file_name)
-
-        with open(file_path, "wb") as f:
-            f.write(response.content)
-        
-        return {
-            "message": "圖片已快取成功",
-            "image_filename": file_name
-        }
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 # API ：生成五張圖，每個應用不同排版方式
 @app.post("/generate-multiple-images")
