@@ -7,6 +7,7 @@ import { Leva } from "leva";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import Scene from "@/containers/login/geometry/Scene";
 import { motion } from "framer-motion";
+// import bored from "@/assets/images/bored.gif";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -16,8 +17,6 @@ const Login = () => {
   // const modelUrl = "/Robot_To_C_250415_01.glb";
   // const modelUrl = "/Robot_To_C_250415_02.glb";
   const modelUrl = "/Robot_To_C_250415_02_noGlass.glb";
-
-  // {picboxAni: "picbox-ani", Default: "Default", Sad: "Sad, Bored: "Bored", Dance: "Dance", Thinking: "Thinking"}
   const [animationName, setAnimationName] = useState("");
 
   useEffect(() => {
@@ -69,6 +68,9 @@ const Login = () => {
         <span>Home Printing,</span>
         <span>O in one - ECHO!</span>
       </div> */}
+
+      {/* <img src={bored} alt="" /> */}
+
       <div
         className={`w-full h-[50vh] relative ${
           isCanvasLoaded ? "opacity-100" : "opacity-0"
@@ -109,6 +111,7 @@ const Login = () => {
           <Scene modelUrl={modelUrl} animationName={animationName} />
         </Canvas>
       </div>
+
       {/* <div className="absolute inset-0 flex flex-col justify-center items-center space-y-4"> */}
       <BaseButton
         className="w-2/3"

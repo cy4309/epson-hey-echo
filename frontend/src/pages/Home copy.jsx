@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Input } from "antd";
 import { useNavigate } from "react-router-dom";
 import {
@@ -17,8 +17,7 @@ import {
   uploadImage,
   generateMultiplePdfs,
 } from "@/services/illustrateService";
-import { motion, useAnimation } from "framer-motion";
-import picboxAvatar from "@/assets/images/picbox-avatar.png";
+// import { motion } from "framer-motion";
 
 const Home = () => {
   const S3_BASE_URL = import.meta.env.VITE_S3_BASE_URL;
@@ -35,40 +34,15 @@ const Home = () => {
     "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
     "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
     "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
-    "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
   ]);
   // console.log(imageSelectedToIllustrate);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isOpenForm, setIsOpenForm] = useState(false);
   const [fileName, setFileName] = useState("");
+  console.log(fileName);
   const [textContent, setTextContent] = useState("abc");
   const [fontSize, setFontSize] = useState(30);
   // const [imgUrls, setImgUrls] = useState([]);
-
-  const containerRef = useRef(null);
-  const innerRef = useRef(null);
-  const controls = useAnimation();
-  const [x, setX] = useState(0);
-  const [maxDrag, setMaxDrag] = useState(0);
-  const itemWidth = 300 + 16; // item width + gap
-
-  useEffect(() => {
-    const container = containerRef.current;
-    const inner = innerRef.current;
-
-    if (container && inner) {
-      const max = inner.scrollWidth - container.offsetWidth;
-      setMaxDrag(max);
-    }
-  }, [isGenerationCompleted]);
-
-  const handleArrowClick = (dir) => {
-    let newX = x;
-    if (dir === "left") newX = Math.min(x + itemWidth, 0);
-    if (dir === "right") newX = Math.max(x - itemWidth, -maxDrag);
-    setX(newX);
-    controls.start({ x: newX });
-  };
 
   const handleSendDialog = async () => {
     if (!textAreaValue.trim()) return;
@@ -369,79 +343,40 @@ const Home = () => {
 
       {isGenerationCompleted && (
         <div className="p-4 w-full max-w-4xl mx-auto border rounded-xl">
-          <div
-            ref={containerRef}
-            className="relative w-full max-w-5xl mx-auto overflow-hidden"
-          >
-            <div className="flex justify-center items-center gap-2 mb-4">
-              <motion.img
-                src={picboxAvatar}
-                alt="picbox"
-                className="w-8 duration-100 cursor-pointer"
-                whileTap={{ scale: 1.8 }}
-              />
-              <h2 className="text-2xl text-center">: Which one?</h2>
-            </div>
+          <h2 className="text-center">Which one do you like?</h2>
+          <div className="w-full flex flex-wrap justify-center items-center">
+            {/* imageSelectedToIllustrate.length === 1
+                ? "flex justify-center items-center border-blue-500 border-2"
+                : "grid grid-cols-2 sm:grid-cols-2 gap-4 justify-center items-center border-yellow-500 border-2" */}
+            {imageSelectedToIllustrate.map((imageUrl, index) => (
+              <div
+                key={index}
+                className={`rounded-xl w-2/3 ${
+                  selectedIndex === index ? "bg-green-500" : "bg-red-500"
+                }`}
+                onClick={() => setSelectedIndex(index)}
+              >
+                <img
+                  src={imageUrl}
+                  alt={`Image ${index + 1}`}
+                  className="scale-95 rounded-xl shadow"
+                />
+              </div>
+            ))}
 
-            {/* Carousel */}
-            <motion.div
-              ref={innerRef}
-              className="flex gap-4 cursor-grab active:cursor-grabbing"
-              drag="x"
-              dragConstraints={{ left: -maxDrag, right: 0 }}
-              animate={controls}
-              style={{
-                width: `${imageSelectedToIllustrate.length * 250}px`, // 假設每張寬 300px
-              }}
-            >
-              {imageSelectedToIllustrate.map((imageUrl, index) => (
-                <div
-                  key={index}
-                  className={`rounded-xl w-full border-2 ${
-                    selectedIndex === index
-                      ? "border-yellow-500"
-                      : "border-gray-200"
-                  }`}
-                  onClick={() => setSelectedIndex(index)}
-                >
-                  <motion.img
-                    key={index}
-                    src={imageUrl}
-                    className="rounded-xl w-full object-cover shadow-lg"
-                  />
-                </div>
-              ))}
-            </motion.div>
-
-            {/* Arrows */}
-            <div className="px-2 z-10 h-10 w-full flex justify-between absolute inset-y-1/2 -translate-y-1/2">
+            <div className="flex justify-center items-center mt-4">
               <BaseButton
-                onClick={() => handleArrowClick("left")}
-                className="bg-black/50 p-2 text-white"
+                className="my-4"
+                onClick={() => setIsGenerationCompleted((prev) => !prev)}
               >
                 <ArrowLeftOutlined />
+                <span className="ml-2">Back</span>
               </BaseButton>
-              <BaseButton
-                onClick={() => handleArrowClick("right")}
-                className="bg-black/50 p-2 text-white"
-              >
+              <BaseButton onClick={submitSelectedImage}>
                 <ArrowRightOutlined />
+                <span className="ml-2">Next</span>
               </BaseButton>
             </div>
-          </div>
-
-          <div className="flex justify-center items-center mt-4">
-            <BaseButton
-              className="my-4"
-              onClick={() => setIsGenerationCompleted((prev) => !prev)}
-            >
-              <ArrowLeftOutlined />
-              <span className="ml-2">Back</span>
-            </BaseButton>
-            <BaseButton onClick={submitSelectedImage}>
-              <ArrowRightOutlined />
-              <span className="ml-2">Next</span>
-            </BaseButton>
           </div>
 
           {isOpenForm && (
@@ -466,6 +401,21 @@ const Home = () => {
               {/* <BaseButton className="m-2" label="列印" onClick={submitPrint} /> */}
             </>
           )}
+
+          {/* <BaseButton
+            label="排版"
+            className="my-4 w-full"
+            onClick={() => navigate("/illustration")}
+          /> */}
+          {/* <BaseButton
+            label="列印"
+            className="my-4 w-full"
+            onClick={() =>
+              navigate("/print", {
+                state: { imageUrl: imageSelectedToIllustrate },
+              })
+            }
+          /> */}
         </div>
       )}
     </>

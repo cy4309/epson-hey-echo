@@ -203,93 +203,93 @@
 //   );
 // }
 
-import { motion, useMotionValue, useTransform } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { motion, useAnimation } from "framer-motion";
+import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
+import BaseButton from "@/components/BaseButton";
+import picboxAvatar from "@/assets/images/picbox-avatar.png";
 
+// const items = ["🚀", "🎮", "🎨", "📱", "💻"];
 const items = [
-  {
-    actName: "Act I",
-    description: "Description of Act I",
-  },
-  {
-    actName: "Act II",
-    description: "Description of Act II",
-  },
-  {
-    actName: "Act III",
-    description: "Description of Act III",
-  },
+  "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
+  "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
+  "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
+  "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
 ];
 
-const GAP = 24;
-const ITEM_WIDTH = 320;
-const trackItemOffset = ITEM_WIDTH + GAP;
-
 export default function Test() {
-  const x = useMotionValue(0);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const constraintsRef = useRef(null);
+  const containerRef = useRef(null);
+  const innerRef = useRef(null);
+  const controls = useAnimation();
+  const [x, setX] = useState(0);
+  const [maxDrag, setMaxDrag] = useState(0);
+  const itemWidth = 300 + 16; // item width + gap
 
-  const handleDragEnd = (_, info) => {
-    const offset = info.offset.x;
-    const direction = offset < 0 ? 1 : -1;
-    const newIndex = Math.min(
-      Math.max(currentIndex + direction, 0),
-      items.length - 1
-    );
-    setCurrentIndex(newIndex);
+  useEffect(() => {
+    const container = containerRef.current;
+    const inner = innerRef.current;
+
+    if (container && inner) {
+      const max = inner.scrollWidth - container.offsetWidth;
+      setMaxDrag(max);
+    }
+  }, []);
+
+  const handleArrowClick = (dir) => {
+    let newX = x;
+    if (dir === "left") newX = Math.min(x + itemWidth, 0);
+    if (dir === "right") newX = Math.max(x - itemWidth, -maxDrag);
+    setX(newX);
+    controls.start({ x: newX });
   };
 
   return (
-    <div className="overflow-hidden w-full py-16 bg-gradient-to-br from-[#0f0f1a] to-[#1a1a2e] flex justify-center">
-      <motion.div
-        className="flex"
-        ref={constraintsRef}
-        drag="x"
-        dragConstraints={{
-          left: -trackItemOffset * (items.length - 1),
-          right: 0,
-        }}
-        dragElastic={0.15}
-        style={{
-          x,
-          gap: `${GAP}px`,
-          perspective: 1200,
-        }}
-        animate={{ x: -(currentIndex * trackItemOffset) }}
-        transition={{ type: "spring", stiffness: 260, damping: 26 }}
-        onDragEnd={handleDragEnd}
-      >
-        {items.map((item, index) => {
-          const range = [
-            -(index + 1) * trackItemOffset,
-            -index * trackItemOffset,
-            -(index - 1) * trackItemOffset,
-          ];
-          const rotateY = useTransform(x, range, [45, 0, -45]);
-          const scale = useTransform(x, range, [0.85, 1, 0.85]);
-          const opacity = useTransform(x, range, [0.4, 1, 0.4]);
+    <div
+      ref={containerRef}
+      className="relative w-full max-w-5xl mx-auto overflow-hidden"
+    >
+      <div className="flex justify-center items-center gap-2 mb-4">
+        <motion.img
+          src={picboxAvatar}
+          alt="picbox"
+          className="w-8 duration-100 cursor-pointer"
+          whileTap={{ scale: 1.8 }}
+        />
+        <h2 className="text-2xl text-center">: Which one?</h2>
+      </div>
 
-          return (
-            <motion.div
-              key={index}
-              className="shrink-0 p-6 rounded-2xl bg-[#1f1f2e] border border-[#333] shadow-lg backdrop-blur-xl"
-              style={{
-                width: ITEM_WIDTH,
-                height: 360,
-                rotateY,
-                scale,
-                opacity,
-              }}
-            >
-              <div className="font-bold text-2xl mb-2 text-white">
-                {item.actName}
-              </div>
-              <p className="text-sm text-gray-300">{item.description}</p>
-            </motion.div>
-          );
-        })}
+      {/* Carousel */}
+      <motion.div
+        ref={innerRef}
+        className="flex gap-4 cursor-grab active:cursor-grabbing"
+        drag="x"
+        dragConstraints={{ left: -maxDrag, right: 0 }}
+        animate={controls}
+      >
+        {items.map((item, index) => (
+          <motion.img
+            key={index}
+            src={item}
+            className="rounded-xl w-2/3 object-cover shadow-lg"
+          />
+        ))}
       </motion.div>
+
+      {/* Arrows */}
+      <div className="px-2 z-10 h-10 w-full flex justify-between absolute inset-y-1/2 -translate-y-1/2">
+        <BaseButton
+          onClick={() => handleArrowClick("left")}
+          className="bg-black/50 p-2 text-white"
+        >
+          <ArrowLeftOutlined />
+        </BaseButton>
+        <BaseButton
+          onClick={() => handleArrowClick("right")}
+          className="bg-black/50 p-2 text-white"
+        >
+          <ArrowRightOutlined />
+        </BaseButton>
+      </div>
     </div>
   );
 }
