@@ -363,7 +363,7 @@ async def view_image(file_name: str):
 async def generate_multiple_images(
     image_filename: str = Form(...), #檔名成稱
     content: str = Form(...), #文字內容
-    font_size: int = Form(60), #字體大小
+    font_size: int = Form(34), #字體大小
     code: int = Form(200)
 ):
     try:
@@ -425,7 +425,7 @@ async def generate_multiple_images(
                 img_width, img_height = img.size
                 # 調整圖片大小以適應A4
                 scale = max(width / img_width, height / img_height)
-                adjusted_font_size = int(font_size * scale * 6) #調整字體大小
+                adjusted_font_size = int(font_size * scale * 5) #調整字體大小(預設100)
                 print(f"[DEBUG] 原始 font_size: {font_size}, 調整倍率 scale: {scale}, 最終 adjusted_font_size: {adjusted_font_size}")
 
                 new_width = int(img_width * scale)
