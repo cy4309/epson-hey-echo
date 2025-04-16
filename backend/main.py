@@ -369,6 +369,8 @@ async def generate_multiple_images(
         # 定義五種排版方式的位置
         layouts = ["topLeft", "topRight", "center", "bottomLeft", "bottomRight"]
         margin = 40 
+        baseline_offset = 10  
+        center_bias_y = -10   
         # positions = {
         #     "topLeft": (img_x + margin, img_y + margin),
         #     "topRight": (img_x + new_width - text_width - margin, img_y + margin),
@@ -421,7 +423,7 @@ async def generate_multiple_images(
                 img_width, img_height = img.size
                 # 調整圖片大小以適應A4
                 scale = max(width / img_width, height / img_height)
-                adjusted_font_size = int(font_size * scale * 4 ) #調整字體大小(預設80)
+                adjusted_font_size = int(font_size * scale * 3 ) #調整字體大小(預設80)
                 print(f"[DEBUG] 原始 font_size: {font_size}, 調整倍率 scale: {scale}, 最終 adjusted_font_size: {adjusted_font_size}")
 
                 new_width = int(img_width * scale)
@@ -454,14 +456,17 @@ async def generate_multiple_images(
                 if layout == "topLeft":
                     x, y = img_x + margin, img_y + margin
                 elif layout == "topRight":
-                    x, y = img_x + new_width - text_width - margin, img_y + margin
+                    x = img_x + new_width - text_width - margin
+                    y = img_y + margin
                 elif layout == "center":
                     x = img_x + (new_width - text_width) / 2
-                    y = img_y + (new_height - text_height) / 2
+                    y = img_y + (new_height - text_height) / 2 + center_bias_y
                 elif layout == "bottomLeft":
-                    x, y = img_x + margin, img_y + new_height - text_height - margin
+                    x = img_x + margin 
+                    y = img_y + new_height - text_height - margin + baseline_offset
                 elif layout == "bottomRight":
-                    x, y = img_x + new_width - text_width - margin, img_y + new_height - text_height - margin
+                    x = img_x + new_width - text_width - margin
+                    y = img_y + new_width - text_width - margin + baseline_offset
 
                 draw.text((x, y), content, font=font, fill=(255, 255, 255))
 
