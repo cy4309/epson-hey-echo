@@ -7,11 +7,11 @@ import { Leva } from "leva";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import Scene from "@/containers/login/geometry/Scene";
 import { motion } from "framer-motion";
-import gifBored from "@/assets/images/bored.gif";
-// import gifSad from "@/assets/images/sad.gif";
-// import gifDefault from "@/assets/images/default.gif";
-import gifThinking from "@/assets/images/thinking.gif";
-// import gifDance from "@/assets/images/dance.gif";
+// import gifDefault from "@/assets/images/a-default.gif";
+import gifBored from "@/assets/images/b-bored.gif";
+import gifThinking from "@/assets/images/c-thinking.gif";
+// import gifDance from "@/assets/images/d-dance.gif";
+// import gifSad from "@/assets/images/e-sad.gif";
 
 const Login = () => {
   const navigate = useNavigate();
