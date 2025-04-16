@@ -201,9 +201,6 @@ async def generate_prompt(req: Request):
                         # "next_step": "await_flyer_info"
                     })
 
-                    # if status != 200:
-                    #     print(f"[WARNING] 上傳Epson失敗，使用本地URL")
-                    #     image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
                 except Exception as upload_error:
                     print(f"[ERROR] 上傳到Epson失敗: {upload_error}")
                     image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
@@ -250,7 +247,7 @@ async def generate_prompt(req: Request):
                     """
 
                     gpt_response = client.chat.completions.create(
-                        model="gpt-4-1106-preview",
+                        model="gpt-4-1106-preview",#gpt-4-1106-preview, gpt-4o-2024-08-06
                         messages=[
                             {"role": "system", "content": system_msg},
                             {"role": "user", "content": user_text}
@@ -367,16 +364,20 @@ async def generate_multiple_images(
     code: int = Form(200)
 ):
     try:
-        width, height = 595, 842
+        width, height =1024, 1792
         img_urls = []
         # 定義五種排版方式的位置
-        positions = {
-            "topLeft": (40, 40),
-            "topRight": (width - 140, 40),
-            "center": (width / 2 , height / 2),
-            "bottomLeft": (40, height - 40),
-            "bottomRight": (width - 40, height - 40),
-        }
+        layouts = ["topLeft", "topRight", "center", "bottomLeft", "bottomRight"]
+        margin = 40 
+        baseline_offset = 10  
+        center_bias_y = -10   
+        # positions = {
+        #     "topLeft": (img_x + margin, img_y + margin),
+        #     "topRight": (img_x + new_width - text_width - margin, img_y + margin),
+        #     "center": (img_x + (new_width - text_width) / 2, img_y + (new_height - text_height) / 2),
+        #     "bottomLeft": (img_x + margin, img_y + new_height - text_height - margin),
+        #     "bottomRight": (img_x + new_width - text_width - margin, img_y + new_height - text_height - margin),
+        # }
 
         # 如果 image_filename 是一整串 URL，嘗試從遠端下載圖檔
         if image_filename.startswith("http"):
@@ -412,7 +413,7 @@ async def generate_multiple_images(
         
 
         # 為每種排版生成獨立的 image
-        for layout, (x, y) in positions.items():
+        for layout in layouts:
             try:
                 fileName = f"{uuid.uuid4().hex}_{layout}.png"
                 file_path = os.path.join(UPLOAD_DIR, fileName)
@@ -422,7 +423,7 @@ async def generate_multiple_images(
                 img_width, img_height = img.size
                 # 調整圖片大小以適應A4
                 scale = max(width / img_width, height / img_height)
-                adjusted_font_size = int(font_size * scale * 4 ) #調整字體大小(預設80)
+                adjusted_font_size = int(font_size * scale * 3 ) #調整字體大小(預設80)
                 print(f"[DEBUG] 原始 font_size: {font_size}, 調整倍率 scale: {scale}, 最終 adjusted_font_size: {adjusted_font_size}")
 
                 new_width = int(img_width * scale)
@@ -444,6 +445,26 @@ async def generate_multiple_images(
                 except Exception as font_error:
                     print(f"[WARNING] 字型載入失敗: {font_error}, 使用預設字型")
                     font = ImageFont.load_default()
+
+                text_bbox = draw.textbbox((0, 0), content, font=font)
+                text_width = text_bbox[2] - text_bbox[0]
+                text_height = text_bbox[3] - text_bbox[1]
+
+                # 根據 layout 計算位置
+                if layout == "topLeft":
+                    x, y = img_x + margin, img_y + margin
+                elif layout == "topRight":
+                    x = img_x + new_width - text_width - margin
+                    y = img_y + margin
+                elif layout == "center":
+                    x = img_x + (new_width - text_width) / 2
+                    y = img_y + (new_height - text_height) / 2 + center_bias_y
+                elif layout == "bottomLeft":
+                    x = img_x + margin 
+                    y = img_y + new_height - text_height - margin + baseline_offset
+                elif layout == "bottomRight":
+                    x = img_x + new_width - text_width - margin
+                    y = img_y + new_width - text_width - margin + baseline_offset
 
                 draw.text((x, y), content, font=font, fill=(255, 255, 255))
 
