@@ -43,7 +43,7 @@ const Home = () => {
   const [isOpenForm, setIsOpenForm] = useState(false);
   const [fileName, setFileName] = useState("");
   const [textContent, setTextContent] = useState("abc");
-  const [fontSize, setFontSize] = useState(30);
+  const [fontSize, setFontSize] = useState(60);
   // const [imgUrls, setImgUrls] = useState([]);
 
   const containerRef = useRef(null);
