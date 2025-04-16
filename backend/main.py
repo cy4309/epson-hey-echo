@@ -373,14 +373,11 @@ async def generate_multiple_images(
         positions = {
             "topLeft": (40, 40),
             "topRight": (width - 140, 40),
-            "center": (width / 2 - 50, height / 2),
+            "center": (width / 2 , height / 2),
             "bottomLeft": (40, height - 40),
-            "bottomRight": (width - 140, height - 40),
+            "bottomRight": (width - 40, height - 40),
         }
 
-        # image_path = os.path.join(UPLOAD_DIR, image_filename)
-        # if not os.path.exists(image_path):
-        #     return JSONResponse(content={"error": "圖片檔案不存在"}, status_code=400)
         # 如果 image_filename 是一整串 URL，嘗試從遠端下載圖檔
         if image_filename.startswith("http"):
             print(f"[INFO] image_filename 是 URL: {image_filename}")
