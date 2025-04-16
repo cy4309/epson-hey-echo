@@ -133,7 +133,7 @@ const Home = () => {
       const res = await uploadImage(formData);
       console.log(res);
       if (res.code === 200) {
-        showSwal({ isSuccess: true, title: `上傳成功!` });
+        showSwal({ isSuccess: true, title: `圖片上傳成功!` });
         const filename = res.filename;
         const url = `${S3_BASE_URL}${filename}`;
         removeFile();
@@ -141,11 +141,11 @@ const Home = () => {
         // setIsUploaded(true);
         // setFileName(res.filename);
       } else {
-        showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+        showSwal({ isSuccess: false, title: `圖片上傳失敗，請稍後再試!` });
       }
     } catch (err) {
       console.error(err);
-      showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+      showSwal({ isSuccess: false, title: `圖片上傳失敗，請稍後再試!` });
     }
   };
 
@@ -274,7 +274,16 @@ const Home = () => {
               </BaseButton>
               <BaseButton
                 className="ml-2"
-                onClick={() => setIsGenerationCompleted((prev) => !prev)}
+                onClick={() => {
+                  if (messages.length > 0) {
+                    setIsGenerationCompleted((prev) => !prev);
+                  } else {
+                    showSwal({
+                      isSuccess: false,
+                      title: "請先輸入訊息或上傳圖片！",
+                    });
+                  }
+                }}
               >
                 <CheckOutlined />
                 <span className="ml-2">Done</span>
@@ -423,20 +432,22 @@ const Home = () => {
                 </motion.div>
 
                 {/* Arrows */}
-                {/* <div className="px-2 z-10 h-10 w-full flex justify-between absolute inset-y-1/2 -translate-y-1/2">
-                  <BaseButton
-                    onClick={() => handleArrowClick("left")}
-                    className="bg-black/50 p-2 text-white"
-                  >
-                    <ArrowLeftOutlined />
-                  </BaseButton>
-                  <BaseButton
-                    onClick={() => handleArrowClick("right")}
-                    className="bg-black/50 p-2 text-white"
-                  >
-                    <ArrowRightOutlined />
-                  </BaseButton>
-                </div> */}
+                {window.innerWidth >= 1024 && (
+                  <div className="px-2 z-10 h-10 w-full flex justify-between absolute inset-y-1/2 -translate-y-1/2">
+                    <BaseButton
+                      onClick={() => handleArrowClick("left")}
+                      className="bg-black/50 p-2 text-white"
+                    >
+                      <ArrowLeftOutlined />
+                    </BaseButton>
+                    <BaseButton
+                      onClick={() => handleArrowClick("right")}
+                      className="bg-black/50 p-2 text-white"
+                    >
+                      <ArrowRightOutlined />
+                    </BaseButton>
+                  </div>
+                )}
               </div>
 
               <div className="my-4 flex justify-center items-center">
@@ -508,8 +519,8 @@ const Home = () => {
                   <span className="ml-2">Back</span>
                 </BaseButton>
                 <BaseButton className="w-full mx-2" onClick={submitFile}>
+                  <span className="mr-2">Next</span>
                   <ArrowRightOutlined />
-                  <span className="ml-2">Next</span>
                 </BaseButton>
               </div>
             </>
