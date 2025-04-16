@@ -308,7 +308,14 @@ const Illustration = () => {
             <span className="ml-2">Back</span>
           </BaseButton> */}
 
-          <BaseButton className="mx-2" onClick={submitSelectedIllustration}>
+          <BaseButton className="w-1/3 mx-2" onClick={() => navigate(-1)}>
+            <ArrowLeftOutlined />
+            <span className="ml-2">Back</span>
+          </BaseButton>
+          <BaseButton
+            className="w-full mx-2"
+            onClick={submitSelectedIllustration}
+          >
             <span className="mr-2">Print</span>
             <ArrowRightOutlined />
           </BaseButton>

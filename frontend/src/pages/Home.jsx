@@ -31,9 +31,9 @@ const Home = () => {
   const [isGenerationCompleted, setIsGenerationCompleted] = useState(false);
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
-  const [imageSelectedToIllustrate, setImageSelectedToIllustrate] = useState([
-    "",
-  ]);
+  const [imageSelectedToIllustrate, setImageSelectedToIllustrate] = useState(
+    []
+  );
   // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
   // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
   // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
@@ -110,7 +110,7 @@ const Home = () => {
       const imageUrls = res.new_messages
         .filter((msg) => msg.type === "image")
         .map((msg) => msg.image_url);
-      setImageSelectedToIllustrate(imageUrls);
+      setImageSelectedToIllustrate((prev) => [...prev, ...imageUrls]);
 
       // Joyce測試自動開啟填表單流程
       // if (res.next_step === "await_flyer_info" && res.image_filename) {
@@ -441,14 +441,16 @@ const Home = () => {
 
               <div className="my-4 flex justify-center items-center">
                 <BaseButton
-                  className="mx-2"
+                  className="w-1/3 mx-2"
                   onClick={() => setIsGenerationCompleted((prev) => !prev)}
                 >
                   <ArrowLeftOutlined />
                   <span className="ml-2">Back</span>
                 </BaseButton>
-
-                <BaseButton className="mx-2" onClick={submitSelectedImage}>
+                <BaseButton
+                  className="w-full mx-2"
+                  onClick={submitSelectedImage}
+                >
                   <span className="mr-2">Next</span>
                   <ArrowRightOutlined />
                 </BaseButton>
@@ -484,7 +486,7 @@ const Home = () => {
                   className="w-8 duration-100 cursor-pointer"
                   whileTap={{ scale: 1.8 }}
                 />
-                <span>..輸入您想要的內文</span>
+                <span>..輸入您想要的字級大小</span>
               </div>
               <Input
                 name="text"
@@ -499,14 +501,13 @@ const Home = () => {
 
               <div className="my-4 flex justify-center items-center">
                 <BaseButton
-                  className="mx-2"
+                  className="w-1/3 mx-2"
                   onClick={() => setIsOpenForm((prev) => !prev)}
                 >
                   <ArrowLeftOutlined />
                   <span className="ml-2">Back</span>
                 </BaseButton>
-
-                <BaseButton className="mx-2" onClick={submitFile}>
+                <BaseButton className="w-full mx-2" onClick={submitFile}>
                   <ArrowRightOutlined />
                   <span className="ml-2">Next</span>
                 </BaseButton>

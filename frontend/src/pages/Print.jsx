@@ -11,9 +11,12 @@ import {
 } from "@/services/epsonService";
 import { useDispatch } from "react-redux";
 import { setAuthCode } from "@/stores/features/epsonSlice";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
 
 const Print = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const params = new URLSearchParams(location.search);
   const authCode = params.get("code");
@@ -21,6 +24,7 @@ const Print = () => {
   const [filePreview, setFilePreview] = useState("");
   const { imgUrlToPrint } = location.state || {};
   // const fileInputRef = useRef(null);
+  const [isPrinting, setIsPrinting] = useState(false);
 
   useEffect(() => {
     if (imgUrlToPrint) {
@@ -132,6 +136,7 @@ const Print = () => {
       // Success
       console.log("Print process completed successfully!");
       showSwal({ isSuccess: true, title: "列印成功!" });
+      setIsPrinting(true);
     } catch (err) {
       console.error("Error during print process:", err);
       showSwal({ isSuccess: false, title: "列印失敗，請稍後再試!" });
@@ -217,44 +222,66 @@ const Print = () => {
   return (
     <>
       <div className="w-full flex flex-wrap justify-center items-center">
-        {filePreview && (
-          <div className="w-1/2 h-1/2 flex justify-center items-center rounded-xl">
+        {filePreview && !isPrinting && (
+          <>
+            <img
+              className="m-4 w-full h-full rounded-xl object-contain"
+              src={filePreview}
+              alt="preview"
+            />
+            {/* <input
+           type="file"
+           ref={fileInputRef}
+           accept=".png, .jpg, .jpeg, .pdf"
+           className="hidden"
+           onChange={handleFileUpload}
+         />
+         {!filePreview ? (
+           <BaseButton
+             label="上傳圖片"
+             onClick={() => fileInputRef.current?.click()}
+             className="w-full m-4 rounded-xl"
+           />
+         ) : (
+           <BaseButton
+             label="重新上傳圖片"
+             onClick={() => fileInputRef.current?.click()}
+             className="w-full m-4 rounded-xl"
+           />
+         )} */}
+            <div className="w-full h-full flex justify-center items-center rounded-xl">
+              <BaseButton className="w-1/3 mx-2" onClick={() => navigate(-1)}>
+                <ArrowLeftOutlined />
+                <span className="ml-2">Back</span>
+              </BaseButton>
+              <BaseButton className="w-full mx-2" onClick={executePrint}>
+                <span className="mr-2">執行列印</span>
+                <ArrowRightOutlined />
+              </BaseButton>
+            </div>
+          </>
+        )}
+        {isPrinting && (
+          <>
             <img
               className="w-full h-full rounded-xl object-contain"
               src={filePreview}
               alt="preview"
             />
-          </div>
-        )}
-
-        {/* <input
-          type="file"
-          ref={fileInputRef}
-          accept=".png, .jpg, .jpeg, .pdf"
-          className="hidden"
-          onChange={handleFileUpload}
-        />
-        {!filePreview ? (
-          <BaseButton
-            label="上傳圖片"
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full m-4 rounded-xl"
-          />
-        ) : (
-          <BaseButton
-            label="重新上傳圖片"
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full m-4 rounded-xl"
-          />
-        )}
-         */}
-
-        {filePreview && (
-          <BaseButton
-            label="執行列印"
-            className="w-full m-2"
-            onClick={executePrint}
-          />
+            <div className="w-full h-full flex justify-center items-center rounded-xl">
+              <BaseButton className="w-1/3 mx-2" onClick={() => navigate(-1)}>
+                <ArrowLeftOutlined />
+                <span className="ml-2">Back</span>
+              </BaseButton>
+              <BaseButton
+                className="w-full mx-2"
+                onClick={() => navigate("/login")}
+              >
+                <span className="mr-2">回首頁</span>
+                <ArrowRightOutlined />
+              </BaseButton>
+            </div>
+          </>
         )}
       </div>
     </>
