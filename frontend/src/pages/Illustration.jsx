@@ -283,20 +283,22 @@ const Illustration = () => {
           </motion.div>
 
           {/* Arrows */}
-          {/* <div className="px-2 z-10 h-10 w-full flex justify-between absolute inset-y-1/2 -translate-y-1/2">
-            <BaseButton
-              onClick={() => handleArrowClick("left")}
-              className="bg-black/50 p-2 text-white"
-            >
-              <ArrowLeftOutlined />
-            </BaseButton>
-            <BaseButton
-              onClick={() => handleArrowClick("right")}
-              className="bg-black/50 p-2 text-white"
-            >
-              <ArrowRightOutlined />
-            </BaseButton>
-          </div> */}
+          {window.innerWidth >= 1024 && (
+            <div className="px-2 z-10 h-10 w-full flex justify-between absolute inset-y-1/2 -translate-y-1/2">
+              <BaseButton
+                onClick={() => handleArrowClick("left")}
+                className="bg-black/50 p-2 text-white"
+              >
+                <ArrowLeftOutlined />
+              </BaseButton>
+              <BaseButton
+                onClick={() => handleArrowClick("right")}
+                className="bg-black/50 p-2 text-white"
+              >
+                <ArrowRightOutlined />
+              </BaseButton>
+            </div>
+          )}
         </div>
 
         <div className="my-4 flex justify-center items-center">

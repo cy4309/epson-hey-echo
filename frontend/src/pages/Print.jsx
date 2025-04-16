@@ -264,15 +264,11 @@ const Print = () => {
         {isPrinting && (
           <>
             <img
-              className="w-full h-full rounded-xl object-contain"
+              className="m-4 w-full h-full rounded-xl object-contain"
               src={filePreview}
               alt="preview"
             />
             <div className="w-full h-full flex justify-center items-center rounded-xl">
-              <BaseButton className="w-1/3 mx-2" onClick={() => navigate(-1)}>
-                <ArrowLeftOutlined />
-                <span className="ml-2">Back</span>
-              </BaseButton>
               <BaseButton
                 className="w-full mx-2"
                 onClick={() => navigate("/login")}
