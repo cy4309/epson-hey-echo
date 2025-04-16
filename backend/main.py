@@ -370,18 +370,17 @@ async def generate_multiple_images(
         width, height = 595, 842
         img_urls = []
         # 定義五種排版方式的位置
-        positions = {
-            "topLeft": (40, 40),
-            "topRight": (width - 140, 40),
-            "center": (width / 2 - 50, height / 2),
-            "bottomLeft": (40, height - 40),
-            "bottomRight": (width - 140, height - 40),
-        }
+        layouts = ["topLeft", "topRight", "center", "bottomLeft", "bottomRight"]
+        successful_urls = []
+        errors = []
+        # positions = {
+        #     "topLeft": (40, 40),
+        #     "topRight": (width - text_width - 140, 40),
+        #     "center": ((width - text_width) / 2, (height - text_height) / 2),
+        #     "bottomLeft": (40, height - text_height - 40),
+        #     "bottomRight": (width - text_width - 40, height - text_height - 40),
+        # }
 
-        # image_path = os.path.join(UPLOAD_DIR, image_filename)
-        # if not os.path.exists(image_path):
-        #     return JSONResponse(content={"error": "圖片檔案不存在"}, status_code=400)
-        # 如果 image_filename 是一整串 URL，嘗試從遠端下載圖檔
         if image_filename.startswith("http"):
             print(f"[INFO] image_filename 是 URL: {image_filename}")
             try:
@@ -415,7 +414,7 @@ async def generate_multiple_images(
         
 
         # 為每種排版生成獨立的 image
-        for layout, (x, y) in positions.items():
+        for layout in layouts:
             try:
                 fileName = f"{uuid.uuid4().hex}_{layout}.png"
                 file_path = os.path.join(UPLOAD_DIR, fileName)
@@ -425,7 +424,7 @@ async def generate_multiple_images(
                 img_width, img_height = img.size
                 # 調整圖片大小以適應A4
                 scale = max(width / img_width, height / img_height)
-                adjusted_font_size = int(font_size * scale * 5) #調整字體大小(預設100)
+                adjusted_font_size = int(font_size * scale * 4 ) #調整字體大小(預設80)
                 print(f"[DEBUG] 原始 font_size: {font_size}, 調整倍率 scale: {scale}, 最終 adjusted_font_size: {adjusted_font_size}")
 
                 new_width = int(img_width * scale)
@@ -448,6 +447,19 @@ async def generate_multiple_images(
                     print(f"[WARNING] 字型載入失敗: {font_error}, 使用預設字型")
                     font = ImageFont.load_default()
 
+                # 根據字型決定文字位置
+                text_width, text_height = draw.textsize(content, font=font)
+                if layout == "topLeft":
+                    x, y = 40, 40
+                elif layout == "topRight":
+                    x, y = width - text_width - 40, 40
+                elif layout == "center":
+                    x, y = (width - text_width) / 2, (height - text_height) / 2
+                elif layout == "bottomLeft":
+                    x, y = 40, height - text_height - 40
+                elif layout == "bottomRight":
+                    x, y = width - text_width - 40, height - text_height - 40
+                 
                 draw.text((x, y), content, font=font, fill=(255, 255, 255))
 
                 # 儲存並上傳
