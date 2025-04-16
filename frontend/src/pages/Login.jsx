@@ -7,28 +7,28 @@ import { Leva } from "leva";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import Scene from "@/containers/login/geometry/Scene";
 import { motion } from "framer-motion";
-// import bored from "@/assets/images/bored.gif";
+// import bored from "@/assets/images/Bored.gif";
+// import sad from "@/assets/images/Sad.gif";
+// import default from "@/assets/images/Default.gif";
+import thinking from "@/assets/images/Thinking.gif";
+// import dance from "@/assets/images/Dance.gif";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
-  // const modelUrl = "/picbox3.glb";
-  // const modelUrl = "/Robot_To_C.glb";
-  // const modelUrl = "/Robot_To_C_250415_01.glb";
-  // const modelUrl = "/Robot_To_C_250415_02.glb";
-  const modelUrl = "/Robot_To_C_250415_02_noGlass.glb";
-  const [animationName, setAnimationName] = useState("");
+  // const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
+  // const modelUrl = "/Robot_To_C_250415_02_noGlass.glb";
+  // const [animationName, setAnimationName] = useState("");
 
-  useEffect(() => {
-    if (localStorage.getItem("darkMode") === "false") {
-      // setAnimationName("picboxAni");
-      // setAnimationName("Default");
-      // setAnimationName("Sad");
-      // setAnimationName("Bored");
-      // setAnimationName("Dance");
-      setAnimationName("Thinking");
-    }
-  }, [animationName]);
+  // useEffect(() => {
+  //   if (localStorage.getItem("darkMode") === "false") {
+  //     // setAnimationName("picboxAni");
+  //     // setAnimationName("Default");
+  //     // setAnimationName("Sad");
+  //     // setAnimationName("Bored");
+  //     // setAnimationName("Dance");
+  //     setAnimationName("Thinking");
+  //   }
+  // }, [animationName]);
 
   const handleLogin = (taskName, userName) => {
     localStorage.setItem("userName", userName);
@@ -69,9 +69,9 @@ const Login = () => {
         <span>O in one - ECHO!</span>
       </div> */}
 
-      {/* <img src={bored} alt="" /> */}
+      <img src={thinking} alt="" />
 
-      <div
+      {/* <div
         className={`w-full h-[50vh] relative ${
           isCanvasLoaded ? "opacity-100" : "opacity-0"
         } transition-opacity duration-500`}
@@ -110,7 +110,7 @@ const Login = () => {
         >
           <Scene modelUrl={modelUrl} animationName={animationName} />
         </Canvas>
-      </div>
+      </div> */}
 
       {/* <div className="absolute inset-0 flex flex-col justify-center items-center space-y-4"> */}
       <BaseButton

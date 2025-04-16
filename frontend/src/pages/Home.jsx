@@ -32,11 +32,12 @@ const Home = () => {
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
   const [imageSelectedToIllustrate, setImageSelectedToIllustrate] = useState([
-    "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
-    "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
-    "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
-    "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
+    "",
   ]);
+  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
+  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
+  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
+  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
   // console.log(imageSelectedToIllustrate);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isOpenForm, setIsOpenForm] = useState(false);
@@ -183,18 +184,18 @@ const Home = () => {
       console.log("上傳圖片結果:", res);
 
       if (res.code === 200) {
-        showSwal({ isSuccess: true, title: `上傳成功!` });
+        showSwal({ isSuccess: true, title: `圖片確認成功!` });
         setFileName(res.filename);
         setIsOpenForm(true);
         // navigate("/illustration", {
         //   state: { imageUrl: selectedImageUrl },
         // });
       } else {
-        showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+        showSwal({ isSuccess: false, title: `圖片確認失敗，請稍後再試!` });
       }
     } catch (error) {
       console.error("上傳圖片時發生錯誤:", error);
-      showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+      showSwal({ isSuccess: false, title: `圖片確認失敗，請稍後再試!` });
     }
   };
 
@@ -375,83 +376,98 @@ const Home = () => {
 
       {isGenerationCompleted && (
         <div className="p-4 w-full max-w-4xl mx-auto border rounded-xl">
-          <div
-            ref={containerRef}
-            className="relative w-full max-w-5xl mx-auto overflow-hidden"
-          >
-            <div className="flex justify-center items-center gap-2 mb-4">
-              <motion.img
-                src={picboxAvatar}
-                alt="picbox"
-                className="w-8 duration-100 cursor-pointer"
-                whileTap={{ scale: 1.8 }}
-              />
-              <h2 className="text-2xl text-center">: Which one?</h2>
-            </div>
-
-            {/* Carousel */}
-            <motion.div
-              ref={innerRef}
-              className="flex gap-4 cursor-grab active:cursor-grabbing"
-              drag="x"
-              dragConstraints={{ left: -maxDrag, right: 0 }}
-              animate={controls}
-              style={{
-                width: `${imageSelectedToIllustrate.length * 250}px`, // 假設每張寬 300px
-              }}
-            >
-              {imageSelectedToIllustrate.map((imageUrl, index) => (
-                <div
-                  key={index}
-                  className={`rounded-xl w-full border-2 ${
-                    selectedIndex === index
-                      ? "border-yellow-500"
-                      : "border-gray-200"
-                  }`}
-                  onClick={() => setSelectedIndex(index)}
-                >
+          {!isOpenForm && (
+            <>
+              <div
+                ref={containerRef}
+                className="relative w-full max-w-5xl mx-auto overflow-hidden"
+              >
+                <div className="flex justify-center items-center gap-2 mb-4">
                   <motion.img
-                    key={index}
-                    src={imageUrl}
-                    className="rounded-xl w-full object-cover shadow-lg"
+                    src={picboxAvatar}
+                    alt="picbox"
+                    className="w-8 duration-100 cursor-pointer"
+                    whileTap={{ scale: 1.8 }}
                   />
+                  <h2 className="text-2xl text-center">..Which one?</h2>
                 </div>
-              ))}
-            </motion.div>
 
-            {/* Arrows */}
-            <div className="px-2 z-10 h-10 w-full flex justify-between absolute inset-y-1/2 -translate-y-1/2">
-              <BaseButton
-                onClick={() => handleArrowClick("left")}
-                className="bg-black/50 p-2 text-white"
-              >
-                <ArrowLeftOutlined />
-              </BaseButton>
-              <BaseButton
-                onClick={() => handleArrowClick("right")}
-                className="bg-black/50 p-2 text-white"
-              >
-                <ArrowRightOutlined />
-              </BaseButton>
-            </div>
-          </div>
+                {/* Carousel */}
+                <motion.div
+                  ref={innerRef}
+                  className="flex gap-4 cursor-grab active:cursor-grabbing"
+                  drag="x"
+                  dragConstraints={{ left: -maxDrag, right: 0 }}
+                  animate={controls}
+                  style={{
+                    width: `${imageSelectedToIllustrate.length * 250}px`, // 假設每張寬 300px
+                  }}
+                >
+                  {imageSelectedToIllustrate.map((imageUrl, index) => (
+                    <div
+                      key={index}
+                      className={`rounded-xl w-full border-2 ${
+                        selectedIndex === index
+                          ? "border-primary"
+                          : "border-secondary"
+                      }`}
+                      onClick={() => setSelectedIndex(index)}
+                    >
+                      <motion.img
+                        key={index}
+                        src={imageUrl}
+                        className="rounded-xl w-full object-cover shadow-lg"
+                      />
+                    </div>
+                  ))}
+                </motion.div>
 
-          <div className="flex justify-center items-center mt-4">
-            <BaseButton
-              className="my-4"
-              onClick={() => setIsGenerationCompleted((prev) => !prev)}
-            >
-              <ArrowLeftOutlined />
-              <span className="ml-2">Back</span>
-            </BaseButton>
-            <BaseButton onClick={submitSelectedImage}>
-              <ArrowRightOutlined />
-              <span className="ml-2">Next</span>
-            </BaseButton>
-          </div>
+                {/* Arrows */}
+                {/* <div className="px-2 z-10 h-10 w-full flex justify-between absolute inset-y-1/2 -translate-y-1/2">
+                  <BaseButton
+                    onClick={() => handleArrowClick("left")}
+                    className="bg-black/50 p-2 text-white"
+                  >
+                    <ArrowLeftOutlined />
+                  </BaseButton>
+                  <BaseButton
+                    onClick={() => handleArrowClick("right")}
+                    className="bg-black/50 p-2 text-white"
+                  >
+                    <ArrowRightOutlined />
+                  </BaseButton>
+                </div> */}
+              </div>
+
+              <div className="my-4 flex justify-center items-center">
+                <BaseButton
+                  className="mx-2"
+                  onClick={() => setIsGenerationCompleted((prev) => !prev)}
+                >
+                  <ArrowLeftOutlined />
+                  <span className="ml-2">Back</span>
+                </BaseButton>
+
+                <BaseButton className="mx-2" onClick={submitSelectedImage}>
+                  <span className="mr-2">Next</span>
+                  <ArrowRightOutlined />
+                </BaseButton>
+              </div>
+            </>
+          )}
 
           {isOpenForm && (
             <>
+              <div className="m-2 flex justify-start items-end">
+                {/* <img src={picboxAvatar} alt="picboxAvatar" className="w-8" /> */}
+                <motion.img
+                  src={picboxAvatar}
+                  alt="picbox"
+                  className="w-8 duration-100 cursor-pointer"
+                  whileTap={{ scale: 1.8 }}
+                />
+                <span>..輸入您想要的標題</span>
+              </div>
               <Input
                 name="text"
                 placeholder="輸入文字內容"
@@ -460,6 +476,16 @@ const Home = () => {
                 value={textContent}
                 onChange={(e) => setTextContent(e.target.value)}
               />
+              <div className="mt-8 m-2 flex justify-start items-end">
+                {/* <img src={picboxAvatar} alt="picboxAvatar" className="w-8" /> */}
+                <motion.img
+                  src={picboxAvatar}
+                  alt="picbox"
+                  className="w-8 duration-100 cursor-pointer"
+                  whileTap={{ scale: 1.8 }}
+                />
+                <span>..輸入您想要的內文</span>
+              </div>
               <Input
                 name="text"
                 placeholder="字體大小"
@@ -468,8 +494,23 @@ const Home = () => {
                 value={fontSize}
                 onChange={(e) => setFontSize(Number(e.target.value))}
               />
-              <BaseButton className="m-2" label="送出" onClick={submitFile} />
+              {/* <BaseButton className="m-2" label="送出" onClick={submitFile} /> */}
               {/* <BaseButton className="m-2" label="列印" onClick={submitPrint} /> */}
+
+              <div className="my-4 flex justify-center items-center">
+                <BaseButton
+                  className="mx-2"
+                  onClick={() => setIsOpenForm((prev) => !prev)}
+                >
+                  <ArrowLeftOutlined />
+                  <span className="ml-2">Back</span>
+                </BaseButton>
+
+                <BaseButton className="mx-2" onClick={submitFile}>
+                  <ArrowRightOutlined />
+                  <span className="ml-2">Next</span>
+                </BaseButton>
+              </div>
             </>
           )}
         </div>
