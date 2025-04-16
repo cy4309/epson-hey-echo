@@ -250,7 +250,7 @@ async def generate_prompt(req: Request):
                     """
 
                     gpt_response = client.chat.completions.create(
-                        model="gpt-4o",
+                        model="gpt-4-1106-preview",
                         messages=[
                             {"role": "system", "content": system_msg},
                             {"role": "user", "content": user_text}
