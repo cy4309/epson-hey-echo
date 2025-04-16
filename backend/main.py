@@ -188,13 +188,12 @@ async def generate_prompt(req: Request):
                         image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
                     response_messages = [
                         {"role": "assistant", "type": "text", "content": "以下為您生成的房仲宣傳單"},
-                        # {"role": "assistant", "type": "image", "image_url": image_url}
+                        {"role": "assistant", "type": "image", "image_url": image_url},
                         {
                             "role": "assistant",
                             "type": "text",
-                            "image_url": image_url,
                             "content": "這是我幫你合成的底圖 \n\n請直接輸入以下資訊，我會自動幫你完成整張房仲宣傳單：\n\n 主標題\n 坪數\n 總價\n 聯絡資訊\n\n格式不限，直接輸入內容即可！"
-                        }
+                        },
                     ]
                     print(f"[INFO] 上傳结果: 狀態={status}, URL={image_url}")
                     return JSONResponse(content={
