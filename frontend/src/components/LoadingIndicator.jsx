@@ -1,8 +1,8 @@
 // import Icon from "@mdi/react";
 // import { mdiLoading } from "@mdi/js";
 import { useState, useEffect } from "react";
-import gifDance from "@/assets/images/Dance.gif";
-import gifBored from "@/assets/images/Bored.gif";
+import gifDance from "@/assets/images/dance.gif";
+import gifBored from "@/assets/images/bored.gif";
 
 const LoadingIndicator = () => {
   const [currentGif, setCurrentGif] = useState(gifDance);
