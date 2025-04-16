@@ -219,6 +219,18 @@ const Print = () => {
     }
   };
 
+  if (!filePreview) {
+    return (
+      <>
+        <span>沒有可用的圖片，請返回重新生成。</span>
+        <BaseButton className="my-4" onClick={() => navigate("/login")}>
+          <span className="mr-2">回首頁</span>
+          <ArrowRightOutlined />
+        </BaseButton>
+      </>
+    );
+  }
+
   return (
     <>
       <div className="w-full flex flex-wrap justify-center items-center">

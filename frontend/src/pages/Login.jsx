@@ -7,17 +7,18 @@ import { Leva } from "leva";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import Scene from "@/containers/login/geometry/Scene";
 import { motion } from "framer-motion";
-// import bored from "@/assets/images/Bored.gif";
-// import sad from "@/assets/images/Sad.gif";
-// import default from "@/assets/images/Default.gif";
-import thinking from "@/assets/images/Thinking.gif";
-// import dance from "@/assets/images/Dance.gif";
+import gifBored from "@/assets/images/Bored.gif";
+// import gifSad from "@/assets/images/Sad.gif";
+// import gifDefault from "@/assets/images/Default.gif";
+import gifThinking from "@/assets/images/Thinking.gif";
+// import gifDance from "@/assets/images/Dance.gif";
 
 const Login = () => {
   const navigate = useNavigate();
   // const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
   // const modelUrl = "/Robot_To_C_250415_02_noGlass.glb";
   // const [animationName, setAnimationName] = useState("");
+  const [currentGif, setCurrentGif] = useState(gifBored);
 
   // useEffect(() => {
   //   if (localStorage.getItem("darkMode") === "false") {
@@ -29,6 +30,15 @@ const Login = () => {
   //     setAnimationName("Thinking");
   //   }
   // }, [animationName]);
+
+  const handleGifChange = () => {
+    setCurrentGif((prevGif) => (prevGif === gifBored ? gifThinking : gifBored));
+    // setTimeout(() => {
+    //   setCurrentGif((prevGif) =>
+    //     prevGif === gifBored ? gifThinking : gifBored
+    //   );
+    // }, 300);
+  };
 
   const handleLogin = (taskName, userName) => {
     localStorage.setItem("userName", userName);
@@ -69,7 +79,12 @@ const Login = () => {
         <span>O in one - ECHO!</span>
       </div> */}
 
-      <img src={thinking} alt="" />
+      <img
+        src={currentGif}
+        alt="gif"
+        className="cursor-pointer"
+        onClick={handleGifChange}
+      />
 
       {/* <div
         className={`w-full h-[50vh] relative ${
@@ -114,7 +129,7 @@ const Login = () => {
 
       {/* <div className="absolute inset-0 flex flex-col justify-center items-center space-y-4"> */}
       <BaseButton
-        className="w-2/3"
+        className="w-full"
         onClick={() => handleLogin("Welcome", "Admin")}
       >
         Get Started

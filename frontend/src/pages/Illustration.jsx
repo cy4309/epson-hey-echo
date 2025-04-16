@@ -177,11 +177,13 @@ import picboxAvatar from "@/assets/images/picbox-avatar.png";
 import BaseButton from "@/components/BaseButton";
 import { showSwal } from "@/utils/notification";
 import { useNavigate } from "react-router-dom";
+// import LoadingIndicator from "@/components/LoadingIndicator";
 
 const Illustration = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { imgUrls } = location.state || {};
+  // const [isLoading, setIsLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const containerRef = useRef(null);
@@ -192,6 +194,7 @@ const Illustration = () => {
   const itemWidth = 300 + 16; // item width + gap
 
   useEffect(() => {
+    // setIsLoading(false);
     const container = containerRef.current;
     const inner = innerRef.current;
 
@@ -218,7 +221,15 @@ const Illustration = () => {
   };
 
   if (!imgUrls || imgUrls.length === 0) {
-    return <p>沒有可用的圖片，請返回重新生成。</p>;
+    return (
+      <>
+        <span>沒有可用的圖片，請返回重新生成。</span>
+        <BaseButton className="my-4" onClick={() => navigate("/login")}>
+          <span className="mr-2">回首頁</span>
+          <ArrowRightOutlined />
+        </BaseButton>
+      </>
+    );
   }
 
   // return (
@@ -238,71 +249,74 @@ const Illustration = () => {
   return (
     <>
       <div className="p-4 w-full max-w-4xl mx-auto border rounded-xl">
-        <div
-          ref={containerRef}
-          className="relative w-full max-w-5xl mx-auto overflow-hidden"
-        >
-          <div className="flex justify-center items-center gap-2 mb-4">
-            <motion.img
-              src={picboxAvatar}
-              alt="picbox"
-              className="w-8 duration-100 cursor-pointer"
-              whileTap={{ scale: 1.8 }}
-            />
-            <h2 className="text-2xl text-center">..Which one?</h2>
+        {/* {isLoading && <LoadingIndicator />} */}
+        {/* {!isLoading && ( */}
+        <>
+          <div
+            ref={containerRef}
+            className="relative w-full max-w-5xl mx-auto overflow-hidden"
+          >
+            <div className="flex justify-center items-center gap-2 mb-4">
+              <motion.img
+                src={picboxAvatar}
+                alt="picbox"
+                className="w-8 duration-100 cursor-pointer"
+                whileTap={{ scale: 1.8 }}
+              />
+              <h2 className="text-2xl text-center">..Which one?</h2>
+            </div>
+
+            {/* Carousel */}
+            <motion.div
+              ref={innerRef}
+              className="flex gap-4 cursor-grab active:cursor-grabbing"
+              drag="x"
+              dragConstraints={{ left: -maxDrag, right: 0 }}
+              animate={controls}
+              style={{
+                width: `${imgUrls.length * 250}px`, // 假設每張寬 300px
+              }}
+            >
+              {imgUrls.map((imageUrl, index) => (
+                <div
+                  key={index}
+                  className={`rounded-xl w-full border-2 ${
+                    selectedIndex === index
+                      ? "border-primary"
+                      : "border-secondary"
+                  }`}
+                  onClick={() => setSelectedIndex(index)}
+                >
+                  <motion.img
+                    key={index}
+                    src={imageUrl}
+                    className="rounded-xl w-full object-cover shadow-lg"
+                  />
+                </div>
+              ))}
+            </motion.div>
+
+            {/* Arrows */}
+            {window.innerWidth >= 1024 && (
+              <div className="px-2 z-10 h-10 w-full flex justify-between absolute inset-y-1/2 -translate-y-1/2">
+                <BaseButton
+                  onClick={() => handleArrowClick("left")}
+                  className="bg-black/50 p-2 text-white"
+                >
+                  <ArrowLeftOutlined />
+                </BaseButton>
+                <BaseButton
+                  onClick={() => handleArrowClick("right")}
+                  className="bg-black/50 p-2 text-white"
+                >
+                  <ArrowRightOutlined />
+                </BaseButton>
+              </div>
+            )}
           </div>
 
-          {/* Carousel */}
-          <motion.div
-            ref={innerRef}
-            className="flex gap-4 cursor-grab active:cursor-grabbing"
-            drag="x"
-            dragConstraints={{ left: -maxDrag, right: 0 }}
-            animate={controls}
-            style={{
-              width: `${imgUrls.length * 250}px`, // 假設每張寬 300px
-            }}
-          >
-            {imgUrls.map((imageUrl, index) => (
-              <div
-                key={index}
-                className={`rounded-xl w-full border-2 ${
-                  selectedIndex === index
-                    ? "border-primary"
-                    : "border-secondary"
-                }`}
-                onClick={() => setSelectedIndex(index)}
-              >
-                <motion.img
-                  key={index}
-                  src={imageUrl}
-                  className="rounded-xl w-full object-cover shadow-lg"
-                />
-              </div>
-            ))}
-          </motion.div>
-
-          {/* Arrows */}
-          {window.innerWidth >= 1024 && (
-            <div className="px-2 z-10 h-10 w-full flex justify-between absolute inset-y-1/2 -translate-y-1/2">
-              <BaseButton
-                onClick={() => handleArrowClick("left")}
-                className="bg-black/50 p-2 text-white"
-              >
-                <ArrowLeftOutlined />
-              </BaseButton>
-              <BaseButton
-                onClick={() => handleArrowClick("right")}
-                className="bg-black/50 p-2 text-white"
-              >
-                <ArrowRightOutlined />
-              </BaseButton>
-            </div>
-          )}
-        </div>
-
-        <div className="my-4 flex justify-center items-center">
-          {/* <BaseButton
+          <div className="my-4 flex justify-center items-center">
+            {/* <BaseButton
             className="mx-2"
             onClick={() => setIsGenerationCompleted((prev) => !prev)}
           >
@@ -310,18 +324,20 @@ const Illustration = () => {
             <span className="ml-2">Back</span>
           </BaseButton> */}
 
-          <BaseButton className="w-1/3 mx-2" onClick={() => navigate(-1)}>
-            <ArrowLeftOutlined />
-            <span className="ml-2">Back</span>
-          </BaseButton>
-          <BaseButton
-            className="w-full mx-2"
-            onClick={submitSelectedIllustration}
-          >
-            <span className="mr-2">Print</span>
-            <ArrowRightOutlined />
-          </BaseButton>
-        </div>
+            <BaseButton className="w-1/3 mx-2" onClick={() => navigate(-1)}>
+              <ArrowLeftOutlined />
+              <span className="ml-2">Back</span>
+            </BaseButton>
+            <BaseButton
+              className="w-full mx-2"
+              onClick={submitSelectedIllustration}
+            >
+              <span className="mr-2">Print</span>
+              <ArrowRightOutlined />
+            </BaseButton>
+          </div>
+        </>
+        {/* )} */}
       </div>
     </>
   );

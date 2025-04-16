@@ -172,6 +172,7 @@ const Home = () => {
   };
 
   const submitSelectedImage = async () => {
+    setIsLoading(true);
     const selectedImageUrl = imageSelectedToIllustrate[selectedIndex];
     console.log(selectedImageUrl);
     try {
@@ -196,6 +197,8 @@ const Home = () => {
     } catch (error) {
       console.error("上傳圖片時發生錯誤:", error);
       showSwal({ isSuccess: false, title: `圖片確認失敗，請稍後再試!` });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -222,6 +225,8 @@ const Home = () => {
       showSwal({ isSuccess: false, title: `請輸入文字內容和字體大小` });
       return;
     }
+    setIsLoading(true);
+    setIsOpenForm(false);
     const payload = {
       image_filename: fileName,
       content: textContent,
@@ -244,6 +249,8 @@ const Home = () => {
     } catch (err) {
       console.error(err);
       showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -385,7 +392,9 @@ const Home = () => {
 
       {isGenerationCompleted && (
         <div className="p-4 w-full max-w-4xl mx-auto border rounded-xl">
-          {!isOpenForm && (
+          {isLoading && <LoadingIndicator />}
+
+          {!isLoading && !isOpenForm && (
             <>
               <div
                 ref={containerRef}
