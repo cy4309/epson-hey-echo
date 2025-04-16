@@ -444,7 +444,7 @@ async def generate_multiple_images(
 
                 # 載入字型
                 try:
-                    font_path = os.path.join("backend", "fonts", "SourceHanSerifTW-Bold.otf")
+                    font_path = os.path.join(os.getcwd(),"backend", "fonts", "SourceHanSerifTW-Bold.otf")
                     font = ImageFont.truetype("font_path", adjusted_font_size)
                 except Exception as font_error:
                     print(f"[WARNING] 字型載入失敗: {font_error}, 使用預設字型")
