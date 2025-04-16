@@ -10,10 +10,8 @@ from backend.flyer_generator import generate_real_flyer,generate_flyer_from_talk
 
 import google.generativeai as genai
 from PIL import Image as PILImage, ImageDraw, ImageFont
-import uuid,os,io,re,requests
+import uuid,os,io,re,requests,sys
 
-
-import os, sys
 print("CWD =", os.getcwd())
 print("PYTHONPATH =", sys.path)
 print("backend/ content =", os.listdir("backend"))
@@ -26,6 +24,7 @@ print("GEMINI_API_KEY:", os.getenv("GEMINI_API_KEY")[:6])
 app = FastAPI()
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+font_path = os.path.join(os.getcwd(), "backend", "fonts", "SourceHanSerifTW-Bold.otf")
 
 #記憶Gemini 對話歷史
 chat_history = []
@@ -444,8 +443,7 @@ async def generate_multiple_images(
 
                 # 載入字型
                 try:
-                    font_path = os.path.join(os.getcwd(),"backend", "fonts", "SourceHanSerifTW-Bold.otf")
-                    font = ImageFont.truetype("font_path", adjusted_font_size)
+                    font = ImageFont.truetype(font_path, adjusted_font_size)
                 except Exception as font_error:
                     print(f"[WARNING] 字型載入失敗: {font_error}, 使用預設字型")
                     font = ImageFont.load_default()
