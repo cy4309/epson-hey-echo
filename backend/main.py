@@ -364,7 +364,7 @@ async def generate_multiple_images(
     code: int = Form(200)
 ):
     try:
-        width, height = 595, 842
+        width, height =1024, 1792
         img_urls = []
         # 定義五種排版方式的位置
         layouts = ["topLeft", "topRight", "center", "bottomLeft", "bottomRight"]
@@ -446,8 +446,6 @@ async def generate_multiple_images(
                     print(f"[WARNING] 字型載入失敗: {font_error}, 使用預設字型")
                     font = ImageFont.load_default()
 
-                # x, y = positions[layout]
-                # 使用 textbbox 取代 textsize（新版 Pillow）
                 text_bbox = draw.textbbox((0, 0), content, font=font)
                 text_width = text_bbox[2] - text_bbox[0]
                 text_height = text_bbox[3] - text_bbox[1]
