@@ -19,14 +19,14 @@ const Print = () => {
   const authCode = params.get("code");
   // const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
-  const { imageUrl } = location.state || {};
-  const fileInputRef = useRef(null);
+  const { imgUrlToPrint } = location.state || {};
+  // const fileInputRef = useRef(null);
 
   useEffect(() => {
-    if (imageUrl) {
-      convertImageToBase64(imageUrl);
+    if (imgUrlToPrint) {
+      convertImageToBase64(imgUrlToPrint);
     }
-  }, [imageUrl]);
+  }, [imgUrlToPrint]);
 
   useEffect(() => {
     if (authCode) {
@@ -68,41 +68,41 @@ const Print = () => {
     };
   };
 
-  const handleFileUpload = (e) => {
-    const selectedFile = e.target.files[0];
-    if (!selectedFile) return;
+  // const handleFileUpload = (e) => {
+  //   const selectedFile = e.target.files[0];
+  //   if (!selectedFile) return;
 
-    const fileType = selectedFile.type;
-    const fileName = selectedFile.name;
+  //   const fileType = selectedFile.type;
+  //   const fileName = selectedFile.name;
 
-    if (fileType.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64File = reader.result;
-        localStorage.setItem("uploadedFile", base64File);
-        localStorage.setItem("uploadedFileName", fileName);
-        localStorage.setItem("uploadedFileType", fileType);
-        // setFile(selectedFile);
-        setFilePreview(URL.createObjectURL(selectedFile));
-      };
-      reader.readAsDataURL(selectedFile);
-    } else if (fileType === "application/pdf") {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64File = reader.result;
-        localStorage.setItem("uploadedFile", base64File);
-        localStorage.setItem("uploadedFileName", fileName);
-        localStorage.setItem("uploadedFileType", fileType);
-        // setFile(selectedFile);
-        setFilePreview(reader.result);
-      };
-      reader.readAsDataURL(selectedFile);
-    } else {
-      showSwal({ isSuccess: false, title: "不支援的文件類型!" });
-    }
-    // setFile(selectedFile);
-    // setFilePreview(URL.createObjectURL(selectedFile));
-  };
+  //   if (fileType.startsWith("image/")) {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       const base64File = reader.result;
+  //       localStorage.setItem("uploadedFile", base64File);
+  //       localStorage.setItem("uploadedFileName", fileName);
+  //       localStorage.setItem("uploadedFileType", fileType);
+  //       // setFile(selectedFile);
+  //       setFilePreview(URL.createObjectURL(selectedFile));
+  //     };
+  //     reader.readAsDataURL(selectedFile);
+  //   } else if (fileType === "application/pdf") {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       const base64File = reader.result;
+  //       localStorage.setItem("uploadedFile", base64File);
+  //       localStorage.setItem("uploadedFileName", fileName);
+  //       localStorage.setItem("uploadedFileType", fileType);
+  //       // setFile(selectedFile);
+  //       setFilePreview(reader.result);
+  //     };
+  //     reader.readAsDataURL(selectedFile);
+  //   } else {
+  //     showSwal({ isSuccess: false, title: "不支援的文件類型!" });
+  //   }
+  //   // setFile(selectedFile);
+  //   // setFilePreview(URL.createObjectURL(selectedFile));
+  // };
 
   const executePrint = async () => {
     try {
@@ -227,7 +227,7 @@ const Print = () => {
           </div>
         )}
 
-        <input
+        {/* <input
           type="file"
           ref={fileInputRef}
           accept=".png, .jpg, .jpeg, .pdf"
@@ -247,6 +247,7 @@ const Print = () => {
             className="w-full m-4 rounded-xl"
           />
         )}
+         */}
 
         {filePreview && (
           <BaseButton
