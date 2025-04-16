@@ -201,9 +201,6 @@ async def generate_prompt(req: Request):
                         # "next_step": "await_flyer_info"
                     })
 
-                    # if status != 200:
-                    #     print(f"[WARNING] 上傳Epson失敗，使用本地URL")
-                    #     image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
                 except Exception as upload_error:
                     print(f"[ERROR] 上傳到Epson失敗: {upload_error}")
                     image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
@@ -370,13 +367,15 @@ async def generate_multiple_images(
         width, height = 595, 842
         img_urls = []
         # 定義五種排版方式的位置
-        positions = {
-            "topLeft": (40, 40),
-            "topRight": (width - 140, 40),
-            "center": (width / 2 , height / 2),
-            "bottomLeft": (40, height - 40),
-            "bottomRight": (width - 40, height - 40),
-        }
+        layouts = ["topLeft", "topRight", "center", "bottomLeft", "bottomRight"]
+        margin = 40 
+        # positions = {
+        #     "topLeft": (img_x + margin, img_y + margin),
+        #     "topRight": (img_x + new_width - text_width - margin, img_y + margin),
+        #     "center": (img_x + (new_width - text_width) / 2, img_y + (new_height - text_height) / 2),
+        #     "bottomLeft": (img_x + margin, img_y + new_height - text_height - margin),
+        #     "bottomRight": (img_x + new_width - text_width - margin, img_y + new_height - text_height - margin),
+        # }
 
         # 如果 image_filename 是一整串 URL，嘗試從遠端下載圖檔
         if image_filename.startswith("http"):
@@ -412,7 +411,7 @@ async def generate_multiple_images(
         
 
         # 為每種排版生成獨立的 image
-        for layout, (x, y) in positions.items():
+        for layout in layouts:
             try:
                 fileName = f"{uuid.uuid4().hex}_{layout}.png"
                 file_path = os.path.join(UPLOAD_DIR, fileName)
@@ -444,6 +443,25 @@ async def generate_multiple_images(
                 except Exception as font_error:
                     print(f"[WARNING] 字型載入失敗: {font_error}, 使用預設字型")
                     font = ImageFont.load_default()
+
+                # x, y = positions[layout]
+                # 使用 textbbox 取代 textsize（新版 Pillow）
+                text_bbox = draw.textbbox((0, 0), content, font=font)
+                text_width = text_bbox[2] - text_bbox[0]
+                text_height = text_bbox[3] - text_bbox[1]
+
+                # 根據 layout 計算位置
+                if layout == "topLeft":
+                    x, y = img_x + margin, img_y + margin
+                elif layout == "topRight":
+                    x, y = img_x + new_width - text_width - margin, img_y + margin
+                elif layout == "center":
+                    x = img_x + (new_width - text_width) / 2
+                    y = img_y + (new_height - text_height) / 2
+                elif layout == "bottomLeft":
+                    x, y = img_x + margin, img_y + new_height - text_height - margin
+                elif layout == "bottomRight":
+                    x, y = img_x + new_width - text_width - margin, img_y + new_height - text_height - margin
 
                 draw.text((x, y), content, font=font, fill=(255, 255, 255))
 
