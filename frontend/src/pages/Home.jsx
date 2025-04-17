@@ -35,26 +35,28 @@ const Home = () => {
   const [imageSelectedToIllustrate, setImageSelectedToIllustrate] = useState(
     []
   );
-  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
-  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
-  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
-  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
-  // console.log(imageSelectedToIllustrate);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isOpenForm, setIsOpenForm] = useState(false);
   const [fileName, setFileName] = useState("");
   const [textContent, setTextContent] = useState("abc");
   const [fontSize, setFontSize] = useState(34);
-
   const [isIllustrationOpen, setIsIllustrationOpen] = useState(false);
   const [imgUrls, setImgUrls] = useState([]);
-
+  const endRef = useRef(null);
+  // for carousel
   const containerRef = useRef(null);
   const innerRef = useRef(null);
   const controls = useAnimation();
   const [x, setX] = useState(0);
   const [maxDrag, setMaxDrag] = useState(0);
   const itemWidth = 300 + 16; // item width + gap
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      endRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 300); // 延後一點點，讓 DOM 有時間更新
+    return () => clearTimeout(timeout);
+  }, [messages]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -354,6 +356,7 @@ const Home = () => {
                   // </Spin>
                   <LoadingIndicator />
                 )}
+                <div ref={endRef} />
               </div>
               <div className="mb-2 w-full flex justify-start items-center">
                 {filePreview && (
