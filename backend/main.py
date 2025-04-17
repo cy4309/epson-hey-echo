@@ -188,7 +188,7 @@ async def generate_prompt(req: Request):
         # Demo 模式：若輸入包含 demo 且沒傳圖片，就自動用 Demo.png(end)
         has_trigger = any(keyword in user_text for keyword in trigger_keywords)
         has_image = bool(image_url)
-        is_demo_mode = "demo" in user_text and "27011900.png" in image_url # 判斷是否是 demo 模式：文字中有 demo 且圖是 Demo.png
+        is_demo_mode = "demo" in user_text and "27011900.png" in (image_url or "").lower() # 判斷是否是 demo 模式
 
         print("[使用者訊息]", user_text)
         print("[Trigger 判斷]", has_trigger, "| 有圖片:", has_image)
@@ -208,16 +208,16 @@ async def generate_prompt(req: Request):
 
             # 疊建築圖
             if image_url:
-                # demo 模式 → 不用 Pillow，直接回傳原圖
+                # demo 模式:不用 Pillow，直接回傳原圖
                 if is_demo_mode:
                     print("[INFO] demo 模式，不經過 Pillow 處理，直接回傳原圖 URL")
                     response_messages = [
-                        {"role": "assistant", "type": "text", "content": "這是 demo 宣傳單範例圖"},
+                        {"role": "assistant", "type": "text", "content": "這是為您設計的宣傳單"},
                         {"role": "assistant", "type": "image", "image_url": image_url},
                         {
                             "role": "assistant",
                             "type": "text",
-                            "content": "請直接輸入以下資訊，我會幫你套用在這張範例上喔：\n\n主標題、坪數、總價、特色、聯絡方式"
+                            "content": "請直接輸入以下資訊：\n\n坪數、總價、特色、聯絡方式"
                         }
                     ]
                     return JSONResponse(content={
