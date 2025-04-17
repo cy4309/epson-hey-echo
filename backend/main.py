@@ -122,6 +122,10 @@ async def generate_prompt(req: Request):
                         with open(image_path, "wb") as f:
                             f.write(response.content)
                         print(f"[INFO] 成功下載圖片到 {image_path}")
+                        image_url = f"https://epson-hey-echo.onrender.com/view-image/{image_filename}"
+                        data["image_url"] = image_url
+                        image_url = data["image_url"]
+
                     else:
                         print(f"[ERROR] 從 URL 下載失敗，狀態碼: {response.status_code}")
                         return JSONResponse(content={"error": "圖片下載失敗"}, status_code=400)
