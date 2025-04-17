@@ -1,10 +1,10 @@
 export const router_path = {
   index: "/",
   home: "/home",
-  illustration: "/illustration",
+  // illustration: "/illustration",
   print: "/print",
   login: "/login",
-  test: "/test",
+  // test: "/test",
   // form: "/form/:title",
   error: "*",
 };

@@ -170,7 +170,7 @@
 // };
 
 import { useState, useRef, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+// import { useLocation } from "react-router-dom";
 import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
 import { motion, useAnimation } from "framer-motion";
 import picboxAvatar from "@/assets/images/picbox-avatar.png";
@@ -178,11 +178,12 @@ import BaseButton from "@/components/BaseButton";
 import { showSwal } from "@/utils/notification";
 import { useNavigate } from "react-router-dom";
 // import LoadingIndicator from "@/components/LoadingIndicator";
+import PropTypes from "prop-types";
 
-const Illustration = () => {
-  const location = useLocation();
+const Illustration = ({ imgUrls, onBack }) => {
+  // const location = useLocation();
   const navigate = useNavigate();
-  const { imgUrls } = location.state || {};
+  // const { imgUrls } = location.state || {};
   // const [isLoading, setIsLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -324,7 +325,7 @@ const Illustration = () => {
             <span className="ml-2">Back</span>
           </BaseButton> */}
 
-            <BaseButton className="w-1/2 mx-2" onClick={() => navigate(-1)}>
+            <BaseButton className="w-1/2 mx-2" onClick={onBack}>
               <ArrowLeftOutlined />
               <span className="ml-2">Back</span>
             </BaseButton>
@@ -341,6 +342,11 @@ const Illustration = () => {
       </div>
     </>
   );
+};
+
+Illustration.propTypes = {
+  imgUrls: PropTypes.arrayOf(PropTypes.string).isRequired,
+  onBack: PropTypes.func.isRequired,
 };
 
 export default Illustration;

@@ -262,9 +262,12 @@ const Print = () => {
            />
          )} */}
             <div className="w-full h-full flex justify-center items-center rounded-xl">
-              <BaseButton className="w-1/3 mx-2" onClick={() => navigate(-1)}>
+              <BaseButton
+                className="w-1/2 mx-2 !px-0"
+                onClick={() => navigate(-1)}
+              >
                 <ArrowLeftOutlined />
-                <span className="ml-2">Back</span>
+                <span className="ml-2">回主頁</span>
               </BaseButton>
               <BaseButton className="w-full mx-2" onClick={executePrint}>
                 <span className="mr-2">執行列印</span>
@@ -283,7 +286,11 @@ const Print = () => {
             <div className="w-full h-full flex justify-center items-center rounded-xl">
               <BaseButton
                 className="w-full mx-2"
-                onClick={() => navigate("/login")}
+                // onClick={() => navigate("/login")}
+                onClick={() => {
+                  localStorage.removeItem("userName");
+                  showSwal({ isSuccess: true, title: "See you!" });
+                }}
               >
                 <span className="mr-2">回首頁</span>
                 <ArrowRightOutlined />

@@ -19,6 +19,7 @@ import {
 } from "@/services/illustrateService";
 import { motion, useAnimation } from "framer-motion";
 import picboxAvatar from "@/assets/images/picbox-avatar.png";
+import Illustration from "@/containers/home/Illustration";
 
 const Home = () => {
   const S3_BASE_URL = import.meta.env.VITE_S3_BASE_URL;
@@ -44,7 +45,9 @@ const Home = () => {
   const [fileName, setFileName] = useState("");
   const [textContent, setTextContent] = useState("abc");
   const [fontSize, setFontSize] = useState(34);
-  // const [imgUrls, setImgUrls] = useState([]);
+
+  const [isIllustrationOpen, setIsIllustrationOpen] = useState(false);
+  const [imgUrls, setImgUrls] = useState([]);
 
   const containerRef = useRef(null);
   const innerRef = useRef(null);
@@ -239,10 +242,11 @@ const Home = () => {
       console.log(res);
       if (res.code === 200) {
         showSwal({ isSuccess: true, title: `上傳成功!` });
-        // setImgUrls(res.img_urls);
-        navigate("/illustration", {
-          state: { imgUrls: res.img_urls }, // 將後端返回的圖片 URL 傳遞到 /illustration 頁面
-        });
+        setImgUrls(res.img_urls);
+        setIsIllustrationOpen(true);
+        // navigate("/illustration", {
+        //   state: { imgUrls: res.img_urls }, // 將後端返回的圖片 URL 傳遞到 /illustration 頁面
+        // });
       } else {
         showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
       }
@@ -259,127 +263,139 @@ const Home = () => {
   // }
   return (
     <>
-      {!isGenerationCompleted && (
-        <div className="p-4 w-full max-w-4xl mx-auto border rounded-xl">
-          <aside>
-            {/* <h2 className="mb-4 text-xl font-semibold text-center">
+      {isIllustrationOpen ? (
+        <Illustration
+          imgUrls={imgUrls}
+          onBack={() => setIsIllustrationOpen(false)}
+        />
+      ) : (
+        <>
+          {!isGenerationCompleted && (
+            <div className="p-4 w-full max-w-4xl mx-auto border rounded-xl">
+              <aside>
+                {/* <h2 className="mb-4 text-xl font-semibold text-center">
                 AI 設計師 · 對話式生圖
               </h2> */}
-            {/* <motion.div
+                {/* <motion.div
               className="w-[200px] h-[200px] rounded-full bg-black"
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ repeat: Infinity, duration: 2 }}
             /> */}
-            <div className="mb-4 flex justify-center items-center">
-              <BaseButton
-                className="ml-2"
-                onClick={() => window.location.reload()}
-              >
-                <FormOutlined />
-                <span className="ml-2">New</span>
-              </BaseButton>
-              <BaseButton
-                className="ml-2"
-                onClick={() => {
-                  if (messages.length > 0) {
-                    setIsGenerationCompleted((prev) => !prev);
-                  } else {
-                    showSwal({
-                      isSuccess: false,
-                      title: "請先輸入訊息或上傳圖片！",
-                    });
-                  }
-                }}
-              >
-                <CheckOutlined />
-                <span className="ml-2">Done</span>
-              </BaseButton>
-            </div>
-          </aside>
+                <div className="mb-4 flex justify-center items-center">
+                  <BaseButton
+                    className="ml-2"
+                    onClick={() => window.location.reload()}
+                  >
+                    <FormOutlined />
+                    <span className="ml-2">New</span>
+                  </BaseButton>
+                  <BaseButton
+                    className="ml-2"
+                    onClick={() => {
+                      if (messages.length > 0) {
+                        setIsGenerationCompleted((prev) => !prev);
+                      } else {
+                        showSwal({
+                          isSuccess: false,
+                          title: "請先輸入訊息或上傳圖片！",
+                        });
+                      }
+                    }}
+                  >
+                    <CheckOutlined />
+                    <span className="ml-2">Done</span>
+                  </BaseButton>
+                </div>
+              </aside>
 
-          <div className="mb-4 p-4 h-[400px] overflow-y-auto border-0 bg-white rounded-xl dark:bg-primary dark:text-black">
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`mb-2 ${
-                  msg.role === "user" ? "text-right" : "text-left"
-                }`}
-              >
-                {msg.type === "text" && (
+              <div className="mb-4 p-4 h-[400px] overflow-y-auto border-0 bg-white rounded-xl dark:bg-primary dark:text-black">
+                {messages.map((msg, i) => (
                   <div
-                    className={`px-2 py-2 inline-block rounded-xl ${
-                      msg.role === "user" ? "bg-primaryYellow" : "bg-secondary"
+                    key={i}
+                    className={`mb-2 ${
+                      msg.role === "user" ? "text-right" : "text-left"
                     }`}
                   >
-                    {msg.content}
+                    {msg.type === "text" && (
+                      <div
+                        className={`px-2 py-2 inline-block rounded-xl ${
+                          msg.role === "user"
+                            ? "bg-primaryYellow"
+                            : "bg-secondary"
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
+                    )}
+                    {msg.type === "image" && (
+                      <div className="mt-2">
+                        <img
+                          src={msg.image_url}
+                          alt="AI 圖片"
+                          className="max-w-full rounded-xl shadow"
+                        />
+                      </div>
+                    )}
                   </div>
+                ))}
+                {isLoading && (
+                  // <Spin tip="生成中...">
+                  //   <div style={{ minHeight: 40 }}></div>
+                  // </Spin>
+                  <LoadingIndicator />
                 )}
-                {msg.type === "image" && (
-                  <div className="mt-2">
+              </div>
+              <div className="mb-2 w-full flex justify-start items-center">
+                {filePreview && (
+                  <div className="relative">
+                    <button
+                      className="absolute text-white"
+                      onClick={removeFile}
+                    >
+                      <CloseCircleOutlined />
+                    </button>
                     <img
-                      src={msg.image_url}
-                      alt="AI 圖片"
-                      className="max-w-full rounded-xl shadow"
+                      src={filePreview}
+                      alt="預覽圖片"
+                      className="mr-2 w-16 rounded-xl shadow"
                     />
                   </div>
                 )}
               </div>
-            ))}
-            {isLoading && (
-              // <Spin tip="生成中...">
-              //   <div style={{ minHeight: 40 }}></div>
-              // </Spin>
-              <LoadingIndicator />
-            )}
-          </div>
-          <div className="mb-2 w-full flex justify-start items-center">
-            {filePreview && (
-              <div className="relative">
-                <button className="absolute text-white" onClick={removeFile}>
-                  <CloseCircleOutlined />
-                </button>
-                <img
-                  src={filePreview}
-                  alt="預覽圖片"
-                  className="mr-2 w-16 rounded-xl shadow"
+
+              <div className="p-4 w-full border rounded-xl flex">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept=".png, .jpg, .jpeg, .pdf"
+                  className="hidden"
+                  onChange={handleFileUpload}
                 />
+                <BaseButton onClick={() => fileInputRef.current?.click()}>
+                  <PlusOutlined />
+                </BaseButton>
+                <TextArea
+                  className="mx-2 border-0"
+                  rows={3}
+                  placeholder="描述你想要的畫面，可以繼續補充喔！"
+                  value={textAreaValue}
+                  onChange={(e) => setTextAreaValue(e.target.value)}
+                  onPressEnter={(e) => {
+                    if (!e.shiftKey) {
+                      e.preventDefault();
+                      handleSendDialog();
+                    }
+                  }}
+                />
+                {textAreaValue.trim() !== "" && (
+                  <BaseButton onClick={handleSendDialog}>
+                    <ArrowRightOutlined />
+                  </BaseButton>
+                )}
               </div>
-            )}
-          </div>
 
-          <div className="p-4 w-full border rounded-xl flex">
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept=".png, .jpg, .jpeg, .pdf"
-              className="hidden"
-              onChange={handleFileUpload}
-            />
-            <BaseButton onClick={() => fileInputRef.current?.click()}>
-              <PlusOutlined />
-            </BaseButton>
-            <TextArea
-              className="mx-2 border-0"
-              rows={3}
-              placeholder="描述你想要的畫面，可以繼續補充喔！"
-              value={textAreaValue}
-              onChange={(e) => setTextAreaValue(e.target.value)}
-              onPressEnter={(e) => {
-                if (!e.shiftKey) {
-                  e.preventDefault();
-                  handleSendDialog();
-                }
-              }}
-            />
-            {textAreaValue.trim() !== "" && (
-              <BaseButton onClick={handleSendDialog}>
-                <ArrowRightOutlined />
-              </BaseButton>
-            )}
-          </div>
-
-          {/* <div className="mt-2 text-center">
+              {/* <div className="mt-2 text-center">
             <BaseButton
               onClick={handleSendDialog}
               disabled={loading || !input.trim()}
@@ -387,154 +403,156 @@ const Home = () => {
               {loading ? "生成中..." : "送出訊息"}
             </BaseButton>
             </div> */}
-        </div>
-      )}
+            </div>
+          )}
 
-      {isGenerationCompleted && (
-        <div className="p-4 w-full max-w-4xl mx-auto border rounded-xl">
-          {isLoading && <LoadingIndicator />}
+          {isGenerationCompleted && (
+            <div className="p-4 w-full max-w-4xl mx-auto border rounded-xl">
+              {isLoading && <LoadingIndicator />}
 
-          {!isLoading && !isOpenForm && (
-            <>
-              <div
-                ref={containerRef}
-                className="relative w-full max-w-5xl mx-auto overflow-hidden"
-              >
-                <div className="flex justify-center items-center gap-2 mb-4">
-                  <motion.img
-                    src={picboxAvatar}
-                    alt="picbox"
-                    className="w-8 duration-100 cursor-pointer"
-                    whileTap={{ scale: 1.8 }}
-                  />
-                  <h2 className="text-2xl text-center">..Which one?</h2>
-                </div>
-
-                {/* Carousel */}
-                <motion.div
-                  ref={innerRef}
-                  className="flex gap-4 cursor-grab active:cursor-grabbing"
-                  drag="x"
-                  dragConstraints={{ left: -maxDrag, right: 0 }}
-                  animate={controls}
-                  style={{
-                    width: `${imageSelectedToIllustrate.length * 250}px`, // 假設每張寬 300px
-                  }}
-                >
-                  {imageSelectedToIllustrate.map((imageUrl, index) => (
-                    <div
-                      key={index}
-                      className={`rounded-xl w-full border-2 ${
-                        selectedIndex === index
-                          ? "border-primary"
-                          : "border-secondary"
-                      }`}
-                      onClick={() => setSelectedIndex(index)}
-                    >
+              {!isLoading && !isOpenForm && (
+                <>
+                  <div
+                    ref={containerRef}
+                    className="relative w-full max-w-5xl mx-auto overflow-hidden"
+                  >
+                    <div className="flex justify-center items-center gap-2 mb-4">
                       <motion.img
-                        key={index}
-                        src={imageUrl}
-                        className="rounded-xl w-full object-cover shadow-lg"
+                        src={picboxAvatar}
+                        alt="picbox"
+                        className="w-8 duration-100 cursor-pointer"
+                        whileTap={{ scale: 1.8 }}
                       />
+                      <h2 className="text-2xl text-center">..Which one?</h2>
                     </div>
-                  ))}
-                </motion.div>
 
-                {/* Arrows */}
-                {window.innerWidth >= 1024 && (
-                  <div className="px-2 z-10 h-10 w-full flex justify-between absolute inset-y-1/2 -translate-y-1/2">
+                    {/* Carousel */}
+                    <motion.div
+                      ref={innerRef}
+                      className="flex gap-4 cursor-grab active:cursor-grabbing"
+                      drag="x"
+                      dragConstraints={{ left: -maxDrag, right: 0 }}
+                      animate={controls}
+                      style={{
+                        width: `${imageSelectedToIllustrate.length * 250}px`, // 假設每張寬 300px
+                      }}
+                    >
+                      {imageSelectedToIllustrate.map((imageUrl, index) => (
+                        <div
+                          key={index}
+                          className={`rounded-xl w-full border-2 ${
+                            selectedIndex === index
+                              ? "border-primary"
+                              : "border-secondary"
+                          }`}
+                          onClick={() => setSelectedIndex(index)}
+                        >
+                          <motion.img
+                            key={index}
+                            src={imageUrl}
+                            className="rounded-xl w-full object-cover shadow-lg"
+                          />
+                        </div>
+                      ))}
+                    </motion.div>
+
+                    {/* Arrows */}
+                    {window.innerWidth >= 1024 && (
+                      <div className="px-2 z-10 h-10 w-full flex justify-between absolute inset-y-1/2 -translate-y-1/2">
+                        <BaseButton
+                          onClick={() => handleArrowClick("left")}
+                          className="bg-black/50 p-2 text-white"
+                        >
+                          <ArrowLeftOutlined />
+                        </BaseButton>
+                        <BaseButton
+                          onClick={() => handleArrowClick("right")}
+                          className="bg-black/50 p-2 text-white"
+                        >
+                          <ArrowRightOutlined />
+                        </BaseButton>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="my-4 flex justify-center items-center">
                     <BaseButton
-                      onClick={() => handleArrowClick("left")}
-                      className="bg-black/50 p-2 text-white"
+                      className="w-1/2 mx-2"
+                      onClick={() => setIsGenerationCompleted((prev) => !prev)}
                     >
                       <ArrowLeftOutlined />
+                      <span className="ml-2">Back</span>
                     </BaseButton>
                     <BaseButton
-                      onClick={() => handleArrowClick("right")}
-                      className="bg-black/50 p-2 text-white"
+                      className="w-full mx-2"
+                      onClick={submitSelectedImage}
                     >
+                      <span className="mr-2">Next</span>
                       <ArrowRightOutlined />
                     </BaseButton>
                   </div>
-                )}
-              </div>
+                </>
+              )}
 
-              <div className="my-4 flex justify-center items-center">
-                <BaseButton
-                  className="w-1/3 mx-2"
-                  onClick={() => setIsGenerationCompleted((prev) => !prev)}
-                >
-                  <ArrowLeftOutlined />
-                  <span className="ml-2">Back</span>
-                </BaseButton>
-                <BaseButton
-                  className="w-full mx-2"
-                  onClick={submitSelectedImage}
-                >
-                  <span className="mr-2">Next</span>
-                  <ArrowRightOutlined />
-                </BaseButton>
-              </div>
-            </>
+              {isOpenForm && (
+                <>
+                  <div className="m-2 flex justify-start items-end">
+                    {/* <img src={picboxAvatar} alt="picboxAvatar" className="w-8" /> */}
+                    <motion.img
+                      src={picboxAvatar}
+                      alt="picbox"
+                      className="w-8 duration-100 cursor-pointer"
+                      whileTap={{ scale: 1.8 }}
+                    />
+                    <span>..輸入您想要的標題</span>
+                  </div>
+                  <Input
+                    name="text"
+                    placeholder="輸入文字內容"
+                    className="m-2"
+                    size="large"
+                    value={textContent}
+                    onChange={(e) => setTextContent(e.target.value)}
+                  />
+                  <div className="mt-8 m-2 flex justify-start items-end">
+                    {/* <img src={picboxAvatar} alt="picboxAvatar" className="w-8" /> */}
+                    <motion.img
+                      src={picboxAvatar}
+                      alt="picbox"
+                      className="w-8 duration-100 cursor-pointer"
+                      whileTap={{ scale: 1.8 }}
+                    />
+                    <span>..輸入您想要的字級大小</span>
+                  </div>
+                  <Input
+                    name="text"
+                    placeholder="字體大小"
+                    className="m-2"
+                    size="large"
+                    value={fontSize}
+                    onChange={(e) => setFontSize(Number(e.target.value))}
+                  />
+                  {/* <BaseButton className="m-2" label="送出" onClick={submitFile} /> */}
+                  {/* <BaseButton className="m-2" label="列印" onClick={submitPrint} /> */}
+
+                  <div className="my-4 flex justify-center items-center">
+                    <BaseButton
+                      className="w-1/2 mx-2"
+                      onClick={() => setIsOpenForm((prev) => !prev)}
+                    >
+                      <ArrowLeftOutlined />
+                      <span className="ml-2">Back</span>
+                    </BaseButton>
+                    <BaseButton className="w-full mx-2" onClick={submitFile}>
+                      <span className="mr-2">Next</span>
+                      <ArrowRightOutlined />
+                    </BaseButton>
+                  </div>
+                </>
+              )}
+            </div>
           )}
-
-          {isOpenForm && (
-            <>
-              <div className="m-2 flex justify-start items-end">
-                {/* <img src={picboxAvatar} alt="picboxAvatar" className="w-8" /> */}
-                <motion.img
-                  src={picboxAvatar}
-                  alt="picbox"
-                  className="w-8 duration-100 cursor-pointer"
-                  whileTap={{ scale: 1.8 }}
-                />
-                <span>..輸入您想要的標題</span>
-              </div>
-              <Input
-                name="text"
-                placeholder="輸入文字內容"
-                className="m-2"
-                size="large"
-                value={textContent}
-                onChange={(e) => setTextContent(e.target.value)}
-              />
-              <div className="mt-8 m-2 flex justify-start items-end">
-                {/* <img src={picboxAvatar} alt="picboxAvatar" className="w-8" /> */}
-                <motion.img
-                  src={picboxAvatar}
-                  alt="picbox"
-                  className="w-8 duration-100 cursor-pointer"
-                  whileTap={{ scale: 1.8 }}
-                />
-                <span>..輸入您想要的字級大小</span>
-              </div>
-              <Input
-                name="text"
-                placeholder="字體大小"
-                className="m-2"
-                size="large"
-                value={fontSize}
-                onChange={(e) => setFontSize(Number(e.target.value))}
-              />
-              {/* <BaseButton className="m-2" label="送出" onClick={submitFile} /> */}
-              {/* <BaseButton className="m-2" label="列印" onClick={submitPrint} /> */}
-
-              <div className="my-4 flex justify-center items-center">
-                <BaseButton
-                  className="w-1/3 mx-2"
-                  onClick={() => setIsOpenForm((prev) => !prev)}
-                >
-                  <ArrowLeftOutlined />
-                  <span className="ml-2">Back</span>
-                </BaseButton>
-                <BaseButton className="w-full mx-2" onClick={submitFile}>
-                  <span className="mr-2">Next</span>
-                  <ArrowRightOutlined />
-                </BaseButton>
-              </div>
-            </>
-          )}
-        </div>
+        </>
       )}
     </>
   );

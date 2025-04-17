@@ -26,9 +26,9 @@ import PropTypes from "prop-types";
 // };
 
 const Home = lazy(() => import("@/pages/Home"));
-const Illustration = lazy(() => import("@/pages/Illustration"));
+// const Illustration = lazy(() => import("@/pages/Illustration"));
 const Print = lazy(() => import("@/pages/Print"));
-const Test = lazy(() => import("@/pages/Test"));
+// const Test = lazy(() => import("@/pages/Test"));
 // const Login = lazy(() => import("@/pages/Login"));
 const Error = lazy(() => import("@/pages/Error"));
 
@@ -85,7 +85,7 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route
+            {/* <Route
               path={router_path.illustration}
               element={
                 <ProtectedRoute>
@@ -94,7 +94,7 @@ const App = () => {
                   </Suspense>
                 </ProtectedRoute>
               }
-            />
+            /> */}
             <Route
               path={router_path.print}
               element={
@@ -105,7 +105,7 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route
+            {/* <Route
               path={router_path.test}
               element={
                 <ProtectedRoute>
@@ -114,7 +114,7 @@ const App = () => {
                   </Suspense>
                 </ProtectedRoute>
               }
-            />
+            /> */}
             <Route path={router_path.login} element={<Login />} />
             <Route path={router_path.error} element={<Error />} />
           </Route>
