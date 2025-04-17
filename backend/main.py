@@ -364,20 +364,13 @@ async def generate_multiple_images(
     code: int = Form(200)
 ):
     try:
-        width, height =1024, 1792
+        width, height = 2480, 3508
         img_urls = []
         # 定義五種排版方式的位置
         layouts = ["topLeft", "topRight", "center", "bottomLeft", "bottomRight"]
         margin = 40 
         baseline_offset = 10  
         center_bias_y = -10   
-        # positions = {
-        #     "topLeft": (img_x + margin, img_y + margin),
-        #     "topRight": (img_x + new_width - text_width - margin, img_y + margin),
-        #     "center": (img_x + (new_width - text_width) / 2, img_y + (new_height - text_height) / 2),
-        #     "bottomLeft": (img_x + margin, img_y + new_height - text_height - margin),
-        #     "bottomRight": (img_x + new_width - text_width - margin, img_y + new_height - text_height - margin),
-        # }
 
         # 如果 image_filename 是一整串 URL，嘗試從遠端下載圖檔
         if image_filename.startswith("http"):
@@ -551,7 +544,7 @@ async def generate_final_flyer(
         logo_path = os.path.join("icons", "default_logo.png")  # 預設 logo
 
     # 開始合成圖
-    width, height = 1240, 1754
+    width, height = 2480, 3508
     poster = PILImage.new("RGB", (width, height), "#264432")
     draw = ImageDraw.Draw(poster)
 
