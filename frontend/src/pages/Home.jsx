@@ -300,6 +300,19 @@ const Home = () => {
     }
     setIsLoading(true);
     setIsOpenForm(false);
+    // Joyce:判斷是否 demo 模式
+    const isDemo = fileName.includes("demo") || fileName.includes("27901900");
+    if (isDemo) {
+      console.log("demo 模式，直接顯示 demo 圖片！");
+      const demoImageUrl = "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27901900_demo.png";
+
+      setImageSelectedToIllustrate((prev) => [...prev, demoImageUrl]);
+      setIsOpenForm(false); // 關掉表單
+      setIsGenerationCompleted(true); // 讓 carousel 區塊顯示
+      setIsLoading(false);
+      return;
+    }
+    //Joyce:原流程走 API
     const payload = {
       image_filename: fileName,
       content: textContent,

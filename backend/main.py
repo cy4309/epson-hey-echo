@@ -213,16 +213,16 @@ async def generate_prompt(req: Request):
                     print("[INFO] demo 模式，不經過 Pillow 處理，直接回傳原圖 URL")
                     response_messages = [
                         {"role": "assistant", "type": "text", "content": "這是為您設計的宣傳單"},
-                        {"role": "assistant", "type": "image", "image_url": image_url},
-                        {
-                            "role": "assistant",
-                            "type": "text",
-                            # "content": "請直接輸入以下資訊：\n\n坪數、總價、特色、聯絡方式"
-                        }
+                        {"role": "assistant", "type": "image", "image_url": image_url}
+                        # {
+                        #     "role": "assistant",
+                        #     "type": "text"
+                        #     # "content": "請直接輸入以下資訊：\n\n坪數、總價、特色、聯絡方式"
+                        # }
                     ]
                     return JSONResponse(content={
                         "new_messages": response_messages,
-                        "image_filename": image_url.split("/")[-1],  # 可視需要是否保留
+                        "image_filename": image_url.split("/")[-1],
                         "next_step": "await_flyer_info"
                     })
                 else:
