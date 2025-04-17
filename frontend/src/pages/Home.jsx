@@ -78,21 +78,21 @@ const Home = () => {
   const handleSendDialog = async () => {
     if (!textAreaValue.trim()) return;
     const newUserMsg = { role: "user", type: "text", content: textAreaValue };
-    // const image_url = await submitFileUpload(); //@JoycePan810暫時拔掉
-    //如果沒有上傳圖片，則不會進行對話
-    let image_url;
+    const image_url = await submitFileUpload(); //@JoycePan810暫時拔掉
+  //如果沒有上傳圖片，則不會進行對話
+    // let image_url;
 
-    if (fileName) {
-      // 若已上傳過圖，從 S3 直接組網址即可
-      image_url = `${S3_BASE_URL}${fileName}`;
-    } else {
-      // 第一次上傳圖
-      image_url = await submitFileUpload();
-      if (!image_url) {
-        showSwal({ isSuccess: false, title: "請先上傳圖片，再開始對話唷！" });
-        return;
-      }
-    }
+    // if (fileName) {
+    //   // 若已上傳過圖，從 S3 直接組網址即可
+    //   image_url = `${S3_BASE_URL}${fileName}`;
+    // } else {
+    //   // 第一次上傳圖
+    //   image_url = await submitFileUpload();
+    //   if (!image_url) {
+    //     showSwal({ isSuccess: false, title: "請先上傳圖片，再開始對話唷！" });
+    //     return;
+    //   }
+    // }
     // const newImageMsg = { role: "user", type: "image", image_url };
     // const fileName = file?.name || "";
     //測試回話開場
@@ -163,7 +163,7 @@ const Home = () => {
             {
               role: "assistant",
               type: "image",
-              image_url: flyerResult.url || flyerResult.url
+              image_url: flyerResult.url
             }
           ]);
           setFlyerMode(false);
