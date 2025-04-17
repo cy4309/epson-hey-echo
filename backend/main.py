@@ -185,9 +185,11 @@ async def generate_prompt(req: Request):
                 except Exception as e:
                     print(f"[ERROR] demo 圖片下載錯誤: {e}")
                     return JSONResponse(content={"error": "demo 圖片下載錯誤"}, status_code=500)
-        # Demo 模式：若輸入包含 demo 且沒傳圖片，就自動用 Demo.png
+        # Demo 模式：若輸入包含 demo 且沒傳圖片，就自動用 Demo.png(end)
         has_trigger = any(keyword in user_text for keyword in trigger_keywords)
         has_image = bool(image_url)
+        is_demo_mode = "demo" in user_text and "Demo.png" in image_url # 判斷是否是 demo 模式：文字中有 demo 且圖是 Demo.png
+
         print("[使用者訊息]", user_text)
         print("[Trigger 判斷]", has_trigger, "| 有圖片:", has_image)
         
@@ -206,20 +208,39 @@ async def generate_prompt(req: Request):
 
             # 疊建築圖
             if image_url:
-                try:
-                    fg = PILImage.open(image_path).convert("RGBA")
-                    print(f"[INFO] 成功加載圖片: {image_path}")
+                # demo 模式 → 不用 Pillow，直接回傳原圖
+                if is_demo_mode:
+                    print("[INFO] demo 模式，不經過 Pillow 處理，直接回傳原圖 URL")
+                    response_messages = [
+                        {"role": "assistant", "type": "text", "content": "這是 demo 宣傳單範例圖"},
+                        {"role": "assistant", "type": "image", "image_url": image_url},
+                        {
+                            "role": "assistant",
+                            "type": "text",
+                            "content": "請直接輸入以下資訊，我會幫你套用在這張範例上喔：\n\n主標題、坪數、總價、特色、聯絡方式"
+                        }
+                    ]
+                    return JSONResponse(content={
+                        "new_messages": response_messages,
+                        "image_filename": image_url.split("/")[-1],  # 可視需要是否保留
+                        "next_step": "await_flyer_info"
+                    })
+                else:
+                # 一般流程 :使用 Pillow 合圖
+                    try:
+                        fg = PILImage.open(image_path).convert("RGBA")
+                        print(f"[INFO] 成功加載圖片: {image_path}")
 
-                    # resize + paste
-                    ratio = width * 0.8 / fg.width
-                    fg_resized = fg.resize((int(fg.width * ratio), int(fg.height * ratio)))
-                    x = (width - fg_resized.width) // 2
-                    y = int(height * 0.35 - fg_resized.height / 2)
-                    poster.paste(fg_resized, (x, y), fg_resized)
-                    print("[INFO] 圖片成功合成到海报")
-                except Exception as img_error:
-                    print(f"[ERROR] 圖片處理失败: {img_error}")
-                    return JSONResponse(content={"error": f"圖片處理失败: {str(img_error)}"}, status_code=500)
+                        # resize + paste
+                        ratio = width * 0.8 / fg.width
+                        fg_resized = fg.resize((int(fg.width * ratio), int(fg.height * ratio)))
+                        x = (width - fg_resized.width) // 2
+                        y = int(height * 0.35 - fg_resized.height / 2)
+                        poster.paste(fg_resized, (x, y), fg_resized)
+                        print("[INFO] 圖片成功合成到海报")
+                    except Exception as img_error:
+                        print(f"[ERROR] 圖片處理失败: {img_error}")
+                        return JSONResponse(content={"error": f"圖片處理失败: {str(img_error)}"}, status_code=500)
 
                 # 儲存圖片
                 fileName = f"{uuid.uuid4().hex}.png"
@@ -260,7 +281,7 @@ async def generate_prompt(req: Request):
                     # 測試引導
                     response_messages = [
                         {"role": "assistant", "type": "image", "image_url": image_url},
-                        {"role": "assistant", "type": "text", "content": "這是建築圖片底圖，請補上主標題、坪數、總價與聯絡資訊，我會幫您合成完整房仲宣傳單！"}
+                        {"role": "assistant", "type": "text", "content": "這是建築圖片底圖，請補上坪數、總價與聯絡資訊，我會幫您合成完整房仲宣傳單！"}
                     ]
 
                     return JSONResponse(content={

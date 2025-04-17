@@ -147,7 +147,7 @@ const Home = () => {
           .map((msg) => msg.content);
 
         const hasFlyerInfo =
-          userTexts.some((t) => t.includes("主標題")) &&
+          // userTexts.some((t) => t.includes("主標題")) &&
           userTexts.some((t) => t.includes("坪數")) &&
           userTexts.some((t) => t.includes("總價")) &&
           userTexts.some((t) => t.includes("聯絡人"));
