@@ -114,13 +114,28 @@ async def generate_prompt(req: Request):
             image_path = os.path.join(UPLOAD_DIR, image_filename)
             print(f"[INFO] 檢查除片文件: {image_path}, 存在: {os.path.exists(image_path)}")
             
+            if not os.path.exists(image_path) and image_url.startswith("http"):
+                try:
+                    print(f"[INFO] 從 URL 下載圖片: {image_url}")
+                    response = requests.get(image_url)
+                    if response.status_code == 200:
+                        with open(image_path, "wb") as f:
+                            f.write(response.content)
+                        print(f"[INFO] 成功下載圖片到 {image_path}")
+                    else:
+                        print(f"[ERROR] 從 URL 下載失敗，狀態碼: {response.status_code}")
+                        return JSONResponse(content={"error": "圖片下載失敗"}, status_code=400)
+                except Exception as e:
+                    print(f"[ERROR] 下載圖片過程出錯: {e}")
+                    return JSONResponse(content={"error": "圖片下載失敗"}, status_code=500)
+                
             if os.path.exists(image_path):
                 data["image_url"] = f"https://epson-hey-echo.onrender.com/view-image/{image_filename}"
                 print(f"[INFO] 更新image_url為: {data['image_url']}")
             else:
                 print(f"[ERROR] 圖片文件不存在: {image_path}")
                 return JSONResponse(content={"error": "圖片文件不存在"}, status_code=404)
-        
+                    
 
         # Step 1: 與Gemini對話
         combined_text = ""
