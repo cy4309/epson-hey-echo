@@ -35,6 +35,12 @@ const Home = () => {
   const [imageSelectedToIllustrate, setImageSelectedToIllustrate] = useState(
     []
   );
+  const [flyerMode, setFlyerMode] = useState(false); // @Joyce是否為房仲流程
+  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
+  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
+  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
+  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
+  // console.log(imageSelectedToIllustrate);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isOpenForm, setIsOpenForm] = useState(false);
   const [fileName, setFileName] = useState("");
@@ -79,7 +85,21 @@ const Home = () => {
   const handleSendDialog = async () => {
     if (!textAreaValue.trim()) return;
     const newUserMsg = { role: "user", type: "text", content: textAreaValue };
-    const image_url = await submitFileUpload();
+    const image_url = await submitFileUpload(); //@JoycePan810暫時拔掉
+    //如果沒有上傳圖片，則不會進行對話
+    // let image_url;
+
+    // if (fileName) {
+    //   // 若已上傳過圖，從 S3 直接組網址即可
+    //   image_url = `${S3_BASE_URL}${fileName}`;
+    // } else {
+    //   // 第一次上傳圖
+    //   image_url = await submitFileUpload();
+    //   if (!image_url) {
+    //     showSwal({ isSuccess: false, title: "請先上傳圖片，再開始對話唷！" });
+    //     return;
+    //   }
+    // }
     // const newImageMsg = { role: "user", type: "image", image_url };
     // const fileName = file?.name || "";
     //測試回話開場
@@ -90,6 +110,7 @@ const Home = () => {
         ? `我已收到你的圖片，馬上幫你處理唷～`
         : `收到囉，我會根據你的描述來設計圖像！`,
     };
+
     const updatedMessages = [...messages, newUserMsg, confirmMsg];
     setMessages(updatedMessages);
     setTextAreaValue("");
@@ -112,6 +133,53 @@ const Home = () => {
       const newMessages = res.new_messages || [];
       setMessages((prev) => [...prev, ...newMessages]);
 
+      // @Joyce:如果是房仲流程，進入引導模式
+      if (res.next_step === "await_flyer_info" && res.image_filename) {
+        setFileName(res.image_filename);
+        setFlyerMode(true);
+        setIsOpenForm(true); //@Joyce:開啟表單填標題
+      }
+
+      // @Joyce:偵測使用者補齊資訊後，自動觸發最終 API
+      if (flyerMode) {
+        const userTexts = [...updatedMessages, ...res.new_messages]
+          .filter((msg) => msg.role === "user" && msg.type === "text")
+          .map((msg) => msg.content);
+
+        const hasFlyerInfo =
+          userTexts.some((t) => t.includes("主標題")) &&
+          userTexts.some((t) => t.includes("坪數")) &&
+          userTexts.some((t) => t.includes("總價")) &&
+          userTexts.some((t) => t.includes("聯絡人"));
+
+        if (hasFlyerInfo) {
+          console.log("➡️ 使用者輸入齊全，準備發送產 flyer");
+          const payload = {
+            messages: updatedMessages.concat(res.new_messages),
+            image_filename: fileName,
+          };
+          const flyerRes = await fetch(
+            "/generate_real_estate_flyer_from_talk",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            }
+          );
+          const flyerResult = await flyerRes.json();
+          console.log("宣傳單產出成功:", flyerResult);
+
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              type: "image",
+              image_url: flyerResult.url,
+            },
+          ]);
+          setFlyerMode(false);
+        }
+      }
       const imageUrls = res.new_messages
         .filter((msg) => msg.type === "image")
         .map((msg) => msg.image_url);
