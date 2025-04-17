@@ -85,23 +85,7 @@ const Home = () => {
   const handleSendDialog = async () => {
     if (!textAreaValue.trim()) return;
     const newUserMsg = { role: "user", type: "text", content: textAreaValue };
-    const image_url = await submitFileUpload(); //@JoycePan810暫時拔掉
-    //如果沒有上傳圖片，則不會進行對話
-    // let image_url;
-
-    // if (fileName) {
-    //   // 若已上傳過圖，從 S3 直接組網址即可
-    //   image_url = `${S3_BASE_URL}${fileName}`;
-    // } else {
-    //   // 第一次上傳圖
-    //   image_url = await submitFileUpload();
-    //   if (!image_url) {
-    //     showSwal({ isSuccess: false, title: "請先上傳圖片，再開始對話唷！" });
-    //     return;
-    //   }
-    // }
-    // const newImageMsg = { role: "user", type: "image", image_url };
-    // const fileName = file?.name || "";
+    const image_url = await submitFileUpload(); 
     //測試回話開場
     const confirmMsg = {
       role: "assistant",
@@ -153,7 +137,7 @@ const Home = () => {
           userTexts.some((t) => t.includes("聯絡人"));
 
         if (hasFlyerInfo) {
-          console.log("➡️ 使用者輸入齊全，準備發送產 flyer");
+          console.log("使用者輸入齊全，準備發送產 flyer");
           const payload = {
             messages: updatedMessages.concat(res.new_messages),
             image_filename: fileName,
@@ -307,9 +291,15 @@ const Home = () => {
       const demoImageUrl = "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27901900_demo.png";
 
       setImageSelectedToIllustrate((prev) => [...prev, demoImageUrl]);
+      setSelectedIndex(imageSelectedToIllustrate.length);
       setIsOpenForm(false); // 關掉表單
-      setIsGenerationCompleted(true); // 讓 carousel 區塊顯示
+      setIsGenerationCompleted(true); 
       setIsLoading(false);
+
+      setTimeout(() => {
+        submitSelectedImage();
+      }, 300);
+      
       return;
     }
     //Joyce:原流程走 API
