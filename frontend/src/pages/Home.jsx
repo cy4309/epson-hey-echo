@@ -60,7 +60,7 @@ const Home = () => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       endRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 300); // 延後一點點，讓 DOM 有時間更新
+    }, 400); // 延後一點點，讓 DOM 有時間更新
     return () => clearTimeout(timeout);
   }, [messages]);
 
