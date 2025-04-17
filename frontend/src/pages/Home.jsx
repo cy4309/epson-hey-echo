@@ -96,6 +96,11 @@ const Home = () => {
     setIsLoading(true);
 
     try {
+      if (!image_url) {
+        showSwal({ isSuccess: false, title: "請先上傳圖片，再開始對話唷！" });
+        setIsLoading(false);
+        return;
+      }
       // const newUserMsg = { role: "user", type: "text", content: textAreaValue };
       // const image_url = await submitFileUpload(); //@Joyce:測試圖片上傳
       // const res = await generateDialogueToImage(updatedMessages);
