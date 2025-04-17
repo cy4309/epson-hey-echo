@@ -301,13 +301,12 @@ const Home = () => {
       const demoImageUrl =
         "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27901900_demo.png";
 
-      // 直接把 demo 圖片塞進 carousel
-      setImageSelectedToIllustrate([demoImageUrl]);
-      setSelectedIndex(0);
-      setIsGenerationCompleted(true);   // 回到 ..Which one? 畫面
-      setIsOpenForm(false);
-      setIsLoading(false);
-      return; // 不呼叫 /generate-multiple-images
+        navigate("/illustration", {
+          state: {
+            imgUrls: [demoImageUrl],
+          },
+        });
+      return; // 不呼叫 /generate-multiple-images   
     }
     /* ---------- demo 快速回傳 end ---------- */
     //Joyce:原流程走 API
