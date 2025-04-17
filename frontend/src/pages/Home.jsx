@@ -36,6 +36,8 @@ const Home = () => {
     []
   );
   const [flyerMode, setFlyerMode] = useState(false); // @Joyce是否為房仲流程
+  const [isDemoMode, setIsDemoMode] = useState(false);//@Joyce:Demo用
+
   // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
   // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
   // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
@@ -122,6 +124,11 @@ const Home = () => {
         setFileName(res.image_filename);
         setFlyerMode(true);
         setIsOpenForm(true); //@Joyce:開啟表單填標題
+
+        //只要檔名含 27011900 代表是 demo
+        if (res.image_filename.includes("27011900")) {
+          setIsDemoMode(true);
+        }
       }
 
       // @Joyce:偵測使用者補齊資訊後，自動觸發最終 API
@@ -285,19 +292,18 @@ const Home = () => {
     setIsLoading(true);
     setIsOpenForm(false);
     // Joyce:判斷是否 demo 模式
-    // const isDemo = fileName.includes("demo") || fileName.includes("27901900");
-    // if (isDemo) {
-    //   console.log("demo 模式，直接顯示 demo 圖片！");
-    //   const demoImageUrl = "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27901900_demo.png";
+    /* ---------- 這段是 demo 快捷 ---------- */
+    if (isDemoMode) {
+      const demoImageUrl =
+        "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27901900_demo.png";
 
-    //   setImageSelectedToIllustrate((prev) => [...prev, demoImageUrl]);
-    //   setSelectedIndex(imageSelectedToIllustrate.length);
-    //   setIsOpenForm(false); // 關掉表單
-    //   setIsGenerationCompleted(true); 
-    //   setIsLoading(false);
-
-    //   return;
-    // }
+      // 直接把 demo 圖片塞進 carousel
+      setImgUrls([demoImageUrl]);
+      setIsIllustrationOpen(true);   // 打開 ..Which one? 畫面
+      setIsLoading(false);
+      return; // 不往下呼叫 /generate-multiple-images
+    }
+    /* ---------- demo 快速回傳 end ---------- */
     //Joyce:原流程走 API
     const payload = {
       image_filename: fileName,
