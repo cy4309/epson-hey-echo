@@ -286,10 +286,10 @@ const Print = () => {
             <div className="w-full h-full flex justify-center items-center rounded-xl">
               <BaseButton
                 className="w-full mx-2"
-                // onClick={() => navigate("/login")}
                 onClick={() => {
                   localStorage.removeItem("userName");
                   showSwal({ isSuccess: true, title: "See you!" });
+                  navigate("/login");
                 }}
               >
                 <span className="mr-2">回首頁</span>
