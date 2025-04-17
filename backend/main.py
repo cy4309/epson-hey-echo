@@ -147,7 +147,7 @@ async def generate_prompt(req: Request):
             if msg["type"] == "text":
                 role = "User" if msg["role"] == "user" else "model"
                 chat_history.append({"role": role, "parts": [msg["content"]]})
-                image_url = data.get("image_url")
+                # image_url = data.get("image_url")
                 combined_text += f"{role}: {msg['content']}\n"
 
         # 如果包含指定關鍵語句，走「合成房仲海報邏輯」
