@@ -296,10 +296,6 @@ const Home = () => {
       setIsGenerationCompleted(true); 
       setIsLoading(false);
 
-      setTimeout(() => {
-        submitSelectedImage();
-      }, 300);
-      
       return;
     }
     //Joyce:原流程走 API
