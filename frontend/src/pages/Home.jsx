@@ -303,8 +303,10 @@ const Home = () => {
 
       // 直接把 demo 圖片塞進 carousel
       setImageSelectedToIllustrate([demoImageUrl]);
-      setSelectedIndex(0);
-      setIsGenerationCompleted(true);   // 回到 ..Which one? 畫面
+      // setSelectedIndex(0);
+      // setIsGenerationCompleted(true);   // 回到 ..Which one? 畫面  
+      setImgUrls([demoImageUrl]);           // 傳給 Illustration.jsx 的 props
+      setIsIllustrationOpen(true);          // 呈現 Illustration 元件
       setIsOpenForm(false);
       setIsLoading(false);
       return; // 不呼叫 /generate-multiple-images 
