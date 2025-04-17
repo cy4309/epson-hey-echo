@@ -126,7 +126,11 @@ const Home = () => {
         setIsOpenForm(true); //@Joyce:開啟表單填標題
 
         //只要檔名含 27011900 代表是 demo
-        if (res.image_filename.includes("27011900")) {
+        if (
+          newMessages.some(
+            (m) => m.type === "image" && m.image_url.includes("27011900")
+          )
+        ) {
           setIsDemoMode(true);
         }
       }
@@ -298,10 +302,12 @@ const Home = () => {
         "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27901900_demo.png";
 
       // 直接把 demo 圖片塞進 carousel
-      setImgUrls([demoImageUrl]);
-      setIsIllustrationOpen(true);   // 打開 ..Which one? 畫面
+      setImageSelectedToIllustrate([demoImageUrl]);
+      setSelectedIndex(0);
+      setIsGenerationCompleted(true);   // 回到 ..Which one? 畫面
+      setIsOpenForm(false);
       setIsLoading(false);
-      return; // 不往下呼叫 /generate-multiple-images
+      return; // 不呼叫 /generate-multiple-images
     }
     /* ---------- demo 快速回傳 end ---------- */
     //Joyce:原流程走 API
