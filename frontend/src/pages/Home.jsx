@@ -309,14 +309,23 @@ const Home = () => {
                 </div>
               </aside>
 
-              <div className="mb-4 p-4 h-[400px] overflow-y-auto border-0 bg-white rounded-xl dark:bg-primary dark:text-black">
+              <div className="mb-4 pr-4 h-[400px] overflow-y-auto border-0 bg-white rounded-xl dark:bg-primary dark:text-black">
                 {messages.map((msg, i) => (
                   <div
                     key={i}
                     className={`mb-2 ${
-                      msg.role === "user" ? "text-right" : "text-left"
+                      msg.role === "user" ? "text-right" : "text-left flex"
                     }`}
                   >
+                    {msg.role !== "user" && (
+                      <div className="mr-2 w-8 h-8 rounded-full border border-secondary flex justify-center items-center shrink-0">
+                        <img
+                          src={picboxAvatar}
+                          alt="picbox"
+                          className="w-6 h-6 rounded-full"
+                        />
+                      </div>
+                    )}
                     {msg.type === "text" && (
                       <div
                         className={`px-2 py-2 inline-block rounded-xl ${
