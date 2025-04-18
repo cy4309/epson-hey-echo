@@ -159,8 +159,10 @@ const Home = () => {
           // userTexts.some((t) => t.includes("主標題")) &&
           userTexts.some((t) => t.includes("坪數")) &&
           userTexts.some((t) => t.includes("總價")) &&
-          userTexts.some((t) => t.includes("聯絡人"));
-        userTexts.some((t) => t.includes("Logo"));
+          userTexts.some((t) => t.includes("特點"))&&
+          userTexts.some((t) => t.includes("聯絡人"))&&
+          userTexts.some((t) => t.includes("聯絡資訊"))&&
+          userTexts.some((t) => t.includes("Logo"));
 
         if (hasFlyerInfo) {
           console.log("使用者輸入齊全，準備發送產 flyer");
@@ -314,7 +316,7 @@ const Home = () => {
     /* ---------- 這段是 demo 快捷 ---------- */
     if (isDemoMode) {
       const demoImageUrl =
-        "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27901900_demo.png";
+        "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27011900_demo_v1f.png";
 
       // 直接把 demo 圖片塞進 carousel
       setImageSelectedToIllustrate([demoImageUrl]);

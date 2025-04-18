@@ -163,7 +163,7 @@ async def generate_prompt(req: Request):
         
         # Demo 模式：若輸入包含 demo 且沒傳圖片，就自動用 Demo.png
         if "demo" in user_text and not image_url:
-            image_url = "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27011900.png"
+            image_url = "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27011900_demo_f1.png"
             print("[INFO] demo 模式觸發，自動套用 Demo 圖:", image_url)
 
             # 模擬前端傳來的 image_url 進行後續處理
@@ -188,7 +188,7 @@ async def generate_prompt(req: Request):
         # Demo 模式：若輸入包含 demo 且沒傳圖片，就自動用 Demo.png(end)
         has_trigger = any(keyword in user_text for keyword in trigger_keywords)
         has_image = bool(image_url)
-        is_demo_mode = "demo" in user_text and "27011900.png" in (image_url or "").lower() # 判斷是否是 demo 模式
+        is_demo_mode = "demo" in user_text and "27011900_demo_f1.png" in (image_url or "").lower() # 判斷是否是 demo 模式
 
         print("[使用者訊息]", user_text)
         print("[Trigger 判斷]", has_trigger, "| 有圖片:", has_image)
@@ -260,7 +260,7 @@ async def generate_prompt(req: Request):
                         {
                             "role": "assistant",
                             "type": "text",
-                            "content": "這是我幫你合成的底圖！\n\n接下來請直接輸入以下資訊，我會自動幫你完成整張房仲宣傳單：\n\n 坪數、總價、特點、 聯絡資訊及Logo格式不限，直接輸入內容即可！"
+                            "content": "這是我幫你合成的底圖！\n\n接下來請直接輸入以下資訊，我會自動幫你完成整張房仲宣傳單：\n\n 坪數、總價、特點、聯絡資訊及Logo格式不限，直接輸入內容即可！"
                         },
                     ]
                     print(f"[INFO] 上傳结果: 狀態={status}, URL={image_url}")
@@ -316,7 +316,7 @@ async def generate_prompt(req: Request):
                     """
 
                     gpt_response = client.chat.completions.create(
-                        model="gpt-4-1106-preview",#gpt-4-1106-preview, gpt-4o-2024-08-06
+                        model="gpt-4o-2024-08-06",#gpt-4-1106-preview, gpt-4o-2024-08-06
                         messages=[
                             {"role": "system", "content": system_msg},
                             {"role": "user", "content": user_text}
