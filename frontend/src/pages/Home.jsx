@@ -159,8 +159,10 @@ const Home = () => {
           // userTexts.some((t) => t.includes("主標題")) &&
           userTexts.some((t) => t.includes("坪數")) &&
           userTexts.some((t) => t.includes("總價")) &&
-          userTexts.some((t) => t.includes("聯絡人"));
-        userTexts.some((t) => t.includes("Logo"));
+          userTexts.some((t) => t.includes("特點"))&&
+          userTexts.some((t) => t.includes("聯絡人"))&&
+          userTexts.some((t) => t.includes("聯絡資訊"))&&
+          userTexts.some((t) => t.includes("Logo"));
 
         if (hasFlyerInfo) {
           console.log("使用者輸入齊全，準備發送產 flyer");
