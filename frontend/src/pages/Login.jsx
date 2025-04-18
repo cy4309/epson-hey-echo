@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import BaseButton from "@/components/BaseButton";
 import { useNavigate } from "react-router-dom";
 import { showSwal } from "@/utils/notification";
@@ -18,26 +18,45 @@ const Login = () => {
   // const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
   // const modelUrl = "/Robot_To_C_250415_02_noGlass.glb";
   // const [animationName, setAnimationName] = useState("");
-  const [currentGif, setCurrentGif] = useState(gifBored);
 
-  // useEffect(() => {
-  //   if (localStorage.getItem("darkMode") === "false") {
-  //     // setAnimationName("picboxAni");
-  //     // setAnimationName("Default");
-  //     // setAnimationName("Sad");
-  //     // setAnimationName("Bored");
-  //     // setAnimationName("Dance");
-  //     setAnimationName("Thinking");
+  const [currentGif, setCurrentGif] = useState(gifBored);
+  // const [currentGif, setCurrentGif] = useState("bored"); // 當前影片狀態
+  // const [isPlayingFirst, setIsPlayingFirst] = useState(true); // 控制哪個 video 顯示
+  // const videoRef1 = useRef(null);
+  // const videoRef2 = useRef(null);
+
+  // const gifSources = {
+  //   bored: gifBored,
+  //   thinking: gifThinking,
+  // };
+
+  // const handleGifChange = () => {
+  //   const nextGif = currentGif === "bored" ? "thinking" : "bored";
+  //   const nextIsPlayingFirst = !isPlayingFirst;
+
+  //   const nextVideo = nextIsPlayingFirst
+  //     ? videoRef1.current
+  //     : videoRef2.current;
+  //   const currentVideo = !nextIsPlayingFirst
+  //     ? videoRef1.current
+  //     : videoRef2.current;
+
+  //   if (nextVideo) {
+  //     nextVideo.src = gifSources[nextGif];
+  //     nextVideo.load();
+  //     nextVideo.play().catch((e) => console.warn("播放失敗:", e));
   //   }
-  // }, [animationName]);
+
+  //   if (currentVideo) {
+  //     currentVideo.pause();
+  //   }
+
+  //   setIsPlayingFirst(nextIsPlayingFirst);
+  //   setCurrentGif(nextGif);
+  // };
 
   const handleGifChange = () => {
     setCurrentGif((prevGif) => (prevGif === gifBored ? gifThinking : gifBored));
-    // setTimeout(() => {
-    //   setCurrentGif((prevGif) =>
-    //     prevGif === gifBored ? gifThinking : gifBored
-    //   );
-    // }, 300);
   };
 
   const handleLogin = (taskName, userName) => {
@@ -85,6 +104,32 @@ const Login = () => {
         className="cursor-pointer"
         onClick={handleGifChange}
       />
+
+      {/* <div className="w-full h-[50vh] relative overflow-hidden">
+        <video
+          ref={videoRef1}
+          autoPlay
+          loop
+          muted
+          playsInline
+          src={gifSources.bored}
+          className={`absolute w-full h-full transition-opacity duration-100 cursor-pointer ${
+            isPlayingFirst ? "opacity-100 z-10" : "opacity-0 z-0"
+          }`}
+          onClick={handleGifChange} // 點擊切換影片
+        />
+        <video
+          ref={videoRef2}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className={`absolute w-full h-full transition-opacity duration-100 cursor-pointer ${
+            isPlayingFirst ? "opacity-0 z-0" : "opacity-100 z-10"
+          }`}
+          onClick={handleGifChange} // 點擊切換影片
+        />
+      </div> */}
 
       {/* <div
         className={`w-full h-[50vh] relative ${
