@@ -439,7 +439,7 @@ async def generate_multiple_images(
         layouts = ["topLeft", "topRight", "center", "bottomLeft", "bottomRight"]
         margin = 20
         center_bias_y = -10 
-        bottom_bias_y = 30
+        bottom_bias_y = 10
         horizontal_offset = 40  # 控制左右內縮距離
         vertical_offset = 140    # 控制上下間距
           
@@ -530,7 +530,7 @@ async def generate_multiple_images(
                     y = img_y + new_height - text_height - vertical_offset - bottom_bias_y
                 elif layout == "bottomRight":
                     x = img_x + new_width - text_width - horizontal_offset
-                    y = img_y + new_height - text_height - vertical_offset
+                    y = img_y + new_height - text_height - vertical_offset - bottom_bias_y
 
                 draw.text((x, y), content, font=font, fill=(255, 255, 255))
 
