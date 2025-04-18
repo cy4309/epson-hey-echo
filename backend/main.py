@@ -199,7 +199,7 @@ async def generate_prompt(req: Request):
             print("[Trigger 是否觸發]", matched,".有圖片", bool(image_url))
 
             # 產純色背景（用 Pillow 產圖）
-            width, height = 1240, 1754
+            width, height = 1024, 1792
             bg_color = "#264432"
             bottom_color = "#F8F1D7"
             poster = PILImage.new("RGB", (width, height), bg_color)
@@ -433,7 +433,7 @@ async def generate_multiple_images(
     code: int = Form(200)
 ):
     try:
-        width, height = 2480, 3508
+        width, height = 1024, 1792 #(2480, 3508) or (1024, 1792)
         img_urls = []
         # 定義五種排版方式的位置
         layouts = ["topLeft", "topRight", "center", "bottomLeft", "bottomRight"]
