@@ -437,7 +437,7 @@ async def generate_multiple_images(
         img_urls = []
         # 定義五種排版方式的位置
         layouts = ["topLeft", "topRight", "center", "bottomLeft", "bottomRight"]
-        margin = 40 
+        margin = 80
         baseline_offset = 10  
         center_bias_y = -10   
 
