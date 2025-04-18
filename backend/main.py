@@ -260,7 +260,7 @@ async def generate_prompt(req: Request):
                         {
                             "role": "assistant",
                             "type": "text",
-                            "content": "這是我幫你合成的底圖！\n\n接下來請直接輸入以下資訊，我會自動幫你完成整張房仲宣傳單：\n\n 坪數、總價、特點、 聯絡資訊及Logo格式不限，直接輸入內容即可！"
+                            "content": "這是我幫你合成的底圖！\n\n接下來請直接輸入以下資訊，我會自動幫你完成整張房仲宣傳單：\n\n 坪數、總價、特點、聯絡人、聯絡資訊及Logo格式不限，直接輸入內容即可！"
                         },
                     ]
                     print(f"[INFO] 上傳结果: 狀態={status}, URL={image_url}")
@@ -316,7 +316,7 @@ async def generate_prompt(req: Request):
                     """
 
                     gpt_response = client.chat.completions.create(
-                        model="gpt-4-1106-preview",#gpt-4-1106-preview, gpt-4o-2024-08-06
+                        model="gpt-4o-2024-08-06",#gpt-4-1106-preview, gpt-4o-2024-08-06
                         messages=[
                             {"role": "system", "content": system_msg},
                             {"role": "user", "content": user_text}
