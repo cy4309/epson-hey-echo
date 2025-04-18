@@ -314,7 +314,7 @@ const Home = () => {
     /* ---------- 這段是 demo 快捷 ---------- */
     if (isDemoMode) {
       const demoImageUrl =
-        "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27901900_demo.png";
+        "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27011900_demo_v1f.png";
 
       // 直接把 demo 圖片塞進 carousel
       setImageSelectedToIllustrate([demoImageUrl]);
