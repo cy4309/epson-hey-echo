@@ -437,11 +437,10 @@ async def generate_multiple_images(
         img_urls = []
         # 定義五種排版方式的位置
         layouts = ["topLeft", "topRight", "center", "bottomLeft", "bottomRight"]
-        margin = 120
-        baseline_offset = 10  
+        margin = 120 
         center_bias_y = -10 
         horizontal_offset = 40  # 控制左右內縮距離
-        vertical_offset = 80    # 控制上下間距  
+        vertical_offset = 140    # 控制上下間距  
 
         # 如果 image_filename 是一整串 URL，嘗試從遠端下載圖檔
         if image_filename.startswith("http"):
@@ -517,9 +516,9 @@ async def generate_multiple_images(
                 # 根據 layout 計算位置
                 if layout == "topLeft":
                     x = img_x + horizontal_offset
-                    y = img_y + margin
+                    y = img_y + vertical_offset
                 elif layout == "topRight":
-                    x = img_x + new_width - text_width - horizontal_offset
+                    x = img_x + new_width - text_width - vertical_offset
                     y = img_y + margin
                 elif layout == "center": 
                     x = img_x + (new_width - text_width) / 2
