@@ -260,7 +260,7 @@ async def generate_prompt(req: Request):
                         {
                             "role": "assistant",
                             "type": "text",
-                            "content": "這是我幫你合成的底圖！\n\n接下來請直接輸入以下資訊，我會自動幫你完成整張房仲宣傳單：\n\n 坪數\n 總價\n 特點\n 聯絡資訊\n\n格式不限，直接輸入內容即可！"
+                            "content": "這是我幫你合成的底圖！\n\n接下來請直接輸入以下資訊，我會自動幫你完成整張房仲宣傳單：\n\n 坪數、總價、特點、 聯絡資訊及Logo格式不限，直接輸入內容即可！"
                         },
                     ]
                     print(f"[INFO] 上傳结果: 狀態={status}, URL={image_url}")
@@ -438,9 +438,9 @@ async def generate_multiple_images(
         # 定義五種排版方式的位置
         layouts = ["topLeft", "topRight", "center", "bottomLeft", "bottomRight"]
         center_bias_y = -10 
-        bottom_bias_y = 40
+        bottom_bias_y = 80
         horizontal_offset = 40  # 控制左右內縮距離
-        vertical_offset = 140    # 控制上下間距
+        vertical_offset = 160    # 控制上下間距
           
 
         # 如果 image_filename 是一整串 URL，嘗試從遠端下載圖檔
