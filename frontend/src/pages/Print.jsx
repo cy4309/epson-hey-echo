@@ -50,7 +50,9 @@ const Print = () => {
   }, [authCode]);
 
   const convertImageToBase64 = (url) => {
-    url = `${url}?token=${encodeURIComponent(`Bearer ${s3AuthCode}`)}`;
+    if (url.includes("s3")) {
+      url = `${url}?token=${encodeURIComponent(`Bearer ${s3AuthCode}`)}`;
+    }
     const fileName = url.substring(
       url.lastIndexOf("/") + 1,
       url.lastIndexOf(".")
