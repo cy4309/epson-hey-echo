@@ -519,17 +519,17 @@ async def generate_multiple_images(
                     x = img_x + horizontal_offset
                     y = img_y + margin
                 elif layout == "topRight":
-                    x = img_x + new_width - text_width - margin
+                    x = img_x + new_width - text_width - horizontal_offset
                     y = img_y + margin
                 elif layout == "center": 
                     x = img_x + (new_width - text_width) / 2
                     y = img_y + (new_height - text_height) / 2 + center_bias_y
                 elif layout == "bottomLeft":
                     x = img_x + margin 
-                    y = img_y + new_height - text_height - margin + baseline_offset
+                    y = img_y + new_height - vertical_offset
                 elif layout == "bottomRight":
                     x = img_x + new_width - text_width - margin
-                    y = img_y + new_width -  text_height - margin + baseline_offset-20
+                    y = img_y + new_width -  vertical_offset
 
                 draw.text((x, y), content, font=font, fill=(255, 255, 255))
 
