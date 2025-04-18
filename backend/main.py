@@ -163,7 +163,7 @@ async def generate_prompt(req: Request):
         
         # Demo 模式：若輸入包含 demo 且沒傳圖片，就自動用 Demo.png
         if "demo" in user_text and not image_url:
-            image_url = "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27011900_demo_v1.png"
+            image_url = "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27011900_demo_f1.png"
             print("[INFO] demo 模式觸發，自動套用 Demo 圖:", image_url)
 
             # 模擬前端傳來的 image_url 進行後續處理
