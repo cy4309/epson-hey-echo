@@ -10,7 +10,7 @@ from backend.flyer_generator import generate_real_flyer,generate_flyer_from_talk
 
 import google.generativeai as genai
 from PIL import Image as PILImage, ImageDraw, ImageFont
-import uuid,os,io,re,requests,sys
+import uuid,os,io,re,requests,sys,asyncio
 
 print("CWD =", os.getcwd())
 print("PYTHONPATH =", sys.path)
