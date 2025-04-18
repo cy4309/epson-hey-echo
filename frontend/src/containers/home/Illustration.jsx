@@ -224,13 +224,13 @@ const Illustration = ({ imgUrls, onBack }) => {
 
   if (!imgUrls || imgUrls.length === 0) {
     return (
-      <>
+      <div className="p-4 w-full h-full max-w-4xl mx-auto border rounded-xl flex flex-col justify-center items-center">
         <span>沒有可用的圖片，請返回重新生成。</span>
         <BaseButton className="my-4" onClick={() => navigate("/login")}>
           <span className="mr-2">回首頁</span>
           <ArrowRightOutlined />
         </BaseButton>
-      </>
+      </div>
     );
   }
 
@@ -250,7 +250,7 @@ const Illustration = ({ imgUrls, onBack }) => {
 
   return (
     <>
-      <div className="p-4 w-full max-w-4xl mx-auto border rounded-xl">
+      <div className="p-4 w-full h-full max-w-4xl mx-auto border rounded-xl flex flex-col justify-center items-center">
         {/* {isLoading && <LoadingIndicator />} */}
         {/* {!isLoading && ( */}
         <>
@@ -326,7 +326,7 @@ const Illustration = ({ imgUrls, onBack }) => {
             <span className="ml-2">Back</span>
           </BaseButton> */}
 
-            <BaseButton className="w-1/2 mx-2" onClick={onBack}>
+            <BaseButton className="w-1/3 mx-2" onClick={onBack}>
               <ArrowLeftOutlined />
               <span className="ml-2">Back</span>
             </BaseButton>

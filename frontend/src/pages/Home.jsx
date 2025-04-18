@@ -76,7 +76,7 @@ const Home = () => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       endRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 400); // 延後一點點，讓 DOM 有時間更新
+    }, 500); // 延後一點點，讓 DOM 有時間更新
     return () => clearTimeout(timeout);
   }, [messages]);
 
@@ -370,7 +370,7 @@ const Home = () => {
         <>
           {!isGenerationCompleted && (
             <div
-              className="p-4 w-full h-full max-w-4xl mx-auto border rounded-xl"
+              className="p-4 w-full h-full max-w-4xl mx-auto border rounded-xl flex flex-col justify-center items-center"
               // style={{ height: `${window.innerHeight}px` }}
               // ref={dialogRef}
             >
@@ -519,7 +519,7 @@ const Home = () => {
           )}
 
           {isGenerationCompleted && (
-            <div className="p-4 w-full max-w-4xl mx-auto border rounded-xl">
+            <div className="p-4 w-full h-full max-w-4xl mx-auto border rounded-xl flex flex-col justify-center items-center">
               {isLoading && <LoadingIndicator />}
 
               {!isLoading && !isOpenForm && (
@@ -589,7 +589,7 @@ const Home = () => {
 
                   <div className="my-4 flex justify-center items-center">
                     <BaseButton
-                      className="w-1/2 mx-2"
+                      className="w-1/3 mx-2"
                       onClick={() => setIsGenerationCompleted((prev) => !prev)}
                     >
                       <ArrowLeftOutlined />
@@ -608,48 +608,50 @@ const Home = () => {
 
               {isOpenForm && (
                 <>
-                  <div className="m-2 flex justify-start items-end">
-                    {/* <img src={picboxAvatar} alt="picboxAvatar" className="w-8" /> */}
-                    <motion.img
-                      src={picboxAvatar}
-                      alt="picbox"
-                      className="w-8 duration-100 cursor-pointer"
-                      whileTap={{ scale: 1.8 }}
+                  <div className="flex flex-col justify-center items-start">
+                    <div className="m-2 flex justify-start items-end">
+                      {/* <img src={picboxAvatar} alt="picboxAvatar" className="w-8" /> */}
+                      <motion.img
+                        src={picboxAvatar}
+                        alt="picbox"
+                        className="w-8 duration-100 cursor-pointer"
+                        whileTap={{ scale: 1.8 }}
+                      />
+                      <span>..輸入您想要的標題</span>
+                    </div>
+                    <Input
+                      name="text"
+                      placeholder="輸入文字內容"
+                      className="m-2"
+                      size="large"
+                      value={textContent}
+                      onChange={(e) => setTextContent(e.target.value)}
                     />
-                    <span>..輸入您想要的標題</span>
-                  </div>
-                  <Input
-                    name="text"
-                    placeholder="輸入文字內容"
-                    className="m-2"
-                    size="large"
-                    value={textContent}
-                    onChange={(e) => setTextContent(e.target.value)}
-                  />
-                  <div className="mt-8 m-2 flex justify-start items-end">
-                    {/* <img src={picboxAvatar} alt="picboxAvatar" className="w-8" /> */}
-                    <motion.img
-                      src={picboxAvatar}
-                      alt="picbox"
-                      className="w-8 duration-100 cursor-pointer"
-                      whileTap={{ scale: 1.8 }}
+                    <div className="mt-8 m-2 flex justify-start items-end">
+                      {/* <img src={picboxAvatar} alt="picboxAvatar" className="w-8" /> */}
+                      <motion.img
+                        src={picboxAvatar}
+                        alt="picbox"
+                        className="w-8 duration-100 cursor-pointer"
+                        whileTap={{ scale: 1.8 }}
+                      />
+                      <span>..輸入您想要的字級大小</span>
+                    </div>
+                    <Input
+                      name="text"
+                      placeholder="字體大小"
+                      className="m-2"
+                      size="large"
+                      value={fontSize}
+                      onChange={(e) => setFontSize(Number(e.target.value))}
                     />
-                    <span>..輸入您想要的字級大小</span>
+                    {/* <BaseButton className="m-2" label="送出" onClick={submitFile} /> */}
+                    {/* <BaseButton className="m-2" label="列印" onClick={submitPrint} /> */}
                   </div>
-                  <Input
-                    name="text"
-                    placeholder="字體大小"
-                    className="m-2"
-                    size="large"
-                    value={fontSize}
-                    onChange={(e) => setFontSize(Number(e.target.value))}
-                  />
-                  {/* <BaseButton className="m-2" label="送出" onClick={submitFile} /> */}
-                  {/* <BaseButton className="m-2" label="列印" onClick={submitPrint} /> */}
 
                   <div className="my-4 flex justify-center items-center">
                     <BaseButton
-                      className="w-1/2 mx-2"
+                      className="w-1/3 mx-2"
                       onClick={() => setIsOpenForm((prev) => !prev)}
                     >
                       <ArrowLeftOutlined />

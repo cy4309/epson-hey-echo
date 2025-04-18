@@ -73,24 +73,25 @@ const Login = () => {
 
   return (
     <>
-      <div className="flex flex-col">
-        {text.map((line, i) => (
-          <motion.div
-            key={i}
-            initial={{ y: "100%", opacity: 0 }}
-            animate={{ y: "0%", opacity: 1 }}
-            transition={{
-              duration: 0.8,
-              ease: [0.76, 0, 0.24, 1],
-              delay: i * 0.3,
-            }}
-            className="text-3xl"
-          >
-            {line}
-          </motion.div>
-        ))}
-      </div>
-      {/* <div className="flex flex-col">
+      <div className="p-4 w-full h-full max-w-4xl mx-auto border rounded-xl flex flex-col justify-center items-center">
+        <div className="flex flex-col">
+          {text.map((line, i) => (
+            <motion.div
+              key={i}
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: "0%", opacity: 1 }}
+              transition={{
+                duration: 0.8,
+                ease: [0.76, 0, 0.24, 1],
+                delay: i * 0.3,
+              }}
+              className="text-3xl"
+            >
+              {line}
+            </motion.div>
+          ))}
+        </div>
+        {/* <div className="flex flex-col">
         <h1 className="text-2xl">I am your Banner Generator</h1>
         <span>Economy,</span>
         <span>Convenience,</span>
@@ -98,14 +99,14 @@ const Login = () => {
         <span>O in one - ECHO!</span>
       </div> */}
 
-      <img
-        src={currentGif}
-        alt="gif"
-        className="cursor-pointer"
-        onClick={handleGifChange}
-      />
+        <img
+          src={currentGif}
+          alt="gif"
+          className="min-h-[200px] cursor-pointer"
+          onClick={handleGifChange}
+        />
 
-      {/* <div className="w-full h-[50vh] relative overflow-hidden">
+        {/* <div className="w-full h-[50vh] relative overflow-hidden">
         <video
           ref={videoRef1}
           autoPlay
@@ -131,7 +132,7 @@ const Login = () => {
         />
       </div> */}
 
-      {/* <div
+        {/* <div
         className={`w-full h-[50vh] relative ${
           isCanvasLoaded ? "opacity-100" : "opacity-0"
         } transition-opacity duration-500`}
@@ -172,14 +173,15 @@ const Login = () => {
         </Canvas>
       </div> */}
 
-      {/* <div className="absolute inset-0 flex flex-col justify-center items-center space-y-4"> */}
-      <BaseButton
-        className="w-full"
-        onClick={() => handleLogin("Welcome", "Admin")}
-      >
-        Get Started
-      </BaseButton>
-      {/* </div> */}
+        {/* <div className="absolute inset-0 flex flex-col justify-center items-center space-y-4"> */}
+        <BaseButton
+          className="w-full"
+          onClick={() => handleLogin("Welcome", "Admin")}
+        >
+          Get Started
+        </BaseButton>
+        {/* </div> */}
+      </div>
     </>
   );
 };

@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 const MainLayout = () => {
   // useVh();
   return (
-    <div className="w-full min-h-screen flex flex-col justify-center items-center bg-white text-black dark:bg-primary dark:text-white">
+    <div className="w-full h-[100dvh] flex flex-col justify-center items-center bg-white text-black dark:bg-primary dark:text-white">
       {/* wrap */}
       {/* h-[100dvh] */}
       {/* <Header /> */}

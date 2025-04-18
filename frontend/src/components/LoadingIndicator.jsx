@@ -41,7 +41,7 @@ const LoadingIndicator = () => {
       <img
         src={currentGif}
         alt="gif"
-        className="cursor-pointer scale-90"
+        className="min-h-[200px] cursor-pointer scale-90"
         onClick={handleGifChange}
       />
       {/* </div> */}

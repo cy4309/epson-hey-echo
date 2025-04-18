@@ -227,19 +227,20 @@ const Print = () => {
 
   if (!filePreview) {
     return (
-      <>
+      <div className="p-4 w-full h-full max-w-4xl mx-auto border rounded-xl flex flex-col justify-center items-center">
         <span>沒有可用的圖片，請返回重新生成。</span>
         <BaseButton className="my-4" onClick={() => navigate("/login")}>
           <span className="mr-2">回首頁</span>
           <ArrowRightOutlined />
         </BaseButton>
-      </>
+      </div>
     );
   }
 
   return (
     <>
-      <div className="w-full flex flex-wrap justify-center items-center">
+      {/* <div className="w-full flex flex-wrap justify-center items-center"> */}
+      <div className="p-4 w-full h-full max-w-4xl mx-auto border rounded-xl flex flex-col justify-center items-center">
         {filePreview && !isPrinting && (
           <>
             <img
@@ -267,7 +268,7 @@ const Print = () => {
              className="w-full m-4 rounded-xl"
            />
          )} */}
-            <div className="w-full h-full flex justify-center items-center rounded-xl">
+            <div className="w-full h-full flex justify-center items-center">
               <BaseButton
                 className="w-1/2 mx-2 !px-0"
                 onClick={() => navigate(-1)}
@@ -289,7 +290,7 @@ const Print = () => {
               src={filePreview}
               alt="preview"
             />
-            <div className="w-full h-full flex justify-center items-center rounded-xl">
+            <div className="w-full h-full flex justify-center items-center">
               <BaseButton
                 className="w-full mx-2"
                 onClick={() => {
