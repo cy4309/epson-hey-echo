@@ -440,7 +440,7 @@ async def generate_multiple_images(
         center_bias_y = -10 
         bottom_bias_y = 80
         horizontal_offset = 40  # 控制左右內縮距離
-        vertical_offset = 140    # 控制上下間距
+        vertical_offset = 160    # 控制上下間距
           
 
         # 如果 image_filename 是一整串 URL，嘗試從遠端下載圖檔
