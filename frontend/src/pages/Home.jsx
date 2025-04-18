@@ -49,6 +49,7 @@ const Home = () => {
   const [isIllustrationOpen, setIsIllustrationOpen] = useState(false);
   const [imgUrls, setImgUrls] = useState([]);
   const endRef = useRef(null);
+  const dialogRef = useRef(null);
   // for carousel
   const containerRef = useRef(null);
   const innerRef = useRef(null);
@@ -56,6 +57,19 @@ const Home = () => {
   const [x, setX] = useState(0);
   const [maxDrag, setMaxDrag] = useState(0);
   const itemWidth = 300 + 16; // item width + gap
+
+  useEffect(() => {
+    const updateHeight = () => {
+      if (dialogRef.current) {
+        dialogRef.current.style.height = `${window.innerHeight}px`;
+      }
+    };
+
+    updateHeight(); // 初始化
+    window.addEventListener("resize", updateHeight);
+
+    return () => window.removeEventListener("resize", updateHeight);
+  }, []);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -341,7 +355,11 @@ const Home = () => {
       ) : (
         <>
           {!isGenerationCompleted && (
-            <div className="p-4 w-full max-w-4xl mx-auto border rounded-xl">
+            <div
+              className="p-4 w-full h-full max-w-4xl mx-auto border rounded-xl"
+              // style={{ height: `${window.innerHeight}px` }}
+              // ref={dialogRef}
+            >
               <aside>
                 {/* <h2 className="mb-4 text-xl font-semibold text-center">
                 AI 設計師 · 對話式生圖
@@ -379,7 +397,7 @@ const Home = () => {
                 </div>
               </aside>
 
-              <div className="mb-4 pr-4 h-[400px] overflow-y-auto border-0 bg-white rounded-xl dark:bg-primary dark:text-black">
+              <div className="mb-4 pr-4 h-[50vh] overflow-y-auto border-0 bg-white rounded-xl dark:bg-primary dark:text-black">
                 {messages.map((msg, i) => (
                   <div
                     key={i}

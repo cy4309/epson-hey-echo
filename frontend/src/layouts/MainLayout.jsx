@@ -11,7 +11,7 @@ const MainLayout = () => {
       {/* h-[100dvh] */}
       {/* <Header /> */}
       {/* <main className="p-4 w-full flex-grow flex flex-col justify-center items-center"> */}
-      <main className="p-4 w-full max-w-[480px] flex-grow flex flex-col justify-center items-center">
+      <main className="p-4 w-full h-full max-w-[480px] flex-grow flex flex-col justify-center items-center">
         <Outlet />
       </main>
       {/* <Footer /> */}
