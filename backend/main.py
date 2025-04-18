@@ -10,7 +10,7 @@ from backend.flyer_generator import generate_real_flyer,generate_flyer_from_talk
 
 import google.generativeai as genai
 from PIL import Image as PILImage, ImageDraw, ImageFont
-import uuid,os,io,re,requests,sys
+import uuid,os,io,re,requests,sys,asyncio
 
 print("CWD =", os.getcwd())
 print("PYTHONPATH =", sys.path)
@@ -163,6 +163,8 @@ async def generate_prompt(req: Request):
         
         # Demo 模式：若輸入包含 demo 且沒傳圖片，就自動用 Demo.png
         if "demo" in user_text and not image_url:
+            print("[INFO] demo 模式觸發，開始模擬處理延遲...")
+            await asyncio.sleep(5) 
             image_url = "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27011900_demo_f1.png"
             print("[INFO] demo 模式觸發，自動套用 Demo 圖:", image_url)
 
@@ -260,7 +262,7 @@ async def generate_prompt(req: Request):
                         {
                             "role": "assistant",
                             "type": "text",
-                            "content": "這是我幫你合成的底圖！\n\n接下來請直接輸入以下資訊，我會自動幫你完成整張房仲宣傳單：\n\n 坪數、總價、特點、聯絡資訊及Logo格式不限，直接輸入內容即可！"
+                            "content": "這是我幫你合成的底圖！\n\n接下來請直接輸入以下資訊，我會自動幫你完成整張房仲宣傳單：\n\n 坪數、總價、特點、聯絡人、聯絡資訊及Logo格式不限，直接輸入內容即可！"
                         },
                     ]
                     print(f"[INFO] 上傳结果: 狀態={status}, URL={image_url}")
