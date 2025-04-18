@@ -36,7 +36,7 @@ const Home = () => {
     []
   );
   const [flyerMode, setFlyerMode] = useState(false); // @Joyce是否為房仲流程
-  const [isDemoMode, setIsDemoMode] = useState(false);//@Joyce:Demo用
+  const [isDemoMode, setIsDemoMode] = useState(false); //@Joyce:Demo用
 
   // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
   // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
@@ -101,7 +101,7 @@ const Home = () => {
   const handleSendDialog = async () => {
     if (!textAreaValue.trim()) return;
     const newUserMsg = { role: "user", type: "text", content: textAreaValue };
-    const image_url = await submitFileUpload(); 
+    const image_url = await submitFileUpload();
     //測試回話開場
     const confirmMsg = {
       role: "assistant",
@@ -160,7 +160,7 @@ const Home = () => {
           userTexts.some((t) => t.includes("坪數")) &&
           userTexts.some((t) => t.includes("總價")) &&
           userTexts.some((t) => t.includes("聯絡人"));
-          userTexts.some((t) => t.includes("Logo"));
+        userTexts.some((t) => t.includes("Logo"));
 
         if (hasFlyerInfo) {
           console.log("使用者輸入齊全，準備發送產 flyer");
@@ -319,12 +319,12 @@ const Home = () => {
       // 直接把 demo 圖片塞進 carousel
       setImageSelectedToIllustrate([demoImageUrl]);
       // setSelectedIndex(0);
-      // setIsGenerationCompleted(true);   // 回到 ..Which one? 畫面  
-      setImgUrls([demoImageUrl]);           // 傳給 Illustration.jsx 的 props
-      setIsIllustrationOpen(true);          // 呈現 Illustration 元件
+      // setIsGenerationCompleted(true); // 回到 ..Which one? 畫面
+      setImgUrls([demoImageUrl]); // 傳給 Illustration.jsx 的 props
+      setIsIllustrationOpen(true); // 呈現 Illustration 元件
       setIsOpenForm(false);
       setIsLoading(false);
-      return; // 不呼叫 /generate-multiple-images 
+      return; // 不呼叫 /generate-multiple-images
     }
     /* ---------- demo 快速回傳 end ---------- */
     //Joyce:原流程走 API
