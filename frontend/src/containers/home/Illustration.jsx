@@ -196,6 +196,7 @@ const Illustration = ({ imgUrls, onBack }) => {
 
   useEffect(() => {
     // setIsLoading(false);
+    console.log("imgUrls", imgUrls);
     const container = containerRef.current;
     const inner = innerRef.current;
 
