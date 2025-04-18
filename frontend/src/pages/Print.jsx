@@ -25,9 +25,11 @@ const Print = () => {
   const { imgUrlToPrint } = location.state || {};
   // const fileInputRef = useRef(null);
   const [isPrinting, setIsPrinting] = useState(false);
+  const s3AuthCode = "b1f7690c-ad05-4416-8c42-72df5c38fae2";
 
   useEffect(() => {
     if (imgUrlToPrint) {
+      console.log("Image URL to print:", imgUrlToPrint);
       convertImageToBase64(imgUrlToPrint);
     }
   }, [imgUrlToPrint]);
@@ -48,6 +50,7 @@ const Print = () => {
   }, [authCode]);
 
   const convertImageToBase64 = (url) => {
+    url = `${url}?token=${encodeURIComponent(`Bearer ${s3AuthCode}`)}`;
     const fileName = url.substring(
       url.lastIndexOf("/") + 1,
       url.lastIndexOf(".")
