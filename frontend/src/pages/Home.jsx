@@ -36,6 +36,8 @@ const Home = () => {
     []
   );
   const [flyerMode, setFlyerMode] = useState(false); // @Joyce是否為房仲流程
+  const [isDemoMode, setIsDemoMode] = useState(false);//@Joyce:Demo用
+
   // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
   // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
   // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
@@ -99,23 +101,7 @@ const Home = () => {
   const handleSendDialog = async () => {
     if (!textAreaValue.trim()) return;
     const newUserMsg = { role: "user", type: "text", content: textAreaValue };
-    const image_url = await submitFileUpload(); //@JoycePan810暫時拔掉
-    //如果沒有上傳圖片，則不會進行對話
-    // let image_url;
-
-    // if (fileName) {
-    //   // 若已上傳過圖，從 S3 直接組網址即可
-    //   image_url = `${S3_BASE_URL}${fileName}`;
-    // } else {
-    //   // 第一次上傳圖
-    //   image_url = await submitFileUpload();
-    //   if (!image_url) {
-    //     showSwal({ isSuccess: false, title: "請先上傳圖片，再開始對話唷！" });
-    //     return;
-    //   }
-    // }
-    // const newImageMsg = { role: "user", type: "image", image_url };
-    // const fileName = file?.name || "";
+    const image_url = await submitFileUpload(); 
     //測試回話開場
     const confirmMsg = {
       role: "assistant",
@@ -152,6 +138,15 @@ const Home = () => {
         setFileName(res.image_filename);
         setFlyerMode(true);
         setIsOpenForm(true); //@Joyce:開啟表單填標題
+
+        //只要檔名含 27011900 代表是 demo
+        if (
+          newMessages.some(
+            (m) => m.type === "image" && m.image_url.includes("27011900")
+          )
+        ) {
+          setIsDemoMode(true);
+        }
       }
 
       // @Joyce:偵測使用者補齊資訊後，自動觸發最終 API
@@ -161,13 +156,14 @@ const Home = () => {
           .map((msg) => msg.content);
 
         const hasFlyerInfo =
-          userTexts.some((t) => t.includes("主標題")) &&
+          // userTexts.some((t) => t.includes("主標題")) &&
           userTexts.some((t) => t.includes("坪數")) &&
           userTexts.some((t) => t.includes("總價")) &&
           userTexts.some((t) => t.includes("聯絡人"));
+          userTexts.some((t) => t.includes("Logo"));
 
         if (hasFlyerInfo) {
-          console.log("➡️ 使用者輸入齊全，準備發送產 flyer");
+          console.log("使用者輸入齊全，準備發送產 flyer");
           const payload = {
             messages: updatedMessages.concat(res.new_messages),
             image_filename: fileName,
@@ -314,6 +310,24 @@ const Home = () => {
     }
     setIsLoading(true);
     setIsOpenForm(false);
+    // Joyce:判斷是否 demo 模式
+    /* ---------- 這段是 demo 快捷 ---------- */
+    if (isDemoMode) {
+      const demoImageUrl =
+        "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27901900_demo.png";
+
+      // 直接把 demo 圖片塞進 carousel
+      setImageSelectedToIllustrate([demoImageUrl]);
+      // setSelectedIndex(0);
+      // setIsGenerationCompleted(true);   // 回到 ..Which one? 畫面  
+      setImgUrls([demoImageUrl]);           // 傳給 Illustration.jsx 的 props
+      setIsIllustrationOpen(true);          // 呈現 Illustration 元件
+      setIsOpenForm(false);
+      setIsLoading(false);
+      return; // 不呼叫 /generate-multiple-images 
+    }
+    /* ---------- demo 快速回傳 end ---------- */
+    //Joyce:原流程走 API
     const payload = {
       image_filename: fileName,
       content: textContent,
