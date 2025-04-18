@@ -439,8 +439,10 @@ async def generate_multiple_images(
         layouts = ["topLeft", "topRight", "center", "bottomLeft", "bottomRight"]
         margin = 20
         center_bias_y = -10 
+        bottom_bias_y = 30
         horizontal_offset = 40  # 控制左右內縮距離
-        vertical_offset = 140    # 控制上下間距  
+        vertical_offset = 140    # 控制上下間距
+          
 
         # 如果 image_filename 是一整串 URL，嘗試從遠端下載圖檔
         if image_filename.startswith("http"):
@@ -525,9 +527,9 @@ async def generate_multiple_images(
                     y = img_y + (new_height - text_height) / 2 + center_bias_y
                 elif layout == "bottomLeft":
                     x = img_x + horizontal_offset 
-                    y = img_y + new_height - text_height - vertical_offset
+                    y = img_y + new_height - text_height - vertical_offset - bottom_bias_y
                 elif layout == "bottomRight":
-                    x = img_x + new_width - text_width - margin
+                    x = img_x + new_width - text_width - horizontal_offset
                     y = img_y + new_height - text_height - vertical_offset
 
                 draw.text((x, y), content, font=font, fill=(255, 255, 255))
