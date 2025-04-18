@@ -529,8 +529,8 @@ async def generate_multiple_images(
                     x = img_x + horizontal_offset 
                     y = img_y + new_height - text_height - vertical_offset - bottom_bias_y
                 elif layout == "bottomRight":
-                    x = img_x + new_width - text_width - margin
-                    y = img_y + new_height - text_height - vertical_offset - bottom_bias_y
+                    x = img_x + new_width - text_width - horizontal_offset
+                    y = img_y + new_height - text_height - vertical_offset
 
                 draw.text((x, y), content, font=font, fill=(255, 255, 255))
 
