@@ -57,7 +57,8 @@ const Print = () => {
       url.lastIndexOf("/") + 1,
       url.lastIndexOf(".")
     );
-    const mimeType = url.substring(url.lastIndexOf(".") + 1);
+    // const mimeType = url.substring(url.lastIndexOf(".") + 1);
+    const mimeType = url.substring(url.lastIndexOf(".") + 1).split("?")[0];
     localStorage.setItem("uploadedFileName", fileName);
     localStorage.setItem("uploadedFileType", `image/${mimeType}`);
 
