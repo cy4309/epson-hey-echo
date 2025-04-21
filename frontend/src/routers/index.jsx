@@ -4,7 +4,6 @@ export const router_path = {
   // illustration: "/illustration",
   print: "/print",
   login: "/login",
-  // test: "/test",
   // form: "/form/:title",
   error: "*",
 };

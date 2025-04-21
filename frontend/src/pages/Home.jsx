@@ -35,14 +35,9 @@ const Home = () => {
   const [imageSelectedToIllustrate, setImageSelectedToIllustrate] = useState(
     []
   );
-  const [flyerMode, setFlyerMode] = useState(false); // @Joyce是否為房仲流程
-  const [isDemoMode, setIsDemoMode] = useState(false); //@Joyce:Demo用
+  const [flyerMode, setFlyerMode] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
-  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
-  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
-  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/123.png",
-  // "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/456.png",
-  // console.log(imageSelectedToIllustrate);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isOpenForm, setIsOpenForm] = useState(false);
   const [fileName, setFileName] = useState("");
@@ -51,7 +46,7 @@ const Home = () => {
   const [isIllustrationOpen, setIsIllustrationOpen] = useState(false);
   const [imgUrls, setImgUrls] = useState([]);
   const endRef = useRef(null);
-  const dialogRef = useRef(null);
+  // const dialogRef = useRef(null);
   // for carousel
   const containerRef = useRef(null);
   const innerRef = useRef(null);
@@ -60,18 +55,17 @@ const Home = () => {
   const [maxDrag, setMaxDrag] = useState(0);
   const itemWidth = 300 + 16; // item width + gap
 
-  useEffect(() => {
-    const updateHeight = () => {
-      if (dialogRef.current) {
-        dialogRef.current.style.height = `${window.innerHeight}px`;
-      }
-    };
+  // useEffect(() => {
+  //   const updateHeight = () => {
+  //     if (dialogRef.current) {
+  //       dialogRef.current.style.height = `${window.innerHeight}px`;
+  //     }
+  //   };
+  //   updateHeight(); // 初始化
+  //   window.addEventListener("resize", updateHeight);
 
-    updateHeight(); // 初始化
-    window.addEventListener("resize", updateHeight);
-
-    return () => window.removeEventListener("resize", updateHeight);
-  }, []);
+  //   return () => window.removeEventListener("resize", updateHeight);
+  // }, []);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -159,9 +153,9 @@ const Home = () => {
           // userTexts.some((t) => t.includes("主標題")) &&
           userTexts.some((t) => t.includes("坪數")) &&
           userTexts.some((t) => t.includes("總價")) &&
-          userTexts.some((t) => t.includes("特點"))&&
-          userTexts.some((t) => t.includes("聯絡人"))&&
-          userTexts.some((t) => t.includes("聯絡資訊"))&&
+          userTexts.some((t) => t.includes("特點")) &&
+          userTexts.some((t) => t.includes("聯絡人")) &&
+          userTexts.some((t) => t.includes("聯絡資訊")) &&
           userTexts.some((t) => t.includes("Logo"));
 
         if (hasFlyerInfo) {
@@ -237,7 +231,6 @@ const Home = () => {
   const handleFileUpload = (e) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
-    // console.log(selectedFile);
     const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
     if (!allowedTypes.includes(selectedFile.type)) {
       showSwal(false, "只支援 PNG、JPG、JPEG 格式");
@@ -265,7 +258,6 @@ const Home = () => {
       // const formData = await convertUrlToFormData(selectedImageUrl);
       const formData = new FormData();
       formData.append("image_url", selectedImageUrl);
-      // 將 FormData 發送到後端
       const res = await uploadImage(formData);
       console.log("上傳圖片結果:", res);
 
@@ -377,15 +369,6 @@ const Home = () => {
               // ref={dialogRef}
             >
               <aside>
-                {/* <h2 className="mb-4 text-xl font-semibold text-center">
-                AI 設計師 · 對話式生圖
-              </h2> */}
-                {/* <motion.div
-              className="w-[200px] h-[200px] rounded-full bg-black"
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ repeat: Infinity, duration: 2 }}
-            /> */}
                 <div className="mb-4 flex justify-center items-center">
                   <BaseButton
                     className="ml-2"
@@ -400,10 +383,12 @@ const Home = () => {
                       if (messages.length > 0) {
                         setIsGenerationCompleted((prev) => !prev);
                       } else {
-                        showSwal({
-                          isSuccess: false,
-                          title: "請先輸入訊息或上傳圖片！",
-                        });
+                        navigate("/print");
+                        // setIsOpenUploadFile(true);
+                        // showSwal({
+                        //   isSuccess: false,
+                        //   title: "請先輸入訊息或上傳圖片！",
+                        // });
                       }
                     }}
                   >

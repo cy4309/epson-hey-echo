@@ -1,11 +1,7 @@
-import { useEffect, useState, useRef } from "react";
+import { useState } from "react";
 import BaseButton from "@/components/BaseButton";
 import { useNavigate } from "react-router-dom";
 import { showSwal } from "@/utils/notification";
-import { Canvas } from "@react-three/fiber";
-import { Leva } from "leva";
-import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
-import Scene from "@/containers/login/geometry/Scene";
 import { motion } from "framer-motion";
 // import gifDefault from "@/assets/images/a-default.gif";
 import gifBored from "@/assets/images/b-bored.gif";
@@ -13,10 +9,16 @@ import gifThinking from "@/assets/images/c-thinking.gif";
 // import gifDance from "@/assets/images/d-dance.gif";
 // import gifSad from "@/assets/images/e-sad.gif";
 
+// import { useEffect, useRef } from "react";
+// import { Canvas } from "@react-three/fiber";
+// import { Leva } from "leva";
+// import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
+// import Scene from "@/containers/login/geometry/Scene";
+
 const Login = () => {
   const navigate = useNavigate();
   // const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
-  // const modelUrl = "/Robot_To_C_250415_02_noGlass.glb";
+  // const modelUrl = "/Robot_To_C_250415_02_noGlass.glb"; // 如果要用模型，用這個
   // const [animationName, setAnimationName] = useState("");
 
   const [currentGif, setCurrentGif] = useState(gifBored);
@@ -91,13 +93,6 @@ const Login = () => {
             </motion.div>
           ))}
         </div>
-        {/* <div className="flex flex-col">
-        <h1 className="text-2xl">I am your Banner Generator</h1>
-        <span>Economy,</span>
-        <span>Convenience,</span>
-        <span>Home Printing,</span>
-        <span>O in one - ECHO!</span>
-      </div> */}
 
         <img
           src={currentGif}

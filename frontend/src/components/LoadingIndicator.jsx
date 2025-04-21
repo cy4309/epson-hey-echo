@@ -1,19 +1,12 @@
 // import Icon from "@mdi/react";
 // import { mdiLoading } from "@mdi/js";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import gifDance from "@/assets/images/d-dance.gif";
 import gifBored from "@/assets/images/b-bored.gif";
 import picboxAvatar from "@/assets/images/picbox-avatar.png";
 
 const LoadingIndicator = () => {
   const [currentGif, setCurrentGif] = useState(gifDance);
-
-  // useEffect(() => {
-  //   const timer = setTimeout(() => {
-  //     setCurrentGif(gifDance);
-  //   }, 5000);
-  //   return () => clearTimeout(timer);
-  // }, []);
 
   const handleGifChange = () => {
     setCurrentGif((prevGif) => (prevGif === gifDance ? gifBored : gifDance));

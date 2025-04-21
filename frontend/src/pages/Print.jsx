@@ -12,7 +12,11 @@ import {
 import { useDispatch } from "react-redux";
 import { setAuthCode } from "@/stores/features/epsonSlice";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
+import {
+  ArrowLeftOutlined,
+  ArrowRightOutlined,
+  AreaChartOutlined,
+} from "@ant-design/icons";
 
 const Print = () => {
   const location = useLocation();
@@ -23,9 +27,9 @@ const Print = () => {
   // const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
   const { imgUrlToPrint } = location.state || {};
-  // const fileInputRef = useRef(null);
+  const fileInputRef = useRef(null);
   const [isPrinting, setIsPrinting] = useState(false);
-  const s3AuthCode = "b1f7690c-ad05-4416-8c42-72df5c38fae2";
+  const s3AuthCode = import.meta.env.VITE_S3_AUTH_CODE;
 
   useEffect(() => {
     if (imgUrlToPrint) {
@@ -78,41 +82,41 @@ const Print = () => {
     };
   };
 
-  // const handleFileUpload = (e) => {
-  //   const selectedFile = e.target.files[0];
-  //   if (!selectedFile) return;
+  const handleFileUpload = (e) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
 
-  //   const fileType = selectedFile.type;
-  //   const fileName = selectedFile.name;
+    const fileType = selectedFile.type;
+    const fileName = selectedFile.name;
 
-  //   if (fileType.startsWith("image/")) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       const base64File = reader.result;
-  //       localStorage.setItem("uploadedFile", base64File);
-  //       localStorage.setItem("uploadedFileName", fileName);
-  //       localStorage.setItem("uploadedFileType", fileType);
-  //       // setFile(selectedFile);
-  //       setFilePreview(URL.createObjectURL(selectedFile));
-  //     };
-  //     reader.readAsDataURL(selectedFile);
-  //   } else if (fileType === "application/pdf") {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       const base64File = reader.result;
-  //       localStorage.setItem("uploadedFile", base64File);
-  //       localStorage.setItem("uploadedFileName", fileName);
-  //       localStorage.setItem("uploadedFileType", fileType);
-  //       // setFile(selectedFile);
-  //       setFilePreview(reader.result);
-  //     };
-  //     reader.readAsDataURL(selectedFile);
-  //   } else {
-  //     showSwal({ isSuccess: false, title: "不支援的文件類型!" });
-  //   }
-  //   // setFile(selectedFile);
-  //   // setFilePreview(URL.createObjectURL(selectedFile));
-  // };
+    if (fileType.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64File = reader.result;
+        localStorage.setItem("uploadedFile", base64File);
+        localStorage.setItem("uploadedFileName", fileName);
+        localStorage.setItem("uploadedFileType", fileType);
+        // setFile(selectedFile);
+        setFilePreview(URL.createObjectURL(selectedFile));
+      };
+      reader.readAsDataURL(selectedFile);
+    } else if (fileType === "application/pdf") {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64File = reader.result;
+        localStorage.setItem("uploadedFile", base64File);
+        localStorage.setItem("uploadedFileName", fileName);
+        localStorage.setItem("uploadedFileType", fileType);
+        // setFile(selectedFile);
+        setFilePreview(reader.result);
+      };
+      reader.readAsDataURL(selectedFile);
+    } else {
+      showSwal({ isSuccess: false, title: "不支援的文件類型!" });
+    }
+    // setFile(selectedFile);
+    // setFilePreview(URL.createObjectURL(selectedFile));
+  };
 
   const executePrint = async () => {
     try {
@@ -228,11 +232,42 @@ const Print = () => {
   if (!filePreview) {
     return (
       <div className="p-4 w-full h-full max-w-4xl mx-auto border rounded-xl flex flex-col justify-center items-center">
-        <span>沒有可用的圖片，請返回重新生成。</span>
-        <BaseButton className="my-4" onClick={() => navigate("/login")}>
-          <span className="mr-2">回首頁</span>
-          <ArrowRightOutlined />
-        </BaseButton>
+        <span>沒有可用的圖片，請上傳圖片或重新生成。</span>
+        <div className="my-4 w-full flex justify-center items-center">
+          <BaseButton
+            className="w-full mx-2"
+            onClick={() => navigate("/login")}
+          >
+            <ArrowLeftOutlined />
+            <span className="ml-2">回首頁</span>
+          </BaseButton>
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept=".png, .jpg, .jpeg, .pdf"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
+          {!filePreview ? (
+            <BaseButton
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full m-4 rounded-xl"
+            >
+              <AreaChartOutlined />
+              <span className="ml-2">上傳照片</span>
+            </BaseButton>
+          ) : (
+            <BaseButton
+              label="重新上傳圖片"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full m-4 rounded-xl"
+            >
+              <AreaChartOutlined />
+              <span className="ml-2">重新上傳</span>
+            </BaseButton>
+          )}
+        </div>
       </div>
     );
   }
@@ -248,26 +283,6 @@ const Print = () => {
               src={filePreview}
               alt="preview"
             />
-            {/* <input
-           type="file"
-           ref={fileInputRef}
-           accept=".png, .jpg, .jpeg, .pdf"
-           className="hidden"
-           onChange={handleFileUpload}
-         />
-         {!filePreview ? (
-           <BaseButton
-             label="上傳圖片"
-             onClick={() => fileInputRef.current?.click()}
-             className="w-full m-4 rounded-xl"
-           />
-         ) : (
-           <BaseButton
-             label="重新上傳圖片"
-             onClick={() => fileInputRef.current?.click()}
-             className="w-full m-4 rounded-xl"
-           />
-         )} */}
             <div className="w-full h-full flex justify-center items-center">
               <BaseButton
                 className="w-1/2 mx-2 !px-0"
