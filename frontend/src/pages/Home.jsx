@@ -125,6 +125,26 @@ const Home = () => {
       });
       console.log("後端回傳:", res);
       const newMessages = res.new_messages || [];
+
+      if (file) {
+        const fileMessage = {
+          role: "user",
+          type: "file",
+          file_url: URL.createObjectURL(file),
+          file_name: file.name,
+        };
+
+        // 找到最後一筆 role="user" 的位置
+        const lastUserIndex = updatedMessages
+          .map((msg, index) => (msg.role === "user" ? index : -1))
+          .filter((index) => index !== -1)
+          .pop();
+
+        // 將 fileMessage 插入到最後一筆 role="user" 的前一筆位置
+        if (lastUserIndex !== undefined) {
+          updatedMessages.splice(lastUserIndex, 0, fileMessage);
+        }
+      }
       setMessages((prev) => [...prev, ...newMessages]);
 
       // @Joyce:如果是房仲流程，進入引導模式
@@ -146,7 +166,11 @@ const Home = () => {
       // @Joyce:偵測使用者補齊資訊後，自動觸發最終 API
       if (flyerMode) {
         const userTexts = [...updatedMessages, ...res.new_messages]
-          .filter((msg) => msg.role === "user" && msg.type === "text")
+          .filter(
+            (msg) =>
+              msg.role === "user" &&
+              (msg.type === "text" || msg.type === "file")
+          )
           .map((msg) => msg.content);
 
         const hasFlyerInfo =
@@ -412,6 +436,21 @@ const Home = () => {
                           src={picboxAvatar}
                           alt="picbox"
                           className="w-6 h-6 rounded-full"
+                        />
+                      </div>
+                    )}
+                    {msg.type === "file" && (
+                      <div
+                        className={`px-2 py-2 inline-block rounded-xl ${
+                          msg.role === "user"
+                            ? "bg-primaryYellow"
+                            : "bg-secondary"
+                        }`}
+                      >
+                        <img
+                          src={msg.file_url}
+                          alt="msg.file_name"
+                          className="w-48"
                         />
                       </div>
                     )}
