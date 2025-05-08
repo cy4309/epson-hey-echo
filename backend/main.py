@@ -8,6 +8,10 @@ from openai import OpenAI
 from backend.s3_uploader import upload_image_to_epsondest
 from backend.flyer_generator import generate_real_flyer,generate_flyer_from_talk
 
+#Routes
+from backend.routes.upload_api import router as upload_router
+
+
 import google.generativeai as genai
 from PIL import Image as PILImage, ImageDraw, ImageFont
 import uuid,os,io,re,requests,sys,asyncio
@@ -38,6 +42,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# 掛載所有子路由
+app.include_router(upload_router)
+
 @app.get("/")
 async def root():
     return {"message":"Backend is alive !!!"}
@@ -65,30 +72,6 @@ async def test_gpt():
         return {"gpt_prompt": response.choices[0].message.content.strip()}
     except Exception as e:
         return {"error": str(e)}
-    
-# 測試chatbot: gemini+gpt
-# #開場白
-# @app.get("/onboarding")
-# async def onboarding():
-#     return {
-#         "messages": [
-#             {
-#                 "role": "assistant",
-#                 "type": "text",
-#                 "content": "嗨我是你的 AI 設計師，Echo 🎨 請問你今天想要設計什麼呢？"
-#             },
-#             {
-#                 "role": "assistant",
-#                 "type": "text",
-#                 "content": "你可以選擇：\n1️⃣ AI 圖像創作\n2️⃣ 排版成 PDF\n3️⃣ 給我靈感，我幫你想\n\n直接輸入數字或描述也可以喔！"
-#             },
-#             {
-#                 "role": "assistant",
-#                 "type": "text",
-#                 "content": "如果你有圖片想一起用，也可以上傳，我會幫你加上文字、設計風格，再輸出成漂亮的排版唷！"
-#             }
-#         ]
-#     }
 
 @app.post("/multi-dialogue-to-image")
 async def generate_prompt(req: Request):
