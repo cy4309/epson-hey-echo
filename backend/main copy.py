@@ -1,18 +1,17 @@
 from fastapi import FastAPI, File, UploadFile, Form, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-# from fastapi.requests import Request
 from pydantic import BaseModel
 from reportlab.lib.pagesizes import A4
-# from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from openai import OpenAI
 from backend.s3_uploader import upload_image_to_epsondest
+from backend.flyer_generator import generate_real_flyer,generate_flyer_from_talk
+
 import google.generativeai as genai
 from PIL import Image as PILImage, ImageDraw, ImageFont
-import uuid,os,io,re
+import uuid,os,io,re,requests,sys,asyncio
 
-import os, sys
 print("CWD =", os.getcwd())
 print("PYTHONPATH =", sys.path)
 print("backend/ content =", os.listdir("backend"))
@@ -24,9 +23,8 @@ print("GEMINI_API_KEY:", os.getenv("GEMINI_API_KEY")[:6])
 
 app = FastAPI()
 UPLOAD_DIR = "uploads"
-# IMG_DIR = "img_files"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-# os.makedirs(IMG_DIR, exist_ok=True)
+font_path = os.path.join(os.getcwd(), "backend", "fonts", "SourceHanSerifTW-Bold.otf")
 
 #記憶Gemini 對話歷史
 chat_history = []
@@ -103,11 +101,13 @@ async def generate_prompt(req: Request):
         image_url = data.get("image_url")
         if image_url in [None, "", "undefined"]:
             image_url = None
-        print("[原始 image_url]", image_url)
+            print("[原始 image_url]", image_url)
+            # Demo 用：強制預設 Demo 圖片
+            # image_url = "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/Demo.png"
+            # print("[INFO] 未提供圖片，改用 Demo 圖:", image_url)
         
         if image_url and isinstance(image_url, str):
             if image_url.startswith("undefined"):
-                # 去除undefined
                 image_filename = image_url.replace("undefined", "")
                 print(f"[INFO] image_url，從{image_url} 到 {image_filename}")
             else:
@@ -117,12 +117,32 @@ async def generate_prompt(req: Request):
             image_path = os.path.join(UPLOAD_DIR, image_filename)
             print(f"[INFO] 檢查除片文件: {image_path}, 存在: {os.path.exists(image_path)}")
             
+            if not os.path.exists(image_path) and image_url.startswith("http"):
+                try:
+                    print(f"[INFO] 從 URL 下載圖片: {image_url}")
+                    response = requests.get(image_url)
+                    if response.status_code == 200:
+                        with open(image_path, "wb") as f:
+                            f.write(response.content)
+                        print(f"[INFO] 成功下載圖片到 {image_path}")
+                        image_url = f"https://epson-hey-echo.onrender.com/view-image/{image_filename}"
+                        data["image_url"] = image_url
+                        image_url = data["image_url"]
+
+                    else:
+                        print(f"[ERROR] 從 URL 下載失敗，狀態碼: {response.status_code}")
+                        return JSONResponse(content={"error": "圖片下載失敗"}, status_code=400)
+                except Exception as e:
+                    print(f"[ERROR] 下載圖片過程出錯: {e}")
+                    return JSONResponse(content={"error": "圖片下載失敗"}, status_code=500)
+                
             if os.path.exists(image_path):
                 data["image_url"] = f"https://epson-hey-echo.onrender.com/view-image/{image_filename}"
                 print(f"[INFO] 更新image_url為: {data['image_url']}")
             else:
                 print(f"[ERROR] 圖片文件不存在: {image_path}")
                 return JSONResponse(content={"error": "圖片文件不存在"}, status_code=404)
+                    
 
         # Step 1: 與Gemini對話
         combined_text = ""
@@ -130,7 +150,7 @@ async def generate_prompt(req: Request):
             if msg["type"] == "text":
                 role = "User" if msg["role"] == "user" else "model"
                 chat_history.append({"role": role, "parts": [msg["content"]]})
-                image_url = data.get("image_url")
+                # image_url = data.get("image_url")
                 combined_text += f"{role}: {msg['content']}\n"
 
         # 如果包含指定關鍵語句，走「合成房仲海報邏輯」
@@ -140,17 +160,48 @@ async def generate_prompt(req: Request):
             msg["content"] for msg in messages 
             if msg["type"] == "text" and msg["role"] == "user"
         ]).strip().lower()
+        
+        # Demo 模式：若輸入包含 demo 且沒傳圖片，就自動用 Demo.png
+        if "demo" in user_text and not image_url:
+            print("[INFO] demo 模式觸發，開始模擬處理延遲...")
+            await asyncio.sleep(5) 
+            image_url = "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27011900_demo_f1.png"
+            print("[INFO] demo 模式觸發，自動套用 Demo 圖:", image_url)
+
+            # 模擬前端傳來的 image_url 進行後續處理
+            data["image_url"] = image_url
+            image_filename = image_url.split("/")[-1]
+            image_path = os.path.join(UPLOAD_DIR, image_filename)
+
+            if not os.path.exists(image_path):
+                try:
+                    print("[INFO] 開始下載 demo 圖片...")
+                    response = requests.get(image_url)
+                    if response.status_code == 200:
+                        with open(image_path, "wb") as f:
+                            f.write(response.content)
+                        print(f"[INFO] 成功下載 demo 圖片到: {image_path}")
+                    else:
+                        print(f"[ERROR] 無法下載 demo 圖片，狀態碼: {response.status_code}")
+                        return JSONResponse(content={"error": "下載 demo 圖片失敗"}, status_code=400)
+                except Exception as e:
+                    print(f"[ERROR] demo 圖片下載錯誤: {e}")
+                    return JSONResponse(content={"error": "demo 圖片下載錯誤"}, status_code=500)
+        # Demo 模式：若輸入包含 demo 且沒傳圖片，就自動用 Demo.png(end)
         has_trigger = any(keyword in user_text for keyword in trigger_keywords)
         has_image = bool(image_url)
+        is_demo_mode = "demo" in user_text and "27011900_demo_f1.png" in (image_url or "").lower() # 判斷是否是 demo 模式
+
         print("[使用者訊息]", user_text)
         print("[Trigger 判斷]", has_trigger, "| 有圖片:", has_image)
         
         if has_trigger and has_image:
+            
             matched = any(keyword in user_text for keyword in trigger_keywords) and (image_url)
             print("[Trigger 是否觸發]", matched,".有圖片", bool(image_url))
 
             # 產純色背景（用 Pillow 產圖）
-            width, height = 1240, 1754
+            width, height = 1024, 1792
             bg_color = "#264432"
             bottom_color = "#F8F1D7"
             poster = PILImage.new("RGB", (width, height), bg_color)
@@ -159,28 +210,34 @@ async def generate_prompt(req: Request):
 
             # 疊建築圖
             if image_url:
-                try:
-                    fg = PILImage.open(image_path).convert("RGBA")
-                    print(f"[INFO] 成功加載圖片: {image_path}")
+                # demo 模式:不用 Pillow，直接回傳原圖
+                if is_demo_mode:
+                    print("[INFO] demo 模式，不經過 Pillow 處理，直接回傳原圖 URL")
+                    response_messages = [
+                        {"role": "assistant", "type": "text", "content": "這是為您設計的宣傳單"},
+                        {"role": "assistant", "type": "image", "image_url": image_url}
+                    ]
+                    return JSONResponse(content={
+                        "new_messages": response_messages,
+                        "image_filename": image_url.split("/")[-1],
+                        "next_step": "await_flyer_info"
+                    })
+                else:
+                # 一般流程 :使用 Pillow 合圖
+                    try:
+                        fg = PILImage.open(image_path).convert("RGBA")
+                        print(f"[INFO] 成功加載圖片: {image_path}")
 
-                    # resize + paste
-                    ratio = width * 0.8 / fg.width
-                    fg_resized = fg.resize((int(fg.width * ratio), int(fg.height * ratio)))
-                    x = (width - fg_resized.width) // 2
-                    y = int(height * 0.35 - fg_resized.height / 2)
-                    poster.paste(fg_resized, (x, y), fg_resized)
-                    print("[INFO] 圖片成功合成到海报")
-                except Exception as img_error:
-                    print(f"[ERROR] 圖片處理失败: {img_error}")
-                    return JSONResponse(content={"error": f"圖片處理失败: {str(img_error)}"}, status_code=500)
-
-                # 加上文字
-                try:
-                    font_h1 = ImageFont.truetype("arial.ttf", 72)
-                    font_h2 = ImageFont.truetype("arial.ttf", 40)
-                    font_cta = ImageFont.truetype("arial.ttf", 36)
-                except:
-                    font_h1 = font_h2 = font_cta = ImageFont.load_default()
+                        # resize + paste
+                        ratio = width * 0.8 / fg.width
+                        fg_resized = fg.resize((int(fg.width * ratio), int(fg.height * ratio)))
+                        x = (width - fg_resized.width) // 2
+                        y = int(height * 0.35 - fg_resized.height / 2)
+                        poster.paste(fg_resized, (x, y), fg_resized)
+                        print("[INFO] 圖片成功合成到海报")
+                    except Exception as img_error:
+                        print(f"[ERROR] 圖片處理失败: {img_error}")
+                        return JSONResponse(content={"error": f"圖片處理失败: {str(img_error)}"}, status_code=500)
 
                 # 儲存圖片
                 fileName = f"{uuid.uuid4().hex}.png"
@@ -193,17 +250,23 @@ async def generate_prompt(req: Request):
                     status, image_url = upload_image_to_epsondest(filepath, fileName)
                     if status != 200 or not image_url or image_url == "null":
                         print(f"[WARNING] 上傳Epson失敗或回傳 URL 無效，使用本地 URL")
-
                         image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
                     response_messages = [
                         {"role": "assistant", "type": "text", "content": "以下為您生成的房仲宣傳單"},
-                        {"role": "assistant", "type": "image", "image_url": image_url}
+                        {"role": "assistant", "type": "image", "image_url": image_url},
+                        {
+                            "role": "assistant",
+                            "type": "text",
+                            "content": "這是我幫你合成的底圖！\n\n接下來請直接輸入以下資訊，我會自動幫你完成整張房仲宣傳單：\n\n 坪數、總價、特點、聯絡人、聯絡資訊及Logo格式不限，直接輸入內容即可！"
+                        },
                     ]
                     print(f"[INFO] 上傳结果: 狀態={status}, URL={image_url}")
-                    
-                    if status != 200:
-                        print(f"[WARNING] 上傳Epson失敗，使用本地URL")
-                        image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
+                    return JSONResponse(content={
+                        "new_messages": response_messages,
+                        "image_filename": fileName
+                        # "next_step": "await_flyer_info"
+                    })
+
                 except Exception as upload_error:
                     print(f"[ERROR] 上傳到Epson失敗: {upload_error}")
                     image_url = f"https://epson-hey-echo.onrender.com/view-image/{fileName}"
@@ -212,57 +275,45 @@ async def generate_prompt(req: Request):
                     response = model.generate_content("請用簡短文字介紹這張房仲海報的設計思路和特色，不超過50字")
                     idea_description = response.text.strip()
                     print("[Gemini response]", idea_description)
-                    
+                    # 測試引導
                     response_messages = [
-                    {"role": "assistant", "type": "text", "content": "以下為您生成的房仲宣傳單"},
-                    {"role": "assistant", "type": "image", "image_url": image_url}
+                        {"role": "assistant", "type": "image", "image_url": image_url},
+                        {"role": "assistant", "type": "text", "content": "這是建築圖片底圖，請補上坪數、總價與聯絡資訊，我會幫您合成完整房仲宣傳單！"}
                     ]
-                return JSONResponse(content={
-                    "new_messages": response_messages
-                })
+
+                    return JSONResponse(content={
+                        "new_messages": response_messages,
+                        "image_filename": image_filename,
+                        "next_step": "await_flyer_info"
+                    })
+
         elif user_text:
                 print("[Fallback] 沒有圖片或不合成，進入 DALL·E 圖像生成邏輯")
                 # Step 2: 使用 GPT-4 轉換為 prompt
                 try:
                     system_msg = """
-                    # 你是一位熟悉房仲廣告與建築攝影的圖像提示詞工程師，根據輸入內容撰寫英文 prompt，供 DALL·E 生成海報背景。
-                    
-                    # 圖片需求：
-                    # - A4 尺寸、直式構圖
-                    # - 無文字、LOGO、裝飾元素
+                    You are a professional visual prompt engineer specializing in real estate ads and flat poster design. Your job is to write natural, vivid English prompts for DALL·E to generate clean poster backgrounds in a minimalist, editorial flat illustration style.
 
-                    # 請從以下分類中，各選擇 1-2 種風格，並以逗號句式組成一段描述，供 DALL·E 使用：
-                    # 【插畫與風格類型】
-                    # Flat Illustration (扁平插畫), Watercolor Illustration (水彩插畫), Vector Art (向量圖風), Paper-cut Style (紙雕風格), Collage Style (拼貼風), Editorial Illustration (編輯插畫), Isometric Design (等距構圖), Retro Graphic Design (復古平面設計), Mid-century Modern (中世紀現代風), Japanese Minimalist (日系極簡), Scandinavian Style (北歐風格), Children’s Book Illustration (童書插畫風), Line Art (線條插畫), Cutout Shapes (剪紙構成),editorial print design(印刷設計)
+                    Prompt constraints:
+                    - Format: Vertical A4
+                    - Style: Flat illustration, minimalist, editorial print design
+                    - No text, logos, UI elements, mockups, shadows, or depth effects
+                    - Clean composition with generous negative space for future text
+                    - Colors: warm palette, earthy tones, or pastel duotone
+                    - No mockup scenes: strictly avoid desks, frames, stationery, decorative borders, or interior staging
+                    - This is not a design proposal or style guide. Do not include color swatches, palette blocks, sample bars, numbered labels, layout grids, A4 indicators, or any presentation-like elements
 
-                    # 【色彩色調】
-                    # Muted Colors (柔和色系), Pastel Tones (粉彩色調), Earthy Tones (大地色系), Warm Palette (暖色系), Cool Palette (冷色系), Monochrome Design (單色設計), Duotone Graphic (雙色設計), Limited Color Palette (限制配色), High Contrast Colors (高對比色), Color Blocking (色塊構成)
-                                        
-                    # 【構圖技巧與方法】
-                    # Centered Composition (中心構圖), Symmetry & Asymmetry (對稱與非對稱), Negative Space Usage (負空間運用), Grid-based Layout (網格系統排版), Focal Object Emphasis (視覺焦點集中), Repetition of Shapes (形狀重複), Framing with Shapes (幾何框架構圖), Abstract Geometric Layout (幾何抽象構圖), Minimalist Structure (極簡結構), Layered Cutout Composition (分層紙雕構圖), Organic Flow Composition (有機流動構圖)
+                    You should write prompts that sound like the following:
 
-                    # 【構圖技巧與視角】
-                    # Top-down View (俯視構圖), Flat Lay Design (平鋪構圖), Front View (正面構圖), Isometric Perspective (等距視角), Center-aligned View (置中構圖), Symmetrical Balance (視覺平衡), Minimal Depth (無透視層次), Single Object Focus (單物主角)
+                    "Create a vertical A4 flat illustration in a minimalist and editorial design style, featuring the exterior of a festive coffee shop decorated with Christmas ornaments and warm lights. Use a warm palette with muted earthy tones. Ensure a clean composition with ample negative space for future layout. Do not include any color references, layout grids, or presentation elements. The image should be a pure full-scene illustration — no surrounding borders, no color strips, no framing, and no background canvas."
 
-                    # 【附加風格提示（可混搭）】
-                    # No Text, No Letters, No Logos (無文字、無字母、無標誌), Poster Composition (海報感排版), Flyer Proportions (傳單比例), Clean Background (淨白或純色背景), Design for Print (印刷設計用途), Soft Texture Overlay (柔和紋理疊加), High Resolution Illustration (高解析插畫)
+                    Always follow this sentence style. Describe the main subject clearly, specify visual style and color tone, and end with layout clarity instructions.
 
-                    
-                    # 請注意：生成的 prompt 最終會用於設計平面海報，畫面要適合作為廣告主視覺，建議避免過度抽象或無主體的構圖。
-                    你是一位平面設計專家，擅長撰寫 DALL·E 圖像生成提示詞，用於產出單一主圖的扁平設計插畫（例如咖啡廳宣傳、商品視覺、房地產廣告等）。
-
-                    請根據使用者描述產出**一段英文 prompt**，用於生成一張 A4 尺寸的直式圖像，風格應符合以下條件：
-
-                    - Flat illustration / Paper-cut / Minimalist / Editorial design 風格
-                    - 不要有 3D 效果、光影或透視
-                    - 不要出現 mockup、展示板、背景紙張、陰影、邊框、配色球、UI 元素
-                    - 僅顯示主圖主體本身，構圖乾淨，四周保留排版空間
-                    - 色系建議使用：warm palette, earthy tones, or pastel tones
-
-                    請以一句完整自然的英文描述輸出 prompt，不要中英混排，不要加上任何補充說明。
+                    Now, based on the user’s input, write one complete sentence in this style. No explanation. No additional notes.
                     """
+
                     gpt_response = client.chat.completions.create(
-                        model="gpt-4-1106-preview",
+                        model="gpt-4o-2024-08-06",#gpt-4-1106-preview, gpt-4o-2024-08-06
                         messages=[
                             {"role": "system", "content": system_msg},
                             {"role": "user", "content": user_text}
@@ -273,13 +324,6 @@ async def generate_prompt(req: Request):
 
                     # 加上固定 prompt 樣板
                     prompt = idea
-                    # """
-                    # A vertical A4 real estate poster background layout.
-                    # Centered composition with clean empty margins. 
-                    # No text, no UI.
-                    # Only the illustration itself on a plain background.
-                    # """.strip()
-
                     print("[Final Prompt to DALL·E]", prompt)
                 except Exception as gpt_error:
                     return JSONResponse(content={"error": f"GPT 錯誤：{str(gpt_error)}"}, status_code=500)
@@ -317,8 +361,6 @@ async def generate_prompt(req: Request):
         print("[ERROR] generate-image:", e)
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-
-# API ：上傳圖片
 @app.post("/upload_image")
 async def upload_image(file: UploadFile = File(None), image_url: str = Form(None)):
     if file:
@@ -336,17 +378,39 @@ async def upload_image(file: UploadFile = File(None), image_url: str = Form(None
                 "message": "圖片上傳成功",
                 "image_url": f"https://epson-hey-echo.onrender.com/view-image/{file_name}",
                 "filename": file_name,
+                "image_url": image_url,
                 "code": 200
                 })
     elif image_url:
-        file_name = image_url.split("/")[-1] 
-        print("[INFO] submitSelectedImage 傳來的圖片 URL:", image_url)
-        return JSONResponse(
-            content={
-                "message": "我已收到你選擇的圖片",
-                "filename": file_name,
-                "code": 200
-            })
+        try:
+            headers = {
+                "User-Agent": "Mozilla/5.0"
+            }
+            response = requests.get(image_url, headers=headers)
+
+            if response.status_code == 200:
+                ext = image_url.split("?")[0].split(".")[-1].lower()
+                if ext not in ["png", "jpg", "jpeg"]:
+                    return JSONResponse(content={"error": "圖片格式不支援"}, status_code=400)
+                file_name = f"{uuid.uuid4().hex}.{ext}"
+                file_path = os.path.join(UPLOAD_DIR, file_name)
+                with open(file_path, "wb") as f:
+                    f.write(response.content)
+                print(f"[INFO] 已成功下載圖片並儲存為: {file_path}")
+                return JSONResponse(
+                    content={
+                        "message": "圖片已成功下載",
+                        "filename": file_name,
+                        "image_url": f"https://epson-hey-echo.onrender.com/view-image/{file_name}",
+                        "code": 200
+                    }
+                )
+            else:
+                print(f"[ERROR] 無法下載圖片，狀態碼: {response.status_code}")
+                return JSONResponse(content={"error": "無法下載圖片"}, status_code=400)
+        except Exception as e:
+            print(f"[ERROR] 圖片下載錯誤: {e}")
+            return JSONResponse(content={"error": "下載失敗"}, status_code=500)
     else:
         return JSONResponse(content={"error": "請上傳圖片或提供圖片 URL"}, status_code=400)
 
@@ -362,24 +426,20 @@ async def view_image(file_name: str):
 async def generate_multiple_images(
     image_filename: str = Form(...), #檔名成稱
     content: str = Form(...), #文字內容
-    font_size: int = Form(30), #字體大小
+    font_size: int = Form(34), #字體大小
     code: int = Form(200)
 ):
     try:
-        width, height = 595, 842
+        width, height = 1024, 1792 #(2480, 3508) or (1024, 1792)
         img_urls = []
         # 定義五種排版方式的位置
-        positions = {
-            "topLeft": (40, 40),
-            "topRight": (width - 140, 40),
-            "center": (width / 2 - 50, height / 2),
-            "bottomLeft": (40, height - 40),
-            "bottomRight": (width - 140, height - 40),
-        }
+        layouts = ["topLeft", "topRight", "center", "bottomLeft", "bottomRight"]
+        center_bias_y = -10 
+        bottom_bias_y = 80
+        horizontal_offset = 40  # 控制左右內縮距離
+        vertical_offset = 160    # 控制上下間距
+          
 
-        # image_path = os.path.join(UPLOAD_DIR, image_filename)
-        # if not os.path.exists(image_path):
-        #     return JSONResponse(content={"error": "圖片檔案不存在"}, status_code=400)
         # 如果 image_filename 是一整串 URL，嘗試從遠端下載圖檔
         if image_filename.startswith("http"):
             print(f"[INFO] image_filename 是 URL: {image_filename}")
@@ -414,7 +474,7 @@ async def generate_multiple_images(
         
 
         # 為每種排版生成獨立的 image
-        for layout, (x, y) in positions.items():
+        for layout in layouts:
             try:
                 fileName = f"{uuid.uuid4().hex}_{layout}.png"
                 file_path = os.path.join(UPLOAD_DIR, fileName)
@@ -424,7 +484,9 @@ async def generate_multiple_images(
                 img_width, img_height = img.size
                 # 調整圖片大小以適應A4
                 scale = max(width / img_width, height / img_height)
-                # adjusted_font_size = int(font_size * scale * 0.8) #調整字體大小
+                adjusted_font_size = int(font_size * scale * 3 ) #調整字體大小(預設80)
+                print(f"[DEBUG] 原始 font_size: {font_size}, 調整倍率 scale: {scale}, 最終 adjusted_font_size: {adjusted_font_size}")
+
                 new_width = int(img_width * scale)
                 new_height = int(img_height * scale)
                 img_resized = img.resize((new_width, new_height))
@@ -440,10 +502,31 @@ async def generate_multiple_images(
 
                 # 載入字型
                 try:
-                    font = ImageFont.truetype("arial.ttf", font_size)
+                    font = ImageFont.truetype(font_path, adjusted_font_size)
                 except Exception as font_error:
                     print(f"[WARNING] 字型載入失敗: {font_error}, 使用預設字型")
                     font = ImageFont.load_default()
+
+                text_bbox = draw.textbbox((0, 0), content, font=font)
+                text_width = text_bbox[2] - text_bbox[0]
+                text_height = text_bbox[3] - text_bbox[1]
+
+                # 根據 layout 計算位置
+                if layout == "topLeft":
+                    x = img_x + horizontal_offset
+                    y = img_y + vertical_offset
+                elif layout == "topRight":
+                    x = img_x + new_width - text_width -  horizontal_offset
+                    y = img_y + vertical_offset
+                elif layout == "center": 
+                    x = img_x + (new_width - text_width) / 2
+                    y = img_y + (new_height - text_height) / 2 + center_bias_y
+                elif layout == "bottomLeft":
+                    x = img_x + horizontal_offset 
+                    y = img_y + new_height - text_height - vertical_offset - bottom_bias_y
+                elif layout == "bottomRight":
+                    x = img_x + new_width - text_width - horizontal_offset
+                    y = img_y + new_height - text_height - vertical_offset - bottom_bias_y
 
                 draw.text((x, y), content, font=font, fill=(255, 255, 255))
 
@@ -497,6 +580,113 @@ async def generate_multiple_images(
         return JSONResponse(content=response_content)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
+    
+# API ：生成房仲海報    
+@app.post("/generate-final-flyer")
+async def generate_final_flyer(
+    image_file: UploadFile = File(...),
+    logo_file: UploadFile = File(None),
+    main_title: str = Form(...),
+    subtitle: str = Form(...),
+    features: str = Form(...),
+    area: str = Form(...),
+    price: str = Form(...),
+    agent_name: str = Form(...),
+    agent_phone: str = Form(...),
+    store_name: str = Form(...),
+    store_phone: str = Form(...),
+    address: str = Form(...)
+):
+    # 儲存建築圖片
+    building_filename = f"{uuid.uuid4().hex}_{image_file.filename}"
+    building_path = os.path.join("uploads", building_filename)
+    with open(building_path, "wb") as f:
+        f.write(await image_file.read())
+
+    # 儲存 logo
+    if logo_file:
+        logo_filename = f"{uuid.uuid4().hex}_{logo_file.filename}"
+        logo_path = os.path.join("uploads", logo_filename)
+        with open(logo_path, "wb") as f:
+            f.write(await logo_file.read())
+    else:
+        logo_path = os.path.join("icons", "default_logo.png")  # 預設 logo
+
+    # 開始合成圖
+    width, height = 2480, 3508
+    poster = PILImage.new("RGB", (width, height), "#264432")
+    draw = ImageDraw.Draw(poster)
+
+    # 字型
+    try:
+        title_font = ImageFont.truetype("fonts/SourceHanSerifTW-Bold.otf", 64)
+    except:
+        title_font = ImageFont.load_default()
+
+    normal_font = ImageFont.load_default()
+
+    # 上方主標題
+    draw.text((80, 50), main_title, font=title_font, fill="#F8F1D7")
+    draw.text((80, 140), subtitle, font=normal_font, fill="#F8F1D7")
+
+    # 建築圖片
+    try:
+        img = PILImage.open(building_path).convert("RGBA")
+        img_w, img_h = img.size
+        scale = width * 0.8 / img_w
+        img_resized = img.resize((int(img_w * scale), int(img_h * scale)))
+        x = (width - img_resized.width) // 2
+        y = 240
+        poster.paste(img_resized, (x, y), img_resized)
+    except Exception as e:
+        print("[ERROR] Failed to paste building image:", e)
+
+    # ICON 區塊
+    icon_names = ["tree.png", "sun.png", "music.png", "mrt.png"]
+    feature_texts = features.strip().split("\n")[:4]
+    icon_y = y + img_resized.height + 30
+    icon_x_start = 100
+    gap = 260
+    for i, icon_name in enumerate(icon_names):
+        try:
+            icon = PILImage.open(os.path.join("icons", icon_name)).convert("RGBA").resize((80, 80))
+            x = icon_x_start + i * gap
+            poster.paste(icon, (x, icon_y), icon)
+            # 對應說明
+            lines = feature_texts[i].split(" ")
+            for j, line in enumerate(lines):
+                draw.text((x, icon_y + 90 + j * 28), line, font=normal_font, fill="white")
+        except Exception as e:
+            print(f"[WARNING] Failed to load icon {icon_name}: {e}")
+
+    # 數據區塊（坪數 / 價格）
+    data_y = icon_y + 200
+    draw.text((100, data_y), f"{area} 坪", font=title_font, fill="white")
+    draw.text((width // 2, data_y), f"{price} 萬", font=title_font, fill="white")
+
+    # 灰底資訊區塊
+    info_y = data_y + 120
+    draw.rectangle([0, info_y, width, height], fill="#F8F1D7")
+    draw.text((100, info_y + 30), f"{agent_name}｜{agent_phone}", font=normal_font, fill="black")
+    draw.text((100, info_y + 70), f"{store_name}｜{store_phone}", font=normal_font, fill="black")
+    draw.text((100, info_y + 110), address, font=normal_font, fill="black")
+
+    # 貼上 logo
+    try:
+        logo = PILImage.open(logo_path).convert("RGBA").resize((160, 80))
+        poster.paste(logo, (width - 200, info_y + 30), logo)
+    except Exception as e:
+        print("[WARNING] 無法貼 logo：", e)
+
+    # 輸出圖片
+    final_filename = f"{uuid.uuid4().hex}_final.png"
+    final_path = os.path.join("uploads", final_filename)
+    poster.save(final_path)
+
+    return JSONResponse(content={
+        "message": "海報已生成",
+        "image_url": f"https://epson-hey-echo.onrender.com/view-image/{final_filename}"
+    })
 
 @app.get("/view-image/{fileName}")
 async def view_img(fileName: str):
