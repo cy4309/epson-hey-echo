@@ -49,30 +49,6 @@ app.include_router(upload_router)
 async def root():
     return {"message":"Backend is alive !!!"}
 
-#test: gemini和gpt
-@app.get("/test-gemini")
-async def test_gemini():
-    try:
-        model = genai.GenerativeModel("gemini-2.0-flash")
-        response = model.generate_content("請提供一個適合用 AI 畫出的有趣場景")
-        return {"gemini_response": response.text.strip()}
-    except Exception as e:
-        return {"error": str(e)}
-
-@app.get("/test-gpt")
-async def test_gpt():
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4-1106-preview",
-            messages=[
-                {"role": "system", "content": "你是提示詞專家，請用英文寫一個適合 DALL·E 圖像生成的 prompt"},
-                {"role": "user", "content": "我想畫一隻戴著太空帽的柴犬站在月球上"}
-            ]
-        )
-        return {"gpt_prompt": response.choices[0].message.content.strip()}
-    except Exception as e:
-        return {"error": str(e)}
-
 @app.post("/multi-dialogue-to-image")
 async def generate_prompt(req: Request):
     try:
@@ -85,9 +61,6 @@ async def generate_prompt(req: Request):
         if image_url in [None, "", "undefined"]:
             image_url = None
             print("[原始 image_url]", image_url)
-            # Demo 用：強制預設 Demo 圖片
-            # image_url = "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/Demo.png"
-            # print("[INFO] 未提供圖片，改用 Demo 圖:", image_url)
         
         if image_url and isinstance(image_url, str):
             if image_url.startswith("undefined"):
@@ -343,66 +316,6 @@ async def generate_prompt(req: Request):
     except Exception as e:
         print("[ERROR] generate-image:", e)
         return JSONResponse(content={"error": str(e)}, status_code=500)
-
-# @app.post("/upload_image")
-# async def upload_image(file: UploadFile = File(None), image_url: str = Form(None)):
-#     if file:
-#         file_extension = file.filename.split(".")[-1].lower()
-#         if file_extension not in ["png", "jpg", "jpeg"]:
-#             return JSONResponse(content={"error": "只支援 PNG、JPG、JPEG 格式"}, status_code=400)
-#         file_name = f"{uuid.uuid4().hex}.{file_extension}"
-#         file_path = os.path.join(UPLOAD_DIR, file_name)
-        
-#         with open(file_path, "wb") as f:
-#             f.write(await file.read())
-            
-#         return JSONResponse(
-#             content={
-#                 "message": "圖片上傳成功",
-#                 "image_url": f"https://epson-hey-echo.onrender.com/view-image/{file_name}",
-#                 "filename": file_name,
-#                 "image_url": image_url,
-#                 "code": 200
-#                 })
-#     elif image_url:
-#         try:
-#             headers = {
-#                 "User-Agent": "Mozilla/5.0"
-#             }
-#             response = requests.get(image_url, headers=headers)
-
-#             if response.status_code == 200:
-#                 ext = image_url.split("?")[0].split(".")[-1].lower()
-#                 if ext not in ["png", "jpg", "jpeg"]:
-#                     return JSONResponse(content={"error": "圖片格式不支援"}, status_code=400)
-#                 file_name = f"{uuid.uuid4().hex}.{ext}"
-#                 file_path = os.path.join(UPLOAD_DIR, file_name)
-#                 with open(file_path, "wb") as f:
-#                     f.write(response.content)
-#                 print(f"[INFO] 已成功下載圖片並儲存為: {file_path}")
-#                 return JSONResponse(
-#                     content={
-#                         "message": "圖片已成功下載",
-#                         "filename": file_name,
-#                         "image_url": f"https://epson-hey-echo.onrender.com/view-image/{file_name}",
-#                         "code": 200
-#                     }
-#                 )
-#             else:
-#                 print(f"[ERROR] 無法下載圖片，狀態碼: {response.status_code}")
-#                 return JSONResponse(content={"error": "無法下載圖片"}, status_code=400)
-#         except Exception as e:
-#             print(f"[ERROR] 圖片下載錯誤: {e}")
-#             return JSONResponse(content={"error": "下載失敗"}, status_code=500)
-#     else:
-#         return JSONResponse(content={"error": "請上傳圖片或提供圖片 URL"}, status_code=400)
-
-# @app.get("/view-image/{file_name}")
-# async def view_image(file_name: str):
-#     file_path = os.path.join(UPLOAD_DIR, file_name)
-#     if not os.path.exists(file_path):
-#         return JSONResponse(content={"error": "File not found"}, status_code=404)
-#     return FileResponse(file_path, media_type="image/jpeg")
 
 # API ：生成五張圖，每個應用不同排版方式
 @app.post("/generate-multiple-images")
@@ -670,10 +583,3 @@ async def generate_final_flyer(
         "message": "海報已生成",
         "image_url": f"https://epson-hey-echo.onrender.com/view-image/{final_filename}"
     })
-
-@app.get("/view-image/{fileName}")
-async def view_img(fileName: str):
-    file_path = os.path.join(UPLOAD_DIR, fileName)
-    if not os.path.exists(file_path):
-        return JSONResponse(content={"error": "File not found"}, status_code=404)
-    return FileResponse(file_path, media_type="image/png")
