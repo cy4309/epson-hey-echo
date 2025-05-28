@@ -15,6 +15,7 @@ from backend.routes.upload_api import router as upload_router
 import google.generativeai as genai
 from PIL import Image as PILImage, ImageDraw, ImageFont
 import uuid,os,io,re,requests,sys,asyncio
+import base64, uuid, os
 
 print("CWD =", os.getcwd())
 print("PYTHONPATH =", sys.path)
@@ -291,7 +292,8 @@ async def generate_prompt(req: Request):
                         model="gpt-image-1", #dall-e-3, dall-e-3-preview
                         prompt=prompt,
                         n=1,
-                        size="1024x1536" #A4尺寸:1024x1792
+                        size="1024x1536", #A4尺寸:1024x1792
+                        response_format="b64_json" #0528_改成用 base64
                     )
                     # image_url = img_response.data[0].url #0528_因為不走DALL·E，所以這行不會用到
 
@@ -308,7 +310,7 @@ async def generate_prompt(req: Request):
                         print("[WARN] Epson 回傳異常，改用本地 URL")
                         image_url = f"https://epson-hey-echo.onrender.com/view-image/{filename}"
                     #endregion<gpt-image-1o>
-                    
+
                     # Gemini 設計師風格說話
                     model = genai.GenerativeModel('gemini-2.0-flash')
                     chat = model.start_chat(history = chat_history)
