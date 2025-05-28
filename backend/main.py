@@ -288,10 +288,10 @@ async def generate_prompt(req: Request):
                 # Step 3: 生成圖片
                 try:
                     img_response = client.images.generate(
-                        model="dall-e-3", #dall-e-3, dall-e-3-preview
+                        model="gpt-image-1", #dall-e-3, dall-e-3-preview
                         prompt=prompt,
                         n=1,
-                        size="1024x1792" #A4尺寸
+                        size="1024x1536" #A4尺寸
                     )
                     image_url = img_response.data[0].url
                     # Gemini 設計師風格說話
