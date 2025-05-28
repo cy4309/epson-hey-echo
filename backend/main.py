@@ -291,7 +291,7 @@ async def generate_prompt(req: Request):
                         model="gpt-image-1", #dall-e-3, dall-e-3-preview
                         prompt=prompt,
                         n=1,
-                        size="1024x1536" #A4尺寸
+                        size="1536x1024" #A4尺寸:1024x1792
                     )
                     image_url = img_response.data[0].url
                     # Gemini 設計師風格說話
