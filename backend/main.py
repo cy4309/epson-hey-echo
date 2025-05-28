@@ -291,9 +291,24 @@ async def generate_prompt(req: Request):
                         model="gpt-image-1", #dall-e-3, dall-e-3-preview
                         prompt=prompt,
                         n=1,
-                        size="1536x1024" #A4尺寸:1024x1792
+                        size="1024x1536" #A4尺寸:1024x1792
                     )
-                    image_url = img_response.data[0].url
+                    # image_url = img_response.data[0].url #0528_因為不走DALL·E，所以這行不會用到
+
+                    #region<gpt-image-1>
+                    b64_data = img_response.data[0].b64_json #0528_改成用 base64
+                    filename  = f"{uuid.uuid4().hex}.png"
+                    filepath  = os.path.join(UPLOAD_DIR, filename)
+                    with open(filepath, "wb") as f:
+                        f.write(base64.b64decode(b64_data))
+                    print(f"[INFO] 已解碼並儲存 {filepath}")
+
+                    status, image_url = upload_image_to_epsondest(filepath, filename)
+                    if status != 200 or not image_url or image_url == "null":
+                        print("[WARN] Epson 回傳異常，改用本地 URL")
+                        image_url = f"https://epson-hey-echo.onrender.com/view-image/{filename}"
+                    #endregion<gpt-image-1o>
+                    
                     # Gemini 設計師風格說話
                     model = genai.GenerativeModel('gemini-2.0-flash')
                     chat = model.start_chat(history = chat_history)
