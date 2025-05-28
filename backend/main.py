@@ -116,37 +116,38 @@ async def generate_prompt(req: Request):
             msg["content"] for msg in messages 
             if msg["type"] == "text" and msg["role"] == "user"
         ]).strip().lower()
-        
-        # Demo 模式：若輸入包含 demo 且沒傳圖片，就自動用 Demo.png
-        if "demo" in user_text and not image_url:
-            print("[INFO] demo 模式觸發，開始模擬處理延遲...")
-            await asyncio.sleep(5) 
-            image_url = "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27011900_demo_f1.png"
-            print("[INFO] demo 模式觸發，自動套用 Demo 圖:", image_url)
+        #region<Demo>
+        # # Demo 模式：若輸入包含 demo 且沒傳圖片，就自動用 Demo.png
+        # if "demo" in user_text and not image_url:
+        #     print("[INFO] demo 模式觸發，開始模擬處理延遲...")
+        #     await asyncio.sleep(5) 
+        #     image_url = "https://prototype-collection-resource.s3.ap-northeast-1.amazonaws.com/blender-render/epson/27011900_demo_f1.png"
+        #     print("[INFO] demo 模式觸發，自動套用 Demo 圖:", image_url)
 
-            # 模擬前端傳來的 image_url 進行後續處理
-            data["image_url"] = image_url
-            image_filename = image_url.split("/")[-1]
-            image_path = os.path.join(UPLOAD_DIR, image_filename)
+        #     # 模擬前端傳來的 image_url 進行後續處理
+        #     data["image_url"] = image_url
+        #     image_filename = image_url.split("/")[-1]
+        #     image_path = os.path.join(UPLOAD_DIR, image_filename)
 
-            if not os.path.exists(image_path):
-                try:
-                    print("[INFO] 開始下載 demo 圖片...")
-                    response = requests.get(image_url)
-                    if response.status_code == 200:
-                        with open(image_path, "wb") as f:
-                            f.write(response.content)
-                        print(f"[INFO] 成功下載 demo 圖片到: {image_path}")
-                    else:
-                        print(f"[ERROR] 無法下載 demo 圖片，狀態碼: {response.status_code}")
-                        return JSONResponse(content={"error": "下載 demo 圖片失敗"}, status_code=400)
-                except Exception as e:
-                    print(f"[ERROR] demo 圖片下載錯誤: {e}")
-                    return JSONResponse(content={"error": "demo 圖片下載錯誤"}, status_code=500)
-        # Demo 模式：若輸入包含 demo 且沒傳圖片，就自動用 Demo.png(end)
+        #     if not os.path.exists(image_path):
+        #         try:
+        #             print("[INFO] 開始下載 demo 圖片...")
+        #             response = requests.get(image_url)
+        #             if response.status_code == 200:
+        #                 with open(image_path, "wb") as f:
+        #                     f.write(response.content)
+        #                 print(f"[INFO] 成功下載 demo 圖片到: {image_path}")
+        #             else:
+        #                 print(f"[ERROR] 無法下載 demo 圖片，狀態碼: {response.status_code}")
+        #                 return JSONResponse(content={"error": "下載 demo 圖片失敗"}, status_code=400)
+        #         except Exception as e:
+        #             print(f"[ERROR] demo 圖片下載錯誤: {e}")
+        #             return JSONResponse(content={"error": "demo 圖片下載錯誤"}, status_code=500)
+        #endregion<Demo>
+        # # Demo 模式：若輸入包含 demo 且沒傳圖片，就自動用 Demo.png(end)
         has_trigger = any(keyword in user_text for keyword in trigger_keywords)
         has_image = bool(image_url)
-        is_demo_mode = "demo" in user_text and "27011900_demo_f1.png" in (image_url or "").lower() # 判斷是否是 demo 模式
+        is_demo_mode = False # (目前已關閉)判斷是否是 demo 模式
 
         print("[使用者訊息]", user_text)
         print("[Trigger 判斷]", has_trigger, "| 有圖片:", has_image)
@@ -284,10 +285,10 @@ async def generate_prompt(req: Request):
                 except Exception as gpt_error:
                     return JSONResponse(content={"error": f"GPT 錯誤：{str(gpt_error)}"}, status_code=500)
 
-                # Step 3: 使用 DALL·E 生成圖片
+                # Step 3: 生成圖片
                 try:
                     img_response = client.images.generate(
-                        model="dall-e-3",
+                        model="gpt-image-1", #dall-e-3, dall-e-3-preview
                         prompt=prompt,
                         n=1,
                         size="1024x1792" #A4尺寸
