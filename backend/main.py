@@ -334,17 +334,17 @@ async def generate_prompt(req: Request):
                     ]
                 })
         
-    except OpenAIError as oe:                 
-        detail = f"{oe.error.type}: {oe.error.message}"
-        logger.error("[OpenAIError] " + detail)
-        raise HTTPException(status_code=502, detail=detail)
-    except Exception:                          
-        trace = traceback.format_exc()
-        logger.error("[Unhandled]\n" + trace)
-        raise HTTPException(status_code=500, detail=trace)
-    # except Exception as e:
-    #     print("[ERROR] generate-image:", e)
-    #     return JSONResponse(content={"error": str(e)}, status_code=500)
+    # except OpenAIError as oe:                 
+    #     detail = f"{oe.error.type}: {oe.error.message}"
+    #     logger.error("[OpenAIError] " + detail)
+    #     raise HTTPException(status_code=502, detail=detail)
+    # except Exception:                          
+    #     trace = traceback.format_exc()
+    #     logger.error("[Unhandled]\n" + trace)
+    #     raise HTTPException(status_code=500, detail=trace)
+    except Exception as e:
+        print("[ERROR] generate-image:", e)
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 # API ：生成五張圖，每個應用不同排版方式
 @app.post("/generate-multiple-images")
