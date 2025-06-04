@@ -24,7 +24,7 @@ print("backend/ content =", os.listdir("backend"))
 #初始化 OpenAI and Gemini
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
-    organization = os.getenv("OPENAI_ORG_ID")
+    # organization = os.getenv("OPENAI_ORG_ID")
     )
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 print("GEMINI_API_KEY:", os.getenv("GEMINI_API_KEY")[:6])
