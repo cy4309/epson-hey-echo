@@ -1,10 +1,10 @@
-from fastapi import FastAPI, File, UploadFile, Form, Request, HTTPException
+from fastapi import FastAPI, File, UploadFile, Form, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
-from openai import OpenAI, OpenAIError
+from openai import OpenAI
 from backend.s3_uploader import upload_image_to_epsondest
 from backend.flyer_generator import generate_real_flyer,generate_flyer_from_talk
 
@@ -15,19 +15,30 @@ from backend.routes.upload_api import router as upload_router
 import google.generativeai as genai
 from PIL import Image as PILImage, ImageDraw, ImageFont
 import uuid,os,io,re,requests,sys,asyncio
-import base64, uuid, os, traceback
+
 
 print("CWD =", os.getcwd())
 print("PYTHONPATH =", sys.path)
 print("backend/ content =", os.listdir("backend"))
 
 #初始化 OpenAI and Gemini
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
-    # organization = os.getenv("OPENAI_ORG_ID")
-    )
+#測試"OPENAI_API_KEY"使用狀況
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+try:
+    model= client.models.list()
+    print("[OpenAI API Key Test] 成功連接到 OpenAI API")
+except Exception as e:
+    print("[OpenAI API Key Test] 連接失敗:", e)
+
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-print("GEMINI_API_KEY:", os.getenv("GEMINI_API_KEY")[:6])
+#測試"GEMINI_API_KEY"使用狀況
+try:
+    model = genai.GenerativeModel('gemini-2.0-flash')
+    response = model.generate_content("Hi, Gemini!")
+    print("[Gemini API Key Test] 成功連接到 Gemini API")
+except Exception as e:
+    print("[Gemini API Key Test] 連接失敗:", e)
+# print("GEMINI_API_KEY:", os.getenv("GEMINI_API_KEY")[:6])
 
 app = FastAPI()
 UPLOAD_DIR = "uploads"
