@@ -306,7 +306,7 @@ async def generate_prompt(req: Request):
                         model="gpt-image-1", #dall-e-3, dall-e-3-preview
                         prompt=prompt,
                         n=1,
-                        size="1024x1792", #A4尺寸:1024x1792 or 1024x1536
+                        size="1024x1792" #A4尺寸:1024x1792 or 1024x1536
                         # response_format="b64_json" #0528_改成用 base64
                     )
                     image_url = img_response.data[0].url #0528_因為不走DALL·E，所以這行不會用到
