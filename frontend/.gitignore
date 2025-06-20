@@ -25,3 +25,9 @@ dist-ssr
 
 # Environment variables
 .env
+.env.*
+
+# Lock files (choose one depending on your package manager)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
