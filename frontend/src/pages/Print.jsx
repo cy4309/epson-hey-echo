@@ -5,6 +5,7 @@ import { showSwal } from "@/utils/notification";
 import {
   getAuthCode,
   postAccessToken,
+  getDeviceInfo,
   postPrintJobCreation,
   postFileUpload,
   postPrintExecution,
@@ -131,6 +132,10 @@ const Print = () => {
       console.log("Step 2: Posting Access Token...");
       await handleAccessToken();
 
+      // Step 2.5: Get Device Info
+      console.log("Step 2.5: Getting Device Info...");
+      await handleDeviceInfo();
+
       // Step 3: Create Print Job
       console.log("Step 3: Creating Print Job...");
       await handlePrintJobCreation();
@@ -163,6 +168,15 @@ const Print = () => {
     } catch (err) {
       console.error(err);
       showSwal({ isSuccess: false, title: `上傳失敗，請稍後再試!` });
+    }
+  };
+  const handleDeviceInfo = async () => {
+    try {
+      const res = await getDeviceInfo();
+      console.log(res);
+    } catch (err) {
+      console.error(err);
+      showSwal({ isSuccess: false, title: `取得失敗，請稍後再試!` });
     }
   };
   const handlePrintJobCreation = async () => {
