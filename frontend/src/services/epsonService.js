@@ -16,6 +16,7 @@ const basicAuth = btoa(`${clientId}:${clientSecret}`); // 編碼為 Base64 格�
 let accessToken = "";
 let refreshToken = "";
 console.log(refreshToken);
+let productName = "";
 let jobId = "";
 let uploadUri = "";
 // let uploadUri = https://upload.epsonconnect.com/data?Key=91ef4affb385e54f999dbc11714e3711cd161d57394ea31aee1c521b81c796c4&File=https://epson-hey-echo.onrender.com/view-pdf/4234264fd91f4666a73735a534834e1e_topLeft.pdf;
@@ -67,8 +68,43 @@ export const postAccessToken = async () => {
     });
 };
 
+// 1.5 get device info
+export const getDeviceInfo = async () => {
+  return await axios
+    .get(`${epsonBaseUrl}/api/2/printing/devices/info`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "x-api-key": epsonApiKey,
+      },
+    })
+    .then((res) => {
+      console.log(res.data);
+      productName = res.data.productName;
+      return res.data;
+    })
+    .catch((err) => {
+      return { code: 500, redirectUrl: "/login", msg: err };
+    });
+};
+
 // 2 print job creation
 export const postPrintJobCreation = async () => {
+  let borderless = false;
+  if (productName === "L6290") {
+    borderless = true;
+  } else if (productName === "L6490") {
+    borderless = false;
+  }
+
+  const printSettings = {
+    paperSize: "ps_a4",
+    paperType: "pt_plainpaper",
+    borderless,
+    printQuality: "high",
+    paperSource: "auto",
+    colorMode: "color",
+  };
+
   return await axios
     .post(
       `${epsonBaseUrl}/api/2/printing/jobs`,
@@ -76,15 +112,7 @@ export const postPrintJobCreation = async () => {
         jobName: "JobName01",
         // "printMode": "document",
         printMode: "photo",
-        printSettings: {
-          paperSize: "ps_a4",
-          paperType: "pt_plainpaper",
-          borderless: false, // L6490
-          // borderless: true, // L6290
-          printQuality: "high",
-          paperSource: "auto",
-          colorMode: "color",
-        },
+        printSettings,
       },
       {
         headers: {
