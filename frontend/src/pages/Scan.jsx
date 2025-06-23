@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import BaseButton from "@/components/BaseButton";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { showSwal } from "@/utils/notification";
 import { Modal, Input } from "antd";
 import { ArrowLeftOutlined, ScanOutlined } from "@ant-design/icons";
@@ -13,9 +13,6 @@ import {
 
 const Scan = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const params = new URLSearchParams(location.search);
-  const authCode = params.get("code");
   const hasTriggeredRef = useRef(false);
   const epsonScanEmail = localStorage.getItem("epson_scan_email");
   const [modalOpen, setModalOpen] = useState(false);
@@ -35,7 +32,7 @@ const Scan = () => {
     try {
       // Step 1: Handle Auth Code
       console.log("Step 1: Getting Auth Code...");
-      if (!authCode) {
+      if (!epsonScanEmail) {
         // 儲存 email 與來源頁資訊
         localStorage.setItem("epson_scan_email", email);
         handleAuthCode();
