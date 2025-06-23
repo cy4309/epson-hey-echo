@@ -3,6 +3,7 @@ export const router_path = {
   home: "/home",
   // illustration: "/illustration",
   print: "/print",
+  scan: "/scan",
   login: "/login",
   // form: "/form/:title",
   error: "*",

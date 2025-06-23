@@ -40,9 +40,17 @@ const Print = () => {
   }, [imgUrlToPrint]);
 
   useEffect(() => {
+    const scanEmail = localStorage.getItem("epson_scan_email");
+
     if (authCode) {
       console.log("Authorization code detected:", authCode);
       dispatch(setAuthCode(authCode));
+
+      if (scanEmail) {
+        // 如果是從掃描頁來的
+        navigate("/scan");
+        return;
+      }
 
       // 從 localStorage 恢復文件預覽
       const storedFile = localStorage.getItem("uploadedFile");

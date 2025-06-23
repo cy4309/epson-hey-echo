@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { router_path } from "@/routers";
 import Login from "@/pages/Login";
 import ProtectedRoute from "@/routers/ProtectedRoute";
-import { LazyHome, LazyPrint, LazyError } from "@/routers/LazyRoutes";
+import { LazyHome, LazyPrint, LazyScan, LazyError } from "@/routers/LazyRoutes";
 
 const router = createBrowserRouter(
   [
@@ -28,6 +28,16 @@ const router = createBrowserRouter(
             <ProtectedRoute>
               <Suspense fallback={<LoadingIndicator />}>
                 <LazyPrint />
+              </Suspense>
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: router_path.scan,
+          element: (
+            <ProtectedRoute>
+              <Suspense fallback={<LoadingIndicator />}>
+                <LazyScan />
               </Suspense>
             </ProtectedRoute>
           ),

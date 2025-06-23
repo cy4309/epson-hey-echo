@@ -16,6 +16,7 @@ const basicAuth = btoa(`${clientId}:${clientSecret}`); // 編碼為 Base64 格�
 let accessToken = "";
 let refreshToken = "";
 console.log(refreshToken);
+let destinationId = "";
 let productName = "";
 let jobId = "";
 let uploadUri = "";
@@ -189,6 +190,52 @@ export const postPrintExecution = async () => {
     .then((res) => {
       console.log(res);
       return res;
+    })
+    .catch((err) => {
+      return { code: 500, redirectUrl: "/login", msg: err };
+    });
+};
+
+// 5 post scan destination
+export const postScanDestination = async (email) => {
+  return await axios
+    .post(
+      `${epsonBaseUrl}/api/2/scanning/destinations`,
+      {
+        aliasName: "JobName01",
+        destinationService: "mail",
+        destination: email,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "x-api-key": epsonApiKey,
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    .then((res) => {
+      console.log(res.data);
+      destinationId = res.data.destinationId;
+      return res.data;
+    })
+    .catch((err) => {
+      return { code: 500, redirectUrl: "/login", msg: err };
+    });
+};
+
+// 6 delete scan destination
+export const deleteScanDestination = async () => {
+  return await axios
+    .delete(`${epsonBaseUrl}/api/2/scanning/destinations/${destinationId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "x-api-key": epsonApiKey,
+      },
+    })
+    .then((res) => {
+      console.log(res.data);
+      return res.data;
     })
     .catch((err) => {
       return { code: 500, redirectUrl: "/login", msg: err };

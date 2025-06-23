@@ -114,8 +114,8 @@ const Nav = () => {
                 <LogoutOutlined />
               </BaseButton>
             </div>
-            {["Generate ->", "Print ->"].map((text, i) => {
-              const routes = ["/", "/print"];
+            {["Generate ->", "Print ->", "Scan ->"].map((text, i) => {
+              const routes = ["/", "/print", "/scan"];
               return (
                 <motion.div
                   key={text}
