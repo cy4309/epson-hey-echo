@@ -97,7 +97,7 @@ const Login = () => {
         <img
           src={currentGif}
           alt="gif"
-          className="min-h-[200px] cursor-pointer"
+          className="min-h-[200px] cursor-pointer my-4 rounded-xl"
           onClick={handleGifChange}
         />
 
