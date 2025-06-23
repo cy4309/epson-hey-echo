@@ -18,6 +18,7 @@ const Scan = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [isEmailSet, setIsEmailSet] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
     if (epsonScanEmail && !hasTriggeredRef.current) {
@@ -60,13 +61,21 @@ const Scan = () => {
       // Step 4: Delete Scan Destination
       console.log("Step 4: Deleting Scan Destination...");
       await handleDeleteScanDestination();
-      showSwal({ isSuccess: true, title: "掃描目的地已刪除!" });
+      // showSwal({ isSuccess: true, title: "掃描目的地已刪除!" });
       localStorage.removeItem("epson_scan_email");
+      setIsEmailSet(false);
       setModalOpen(false);
     } catch (err) {
       console.error("Error during delete scan process:", err);
-      showSwal({ isSuccess: false, title: "刪除掃描目的地失敗，請稍後再試!" });
+      // showSwal({ isSuccess: false, title: "刪除掃描目的地失敗，請稍後再試!" });
     }
+  };
+
+  // 驗證 email 格式的函式
+  const validateEmail = (value) => {
+    // 簡單 email 正則
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(value);
   };
 
   const handleAuthCode = () => {
@@ -130,15 +139,28 @@ const Scan = () => {
             className="mb-4"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
             required
+            onChange={(e) => {
+              setEmail(e.target.value);
+            }}
           />
 
-          {/* 自訂按鈕 */}
+          {emailError && <div className="text-red-500 mb-2">{emailError}</div>}
           <div className="flex justify-end items-center gap-2">
             <BaseButton onClick={() => setModalOpen(false)}>取消</BaseButton>
             {!isEmailSet ? (
-              <BaseButton onClick={() => executeScan(email)}>確定</BaseButton>
+              <BaseButton
+                onClick={() => {
+                  if (!validateEmail(email)) {
+                    setEmailError("請輸入正確的電子郵箱格式");
+                    return;
+                  }
+                  setEmailError(""); // 清除錯誤訊息
+                  executeScan(email);
+                }}
+              >
+                確定
+              </BaseButton>
             ) : (
               <BaseButton onClick={() => executeDeleteScan()}>完成</BaseButton>
             )}
