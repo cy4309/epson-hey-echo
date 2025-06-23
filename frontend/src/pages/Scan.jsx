@@ -134,37 +134,47 @@ const Scan = () => {
           footer={null} // 取消預設 footer
           onCancel={() => setModalOpen(false)}
         >
-          <Input
-            placeholder="請輸入電子郵箱"
-            className="mb-4"
-            type="email"
-            value={email}
-            required
-            onChange={(e) => {
-              setEmail(e.target.value);
-            }}
-          />
-
-          {emailError && <div className="text-red-500 mb-2">{emailError}</div>}
-          <div className="flex justify-end items-center gap-2">
-            <BaseButton onClick={() => setModalOpen(false)}>取消</BaseButton>
-            {!isEmailSet ? (
-              <BaseButton
-                onClick={() => {
-                  if (!validateEmail(email)) {
-                    setEmailError("請輸入正確的電子郵箱格式");
-                    return;
-                  }
-                  setEmailError(""); // 清除錯誤訊息
-                  executeScan(email);
+          {!isEmailSet ? (
+            <>
+              <Input
+                placeholder="請輸入電子郵箱"
+                className="mb-4"
+                type="email"
+                value={email}
+                required
+                onChange={(e) => {
+                  setEmail(e.target.value);
                 }}
-              >
-                確定
-              </BaseButton>
-            ) : (
-              <BaseButton onClick={() => executeDeleteScan()}>完成</BaseButton>
-            )}
-          </div>
+              />
+              {emailError && (
+                <div className="text-red-500 mb-2">{emailError}</div>
+              )}
+              <div className="flex justify-end items-center gap-2">
+                <BaseButton onClick={() => setModalOpen(false)}>
+                  取消
+                </BaseButton>
+                <BaseButton
+                  onClick={() => {
+                    if (!validateEmail(email)) {
+                      setEmailError("請輸入正確的電子郵箱格式");
+                      return;
+                    }
+                    setEmailError(""); // 清除錯誤訊息
+                    executeScan(email);
+                  }}
+                >
+                  確定
+                </BaseButton>
+              </div>
+            </>
+          ) : (
+            <BaseButton
+              className="w-full mx-2"
+              onClick={() => executeDeleteScan()}
+            >
+              掃描完成
+            </BaseButton>
+          )}
         </Modal>
       </div>
     </div>
