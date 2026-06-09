@@ -15,7 +15,9 @@ from backend.routes.upload_api import router as upload_router
 import google.generativeai as genai
 from PIL import Image as PILImage, ImageDraw, ImageFont
 import uuid,os,io,re,requests,sys,asyncio
+from dotenv import load_dotenv
 
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
 print("CWD =", os.getcwd())
 print("PYTHONPATH =", sys.path)
